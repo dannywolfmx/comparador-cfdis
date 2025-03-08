@@ -1,8 +1,4 @@
-import 'emisor.dart';
-import 'receptor.dart';
 import 'concepto.dart';
-import 'timbre_fiscal.dart';
-import 'impuesto.dart';
 import 'package:comparador_cfdis/models/complemento_pago.dart';
 
 class CFDI {

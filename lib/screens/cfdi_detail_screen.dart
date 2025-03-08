@@ -257,7 +257,7 @@ class CFDIDetailScreen extends StatelessWidget {
             children: [
               pw.Text('EMISOR:', style: pw.TextStyle(font: fontBold)),
               pw.SizedBox(height: 5),
-              pw.Text('${cfdi.emisor?.nombre ?? "N/A"}',
+              pw.Text(cfdi.emisor?.nombre ?? "N/A",
                   style: pw.TextStyle(font: font)),
               pw.Text('RFC: ${cfdi.emisor?.rfc ?? "N/A"}',
                   style: pw.TextStyle(font: font)),
@@ -274,7 +274,7 @@ class CFDIDetailScreen extends StatelessWidget {
             children: [
               pw.Text('RECEPTOR:', style: pw.TextStyle(font: fontBold)),
               pw.SizedBox(height: 5),
-              pw.Text('${cfdi.receptor?.nombre ?? "N/A"}',
+              pw.Text(cfdi.receptor?.nombre ?? "N/A",
                   style: pw.TextStyle(font: font)),
               pw.Text('RFC: ${cfdi.receptor?.rfc ?? "N/A"}',
                   style: pw.TextStyle(font: font)),
@@ -371,11 +371,11 @@ class CFDIDetailScreen extends StatelessWidget {
                 .map((concepto) => pw.TableRow(
                       children: [
                         _buildPDFTableCell(
-                            concepto.cantidad?.toString() ?? 'N/A', font),
+                            concepto.cantidad.toString() ?? 'N/A', font),
                         _buildPDFTableCell(
                             concepto.descripcion ?? 'Sin descripción', font),
                         _buildPDFTableCell(
-                            '\$${concepto.valorUnitario?.toString() ?? 'N/A'}',
+                            '\$${concepto.valorUnitario.toString() ?? 'N/A'}',
                             font),
                         _buildPDFTableCell(
                             '\$${concepto.importe ?? 'N/A'}', font),
@@ -663,7 +663,7 @@ class CFDIDetailScreen extends StatelessWidget {
             if (cfdi.serie != null || cfdi.folio != null)
               Text(
                 'Serie/Folio: ${cfdi.serie ?? ''} ${cfdi.folio ?? ''}',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
           ],
         ),
@@ -797,7 +797,7 @@ class CFDIDetailScreen extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          'Importe: \$${concepto.importe ?? total?.toStringAsFixed(2) ?? 'N/A'}',
+          'Importe: \$${concepto.importe ?? total.toStringAsFixed(2) ?? 'N/A'}',
           style: TextStyle(
               color: Colors.green.shade700, fontWeight: FontWeight.bold),
         ),
@@ -809,7 +809,7 @@ class CFDIDetailScreen extends StatelessWidget {
               children: [
                 // Información principal
                 _buildConceptoInfoRow(
-                    'Cantidad', concepto.cantidad?.toString() ?? 'N/A'),
+                    'Cantidad', concepto.cantidad.toString() ?? 'N/A'),
                 _buildConceptoInfoRow(
                     'Unidad', concepto.unidad ?? concepto.claveUnidad ?? 'N/A'),
                 _buildConceptoInfoRow(
@@ -817,12 +817,10 @@ class CFDIDetailScreen extends StatelessWidget {
                 const Divider(),
 
                 // Información detallada
-                if (concepto.claveProdServ != null)
-                  _buildConceptoInfoRow(
-                      'Clave Prod/Serv', concepto.claveProdServ!),
-                if (concepto.claveUnidad != null &&
-                    concepto.claveUnidad != concepto.unidad)
-                  _buildConceptoInfoRow('Clave Unidad', concepto.claveUnidad!),
+                _buildConceptoInfoRow(
+                    'Clave Prod/Serv', concepto.claveProdServ!),
+                if (concepto.claveUnidad != concepto.unidad)
+                  _buildConceptoInfoRow('Clave Unidad', concepto.claveUnidad),
 
                 // Impuestos y otros detalles (si estuvieran disponibles en el modelo)
                 // Esto sería implementado si el modelo CFDI tiene estos campos
@@ -866,9 +864,8 @@ class CFDIDetailScreen extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
-            if (concepto.claveProdServ != null)
-              Text('Clave Prod/Serv: ${concepto.claveProdServ}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text('Clave Prod/Serv: ${concepto.claveProdServ}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
       ),
@@ -883,7 +880,7 @@ class CFDIDetailScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            label + ':',
+            '$label:',
             style: const TextStyle(
               fontWeight: FontWeight.w500,
               color: Colors.black54,
@@ -1042,11 +1039,11 @@ class CFDIDetailScreen extends StatelessWidget {
                                 // Modificar la línea del UUID para incluir el botón de búsqueda
                                 Row(
                                   children: [
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 140,
                                       child: Text(
                                         'UUID:',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                           color: Colors.black54,
                                         ),

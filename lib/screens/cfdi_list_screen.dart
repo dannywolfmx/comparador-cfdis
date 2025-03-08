@@ -161,7 +161,7 @@ class CFDIListScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.error_outline,
                           color: Colors.red,
                           size: 60,
@@ -199,8 +199,8 @@ class CFDIListScreen extends StatelessWidget {
                         onPressed: () {
                           context.read<CFDIBloc>().add(LoadCFDIsFromFile());
                         },
-                        child: const Icon(Icons.add_to_photos),
                         tooltip: 'Añadir archivo CFDI',
+                        child: const Icon(Icons.add_to_photos),
                       ),
                       const SizedBox(height: 10),
                       FloatingActionButton(
@@ -210,8 +210,8 @@ class CFDIListScreen extends StatelessWidget {
                               .read<CFDIBloc>()
                               .add(LoadCFDIsFromDirectory());
                         },
-                        child: const Icon(Icons.create_new_folder),
                         tooltip: 'Cargar directorio',
+                        child: const Icon(Icons.create_new_folder),
                       ),
                     ],
                   );

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
 import 'package:printing/printing.dart';
 import 'screens/cfdi_list_screen.dart';
-import 'models/cfdi.dart';
 
 void main() async {
   // Es necesario asegurarse de que los widgets de Flutter estén inicializados
