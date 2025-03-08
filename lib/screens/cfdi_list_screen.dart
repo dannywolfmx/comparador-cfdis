@@ -330,20 +330,23 @@ class CFDIListView extends StatelessWidget {
   }
 
   void _mostrarDetalles(CFDI cfdi, BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('CFDI seleccionado: ${cfdi.emisor?.nombre ?? 'N/A'}'),
-        action: SnackBarAction(
-          label: 'Ver detalles',
-          onPressed: () {
-            // Aquí se podría implementar la navegación para ver el detalle completo del CFDI
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => CFDIDetailScreen(cfdi: cfdi),
-              ),
-            );
-          },
-        ),
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 300),
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return CFDIDetailScreen(cfdi: cfdi);
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          final tween = Tween(begin: begin, end: end);
+          final curvedAnimation =
+              CurvedAnimation(parent: animation, curve: Curves.ease);
+          return SlideTransition(
+            position: tween.animate(curvedAnimation),
+            child: child,
+          );
+        },
       ),
     );
   }
@@ -723,20 +726,23 @@ Color _getColorForTipoComprobante(String? tipo) {
 }
 
 void _mostrarDetalles(CFDI cfdi, BuildContext context) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('CFDI seleccionado: ${cfdi.emisor?.nombre ?? 'N/A'}'),
-      action: SnackBarAction(
-        label: 'Ver detalles',
-        onPressed: () {
-          // Navegar a la pantalla de detalles
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => CFDIDetailScreen(cfdi: cfdi),
-            ),
-          );
-        },
-      ),
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return CFDIDetailScreen(cfdi: cfdi);
+      },
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        final tween = Tween(begin: begin, end: end);
+        final curvedAnimation =
+            CurvedAnimation(parent: animation, curve: Curves.ease);
+        return SlideTransition(
+          position: tween.animate(curvedAnimation),
+          child: child,
+        );
+      },
     ),
   );
 }

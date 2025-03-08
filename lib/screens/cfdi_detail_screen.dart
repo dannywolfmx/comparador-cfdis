@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import '../models/cfdi.dart';
 import '../services/file_service.dart';
 import '../bloc/cfdi_bloc.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class CFDIDetailScreen extends StatelessWidget {
   final CFDI cfdi;
@@ -16,6 +19,14 @@ class CFDIDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalle del CFDI'),
+        actions: [
+          // Botón de impresión
+          IconButton(
+            icon: const Icon(Icons.print),
+            tooltip: 'Imprimir CFDI',
+            onPressed: () => _imprimirCFDI(context),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -73,6 +84,458 @@ class CFDIDetailScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // Método para manejar la impresión
+  Future<void> _imprimirCFDI(BuildContext context) async {
+    // Mostrar un indicador de carga mientras se genera el PDF
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Generando documento para imprimir...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // Generar el PDF
+      final pdf = await _generarPDF(context);
+
+      // Cerrar el diálogo de carga
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Primero intentamos con el método de impresión estándar
+      if (context.mounted) {
+        try {
+          await Printing.layoutPdf(
+            onLayout: (PdfPageFormat format) async => pdf,
+            name: 'CFDI_${cfdi.timbreFiscalDigital?.uuid ?? "Detalle"}',
+          );
+        } catch (printingError) {
+          // Si falla, intentamos con un método alternativo
+          debugPrint('Error en método principal de impresión: $printingError');
+          if (context.mounted) {
+            // Método alternativo usando sharePdf que es más compatible con algunas plataformas
+            await Printing.sharePdf(
+                bytes: pdf,
+                filename:
+                    'CFDI_${cfdi.timbreFiscalDigital?.uuid ?? "Detalle"}.pdf');
+          }
+        }
+      }
+    } catch (e) {
+      // Cerrar el diálogo de carga en caso de error
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        // Mostrar mensaje de error detallado
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al preparar la impresión: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+
+      // Registrar el error para depuración
+      debugPrint('Error de impresión: $e');
+    }
+  }
+
+  // Método para generar el PDF
+  Future<Uint8List> _generarPDF(BuildContext context) async {
+    final pdf = pw.Document();
+
+    // Obtener la fuente predeterminada
+    final font = await PdfGoogleFonts.nunitoRegular();
+    final fontBold = await PdfGoogleFonts.nunitoBold();
+
+    // Crear el documento PDF
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        header: (context) => _buildPDFHeader(fontBold),
+        build: (context) => [
+          // Información principal
+          _buildPDFEmisorReceptor(font, fontBold),
+          pw.SizedBox(height: 20),
+
+          // Detalles generales
+          _buildPDFSection('Detalles Generales', font, fontBold),
+          _buildPDFGeneralDetails(font),
+          pw.SizedBox(height: 20),
+
+          // Conceptos
+          _buildPDFSection('Conceptos', font, fontBold),
+          _buildPDFConceptos(font, fontBold),
+          pw.SizedBox(height: 20),
+
+          // Totales
+          _buildPDFSection('Totales', font, fontBold),
+          _buildPDFTotals(font, fontBold),
+          pw.SizedBox(height: 20),
+
+          // Timbre fiscal
+          _buildPDFSection('Timbre Fiscal Digital', font, fontBold),
+          _buildPDFTFD(font),
+
+          // Si es un CFDI de pago, incluir el complemento
+          if (cfdi.isPagoCFDI) ...[
+            pw.SizedBox(height: 20),
+            _buildPDFSection('Complemento de Pagos', font, fontBold),
+            _buildPDFComplementoPago(font, fontBold),
+          ],
+        ],
+        footer: (context) => pw.Container(
+          alignment: pw.Alignment.centerRight,
+          margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
+          child: pw.Text(
+            'Página ${context.pageNumber} de ${context.pagesCount}',
+            style: pw.TextStyle(font: font, fontSize: 9),
+          ),
+        ),
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  // Construir el encabezado del PDF
+  pw.Widget _buildPDFHeader(pw.Font fontBold) {
+    final tipoComprobante = _formatTipoComprobante(cfdi.tipoDeComprobante);
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+          pw.Text('Detalle de CFDI',
+              style: pw.TextStyle(font: fontBold, fontSize: 20)),
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Text(tipoComprobante,
+                style: pw.TextStyle(font: fontBold, fontSize: 14)),
+          ),
+        ]),
+        pw.Divider(),
+        if (cfdi.timbreFiscalDigital?.uuid != null)
+          pw.Text('UUID: ${cfdi.timbreFiscalDigital!.uuid!}',
+              style: pw.TextStyle(font: fontBold, fontSize: 11)),
+        if (cfdi.fecha != null)
+          pw.Text('Fecha: ${_formatearFecha(cfdi.fecha!)}',
+              style: const pw.TextStyle(fontSize: 10)),
+      ],
+    );
+  }
+
+  // Construir la sección de Emisor/Receptor para PDF
+  pw.Widget _buildPDFEmisorReceptor(pw.Font font, pw.Font fontBold) {
+    return pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        // Columna Emisor
+        pw.Expanded(
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('EMISOR:', style: pw.TextStyle(font: fontBold)),
+              pw.SizedBox(height: 5),
+              pw.Text('${cfdi.emisor?.nombre ?? "N/A"}',
+                  style: pw.TextStyle(font: font)),
+              pw.Text('RFC: ${cfdi.emisor?.rfc ?? "N/A"}',
+                  style: pw.TextStyle(font: font)),
+              pw.Text(
+                  'Régimen: ${_getRegimenFiscalNombre(cfdi.emisor?.regimenFiscal)}',
+                  style: pw.TextStyle(font: font, fontSize: 10)),
+            ],
+          ),
+        ),
+        // Columna Receptor
+        pw.Expanded(
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('RECEPTOR:', style: pw.TextStyle(font: fontBold)),
+              pw.SizedBox(height: 5),
+              pw.Text('${cfdi.receptor?.nombre ?? "N/A"}',
+                  style: pw.TextStyle(font: font)),
+              pw.Text('RFC: ${cfdi.receptor?.rfc ?? "N/A"}',
+                  style: pw.TextStyle(font: font)),
+              pw.Text('Uso CFDI: ${_getUsoCFDINombre(cfdi.receptor?.usoCFDI)}',
+                  style: pw.TextStyle(font: font, fontSize: 10)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Construir título de sección para PDF
+  pw.Widget _buildPDFSection(String title, pw.Font font, pw.Font fontBold) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      decoration: const pw.BoxDecoration(
+        color: PdfColors.grey200,
+      ),
+      child: pw.Text(title, style: pw.TextStyle(font: fontBold, fontSize: 14)),
+    );
+  }
+
+  // Construir detalles generales para PDF
+  pw.Widget _buildPDFGeneralDetails(pw.Font font) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        _buildPDFDetailRow('Versión', cfdi.version ?? 'N/A', font),
+        _buildPDFDetailRow(
+            'Forma de Pago', _getFormaPagoNombre(cfdi.formaPago), font),
+        _buildPDFDetailRow(
+            'Método de Pago', _getMetodoPagoNombre(cfdi.metodoPago), font),
+        _buildPDFDetailRow('Moneda', cfdi.moneda ?? 'N/A', font),
+        if (cfdi.tipoCambio != null && cfdi.tipoCambio != '1')
+          _buildPDFDetailRow('Tipo de Cambio', cfdi.tipoCambio ?? 'N/A', font),
+        _buildPDFDetailRow(
+            'Lugar de Expedición', cfdi.lugarExpedicion ?? 'N/A', font),
+      ],
+    );
+  }
+
+  // Construir fila de detalle para PDF
+  pw.Widget _buildPDFDetailRow(String label, String value, pw.Font font) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.SizedBox(
+            width: 150,
+            child: pw.Text('$label:', style: pw.TextStyle(font: font)),
+          ),
+          pw.Expanded(
+            child: pw.Text(value, style: pw.TextStyle(font: font)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Construir sección de conceptos para PDF
+  pw.Widget _buildPDFConceptos(pw.Font font, pw.Font fontBold) {
+    final conceptos = cfdi.conceptos?.concepto;
+
+    if (conceptos == null || conceptos.isEmpty) {
+      return pw.Text('No hay conceptos disponibles',
+          style: pw.TextStyle(font: font));
+    }
+
+    return pw.Column(
+      children: [
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey300),
+          columnWidths: {
+            0: const pw.FlexColumnWidth(1), // Cantidad
+            1: const pw.FlexColumnWidth(5), // Descripción
+            2: const pw.FlexColumnWidth(2), // Valor Unit.
+            3: const pw.FlexColumnWidth(2), // Importe
+          },
+          children: [
+            // Encabezado
+            pw.TableRow(
+              decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+              children: [
+                _buildPDFTableCell('Cant.', font, isHeader: true),
+                _buildPDFTableCell('Descripción', font, isHeader: true),
+                _buildPDFTableCell('Valor Unit.', font, isHeader: true),
+                _buildPDFTableCell('Importe', font, isHeader: true),
+              ],
+            ),
+            // Filas de conceptos
+            ...conceptos
+                .map((concepto) => pw.TableRow(
+                      children: [
+                        _buildPDFTableCell(
+                            concepto.cantidad?.toString() ?? 'N/A', font),
+                        _buildPDFTableCell(
+                            concepto.descripcion ?? 'Sin descripción', font),
+                        _buildPDFTableCell(
+                            '\$${concepto.valorUnitario?.toString() ?? 'N/A'}',
+                            font),
+                        _buildPDFTableCell(
+                            '\$${concepto.importe ?? 'N/A'}', font),
+                      ],
+                    ))
+                .toList(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Construir celda de tabla para PDF
+  pw.Widget _buildPDFTableCell(String text, pw.Font font,
+      {bool isHeader = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(5),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          font: font,
+          fontSize: 10,
+          fontWeight: isHeader ? pw.FontWeight.bold : null,
+        ),
+      ),
+    );
+  }
+
+  // Construir sección de totales para PDF
+  pw.Widget _buildPDFTotals(pw.Font font, pw.Font fontBold) {
+    return pw.Container(
+      alignment: pw.Alignment.centerRight,
+      padding: const pw.EdgeInsets.all(10),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.end,
+        children: [
+          if (cfdi.subTotal != null)
+            pw.Row(
+              mainAxisSize: pw.MainAxisSize.min,
+              children: [
+                pw.Text('Subtotal: ', style: pw.TextStyle(font: font)),
+                pw.Text('\$${cfdi.subTotal}', style: pw.TextStyle(font: font)),
+              ],
+            ),
+          pw.SizedBox(height: 5),
+          if (cfdi.total != null)
+            pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.grey200,
+                border: pw.Border.all(color: PdfColors.grey400),
+              ),
+              child: pw.Row(
+                mainAxisSize: pw.MainAxisSize.min,
+                children: [
+                  pw.Text('Total: ', style: pw.TextStyle(font: fontBold)),
+                  pw.Text('\$${cfdi.total}',
+                      style: pw.TextStyle(font: fontBold)),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // Construir sección de Timbre Fiscal Digital para PDF
+  pw.Widget _buildPDFTFD(pw.Font font) {
+    final tfd = cfdi.timbreFiscalDigital;
+
+    if (tfd == null) {
+      return pw.Text('No hay información del timbre fiscal digital',
+          style: pw.TextStyle(font: font));
+    }
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        _buildPDFDetailRow('UUID', tfd.uuid ?? 'N/A', font),
+        _buildPDFDetailRow('Fecha de Timbrado',
+            _formatearFecha(tfd.fechaTimbrado ?? ''), font),
+        _buildPDFDetailRow('RFC PAC', tfd.rfcProvCertif ?? 'N/A', font),
+        _buildPDFDetailRow(
+            'No. Certificado SAT', tfd.noCertificadoSAT ?? 'N/A', font),
+      ],
+    );
+  }
+
+  // Construir sección de complemento de pago para PDF
+  pw.Widget _buildPDFComplementoPago(pw.Font font, pw.Font fontBold) {
+    final complemento = cfdi.complementoPago;
+
+    if (complemento == null ||
+        complemento.pagos == null ||
+        complemento.pagos!.isEmpty) {
+      return pw.Text('No hay información de pagos',
+          style: pw.TextStyle(font: font));
+    }
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        _buildPDFDetailRow(
+            'Versión del Complemento', complemento.version ?? 'N/A', font),
+
+        // Totales del complemento
+        if (complemento.totales != null) ...[
+          pw.SizedBox(height: 10),
+          pw.Container(
+            padding: const pw.EdgeInsets.all(10),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.blue50,
+              border: pw.Border.all(color: PdfColors.blue200),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Totales del Complemento',
+                    style: pw.TextStyle(font: fontBold)),
+                pw.SizedBox(height: 5),
+                _buildPDFDetailRow(
+                    'Monto Total',
+                    complemento.totales!.montoTotalPagos != null
+                        ? '\$${complemento.totales!.montoTotalPagos}'
+                        : 'N/A',
+                    font),
+              ],
+            ),
+          ),
+        ],
+
+        // Detalles de cada pago
+        pw.SizedBox(height: 10),
+        ...complemento.pagos!.asMap().entries.map((entry) {
+          int index = entry.key;
+          Pago pago = entry.value;
+
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              if (complemento.pagos!.length > 1)
+                pw.Text('Pago ${index + 1}',
+                    style: pw.TextStyle(font: fontBold)),
+              pw.SizedBox(height: 5),
+              _buildPDFDetailRow(
+                  'Fecha de Pago', _formatearFecha(pago.fechaPago ?? ''), font),
+              _buildPDFDetailRow('Forma de Pago',
+                  _getFormaPagoNombre(pago.formaDePagoP), font),
+              _buildPDFDetailRow('Monto',
+                  pago.monto != null ? '\$${pago.monto}' : 'N/A', font),
+              _buildPDFDetailRow('Moneda', pago.monedaP ?? 'N/A', font),
+              if (pago.tipoCambioP != null && pago.tipoCambioP != '1')
+                _buildPDFDetailRow(
+                    'Tipo de Cambio', pago.tipoCambioP ?? 'N/A', font),
+              pw.SizedBox(height: 10),
+            ],
+          );
+        }).toList(),
+      ],
     );
   }
 

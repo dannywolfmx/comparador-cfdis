@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:typed_data';
+import 'package:printing/printing.dart';
 import 'screens/cfdi_list_screen.dart';
 import 'models/cfdi.dart';
 
-void main() {
-  // Ensure Flutter is initialized before using plugins
+void main() async {
+  // Es necesario asegurarse de que los widgets de Flutter estén inicializados
+  // antes de hacer cualquier operación con plugins nativos
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Inicializar el plugin de impresión con una prueba simple
+  try {
+    // Esto fuerza la inicialización del plugin
+    await Printing.listPrinters();
+    debugPrint('Printing plugin inicializado correctamente');
+  } catch (e) {
+    debugPrint('Error al inicializar printing plugin: $e');
+  }
+
+  // Continuamos con el inicio normal de la aplicación
   runApp(const MyApp());
 }
 

@@ -50,7 +50,6 @@ class ComplementoPago {
 
   // Add the fromJson method that was missing
   factory ComplementoPago.fromJson(Map<String, dynamic> json) {
-    print(json);
     return ComplementoPago.fromMap(json);
   }
 
