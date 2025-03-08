@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/cfdi.dart';
 import '../services/file_service.dart';
+import '../bloc/cfdi_bloc.dart';
 
 class CFDIDetailScreen extends StatelessWidget {
   final CFDI cfdi;
@@ -575,7 +576,41 @@ class CFDIDetailScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildDetailItem('UUID', doc.idDocumento),
+                                // Modificar la línea del UUID para incluir el botón de búsqueda
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 140,
+                                      child: Text(
+                                        'UUID:',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        doc.idDocumento ?? 'N/A',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    if (doc.idDocumento != null)
+                                      Builder(
+                                        builder: (buttonContext) => IconButton(
+                                          icon: const Icon(
+                                              Icons.description_outlined,
+                                              size: 20),
+                                          tooltip: 'Abrir CFDI relacionado',
+                                          onPressed: () => _searchRelatedCFDI(
+                                              buttonContext, doc.idDocumento!),
+                                        ),
+                                      ),
+                                  ],
+                                ),
                                 _buildDetailItem(
                                     'Serie/Folio',
                                     doc.serie != null || doc.folio != null
@@ -789,5 +824,30 @@ class CFDIDetailScreen extends StatelessWidget {
       'S01': 'Sin efectos fiscales',
     };
     return usosCFDI[clave] ?? clave;
+  }
+
+  // Método para buscar y navegar al CFDI relacionado por UUID
+  void _searchRelatedCFDI(BuildContext context, String uuid) {
+    final relatedCFDI = CFDIBloc.findCFDIByUUID(uuid);
+
+    if (relatedCFDI != null && relatedCFDI.timbreFiscalDigital?.uuid != null) {
+      // CFDI encontrado, navegar a él
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CFDIDetailScreen(cfdi: relatedCFDI),
+        ),
+      );
+    } else {
+      // CFDI no encontrado, mostrar mensaje
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'No se encontró el CFDI con UUID: $uuid entre los CFDIs cargados'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 }
