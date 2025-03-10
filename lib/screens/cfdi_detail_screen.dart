@@ -818,7 +818,7 @@ class CFDIDetailScreen extends StatelessWidget {
 
                 // Información detallada
                 _buildConceptoInfoRow(
-                    'Clave Prod/Serv', concepto.claveProdServ!),
+                    'Clave Prod/Serv', concepto.claveProdServ),
                 if (concepto.claveUnidad != concepto.unidad)
                   _buildConceptoInfoRow('Clave Unidad', concepto.claveUnidad),
 

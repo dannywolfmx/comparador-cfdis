@@ -30,9 +30,6 @@ class Concepto {
   });
 
   factory Concepto.fromJson(Map<String, dynamic> json) {
-    // Debug to see what's actually in the JSON
-    developer.log('Parsing concepto: ${json.toString()}');
-
     List<ImpuestoConcepto> impuestos = [];
     List<TrasladoConcepto> traslados = [];
 
@@ -154,7 +151,6 @@ class Concepto {
   // Static method to parse a list of concepts from different CFDI formats
   static List<Concepto> parseConceptos(Map<String, dynamic> cfdi) {
     List<Concepto> conceptos = [];
-    developer.log('CFDI keys: ${cfdi.keys.toString()}');
 
     try {
       // Estructura exacta: Conceptos > concepto

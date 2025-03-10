@@ -16,9 +16,6 @@ class TrasladoConcepto {
   });
 
   factory TrasladoConcepto.fromJson(Map<String, dynamic> json) {
-    // Debug para ver qué contiene el JSON
-    developer.log('Parsing traslado: ${json.toString()}');
-
     // Manejar casos de claves en minúsculas y mayúsculas
     double base;
     try {

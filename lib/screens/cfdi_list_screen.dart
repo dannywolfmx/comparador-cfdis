@@ -405,6 +405,7 @@ class _CFDITableViewState extends State<CFDITableView> {
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
   late List<CFDI> _sortedCfdis;
+  final Set<CFDI> _selectedCfdis = {}; // Conjunto para CFDIs seleccionados
 
   @override
   void initState() {
@@ -475,9 +476,30 @@ class _CFDITableViewState extends State<CFDITableView> {
     final columnProvider = Provider.of<ColumnVisibilityProvider>(context);
 
     // Crear la lista de columnas visibles
-    final List<DataColumn> visibleColumns = [];
+    final List<DataColumn> visibleColumns = [
+      // Columna de selección (checkbox)
+      DataColumn(
+        label: Checkbox(
+          value: _selectedCfdis.isNotEmpty &&
+              _selectedCfdis.length == _sortedCfdis.length,
+          tristate: _selectedCfdis.isNotEmpty &&
+              _selectedCfdis.length < _sortedCfdis.length,
+          onChanged: (bool? value) {
+            setState(() {
+              if (value == true) {
+                // Seleccionar todos
+                _selectedCfdis.addAll(_sortedCfdis);
+              } else {
+                // Deseleccionar todos
+                _selectedCfdis.clear();
+              }
+            });
+          },
+        ),
+      ),
+    ];
 
-    // Columna Emisor
+    // Agregar el resto de columnas visibles
     if (columnProvider.isVisible('emisor')) {
       visibleColumns.add(
         DataColumn(
@@ -583,8 +605,11 @@ class _CFDITableViewState extends State<CFDITableView> {
             minWidth: MediaQuery.of(context).size.width,
           ),
           child: DataTable(
-            sortColumnIndex: _sortColumnIndex < visibleColumns.length
-                ? _sortColumnIndex
+            sortColumnIndex: _sortColumnIndex <
+                    visibleColumns.length -
+                        1 // Ajuste para la columna de checkbox
+                ? _sortColumnIndex +
+                    1 // +1 porque la primera columna es el checkbox
                 : null,
             sortAscending: _sortAscending,
             columnSpacing: 20.0,
@@ -614,10 +639,25 @@ class _CFDITableViewState extends State<CFDITableView> {
     // Convertir el tipo de comprobante a un formato más legible
     String tipoComprobante = _formatTipoComprobante(cfdi.tipoDeComprobante);
 
-    // Crear la lista de celdas visibles
-    final List<DataCell> visibleCells = [];
+    // Crear la lista de celdas visibles, empezando con el checkbox
+    final List<DataCell> visibleCells = [
+      DataCell(
+        Checkbox(
+          value: _selectedCfdis.contains(cfdi),
+          onChanged: (bool? selected) {
+            setState(() {
+              if (selected == true) {
+                _selectedCfdis.add(cfdi);
+              } else {
+                _selectedCfdis.remove(cfdi);
+              }
+            });
+          },
+        ),
+      ),
+    ];
 
-    // Celda Emisor
+    // Agregar el resto de las celdas
     if (columnProvider.isVisible('emisor')) {
       visibleCells.add(
         DataCell(
@@ -682,7 +722,9 @@ class _CFDITableViewState extends State<CFDITableView> {
       );
     }
 
-    return DataRow(cells: visibleCells);
+    return DataRow(
+      cells: visibleCells,
+    );
   }
 }
 
