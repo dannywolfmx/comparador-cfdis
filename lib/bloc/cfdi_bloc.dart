@@ -8,12 +8,6 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
   // Instancia singleton
   static CFDIBloc? _instance;
 
-  // Lista compartida de CFDIs
-  static List<CFDI> _cfdis = [];
-
-  // Getter para la lista de CFDIs
-  static List<CFDI> get cfdis => _cfdis;
-
   // Constructor factory para implementar singleton
   factory CFDIBloc() {
     _instance ??= CFDIBloc._internal();
@@ -39,8 +33,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
         emit(
             CFDIError('No se encontraron CFDIs en el directorio seleccionado'));
       } else {
-        _cfdis = cfdis; // Actualizar la lista singleton
-        emit(CFDILoaded(_cfdis));
+        emit(CFDILoaded(cfdis));
       }
     } catch (e) {
       emit(CFDIError('Error al cargar los CFDIs: $e'));
@@ -56,9 +49,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
     try {
       final cfdi = await CFDIParser.pickAndParseXml();
       if (cfdi != null) {
-        // Añadir el nuevo CFDI a la lista singleton
-        _cfdis.add(cfdi);
-        emit(CFDILoaded(_cfdis));
+        emit(CFDILoaded([cfdi]));
       } else {
         if (state is CFDILoaded) {
           // Mantener el estado actual si ya hay CFDIs cargados
@@ -73,19 +64,13 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
   }
 
   void _onClear(ClearCFDIs event, Emitter<CFDIState> emit) {
-    _cfdis.clear(); // Limpiar la lista singleton
     emit(CFDIInitial());
   }
 
-  // Método para acceder a la lista de CFDIs desde fuera del bloc
-  static List<CFDI> getCFDIs() {
-    return _cfdis;
-  }
-
   // Método para buscar un CFDI por UUID en la lista singleton
-  static CFDI? findCFDIByUUID(String uuid) {
+  static CFDI? findCFDIByUUID(String uuid, List<CFDI> cfdis) {
     final normalizedUuid = uuid.trim().toUpperCase();
-    return _cfdis.firstWhere(
+    return cfdis.firstWhere(
       (cfdi) => cfdi.timbreFiscalDigital?.uuid?.toUpperCase() == normalizedUuid,
       orElse: () => CFDI(),
     );

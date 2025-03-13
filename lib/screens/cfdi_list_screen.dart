@@ -1,3 +1,4 @@
+import 'package:comparador_cfdis/widgets/filter.dart';
 import 'package:comparador_cfdis/widgets/load_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -291,18 +292,21 @@ class CFDIListView extends StatelessWidget {
             child: Text(tipoComprobante.substring(0, 1)),
           ),
           isThreeLine: true,
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
         );
       },
     );
   }
 
-  void _mostrarDetalles(CFDI cfdi, BuildContext context) {
+  void _mostrarDetalles(CFDI cfdi, List<CFDI> cfdis, BuildContext context) {
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 300),
         pageBuilder: (context, animation, secondaryAnimation) {
-          return CFDIDetailScreen(cfdi: cfdi);
+          return CFDIDetailScreen(
+            cfdi: cfdi,
+            cfdis: cfdis,
+          );
         },
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
@@ -568,8 +572,10 @@ class _CFDITableViewState extends State<CFDITableView> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Expanded(flex: 2, child: FilterColumn()),
         // Tabla principal (ahora con Expanded para que funcione dentro de Row)
         Expanded(
+          flex: 6,
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: SingleChildScrollView(
@@ -591,8 +597,8 @@ class _CFDITableViewState extends State<CFDITableView> {
                   horizontalMargin: 10.0,
                   columns: visibleColumns,
                   rows: _sortedCfdis
-                      .map((cfdi) =>
-                          _buildDataRow(cfdi, context, columnProvider))
+                      .map((cfdi) => _buildDataRow(
+                          cfdi, _sortedCfdis, context, columnProvider))
                       .toList(),
                 ),
               ),
@@ -652,7 +658,8 @@ class _CFDITableViewState extends State<CFDITableView> {
                 ),
                 // Contenido del panel
                 Expanded(
-                  child: CFDIDetailScreen(cfdi: _selectedCfdis.first),
+                  child: CFDIDetailScreen(
+                      cfdi: _selectedCfdis.first, cfdis: _sortedCfdis),
                 ),
                 // Botones de acción
                 Padding(
@@ -662,8 +669,8 @@ class _CFDITableViewState extends State<CFDITableView> {
                     children: [
                       ElevatedButton.icon(
                         onPressed: _selectedCfdis.length == 1
-                            ? () =>
-                                _mostrarDetalles(_selectedCfdis.first, context)
+                            ? () => _mostrarDetalles(
+                                _selectedCfdis.first, _sortedCfdis, context)
                             : null,
                         icon: const Icon(Icons.fullscreen),
                         label: const Text('Expandir'),
@@ -696,7 +703,7 @@ class _CFDITableViewState extends State<CFDITableView> {
     );
   }
 
-  DataRow _buildDataRow(CFDI cfdi, BuildContext context,
+  DataRow _buildDataRow(CFDI cfdi, List<CFDI> cfdis, BuildContext context,
       ColumnVisibilityProvider columnProvider) {
     String? fechaFormateada;
     if (cfdi.fecha != null) {
@@ -734,7 +741,7 @@ class _CFDITableViewState extends State<CFDITableView> {
       visibleCells.add(
         DataCell(
           Text(cfdi.emisor?.nombre ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
         ),
       );
     }
@@ -744,7 +751,7 @@ class _CFDITableViewState extends State<CFDITableView> {
       visibleCells.add(
         DataCell(
           Text(cfdi.receptor?.nombre ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
         ),
       );
     }
@@ -754,7 +761,7 @@ class _CFDITableViewState extends State<CFDITableView> {
       visibleCells.add(
         DataCell(
           Text(fechaFormateada ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
         ),
       );
     }
@@ -764,7 +771,7 @@ class _CFDITableViewState extends State<CFDITableView> {
       visibleCells.add(
         DataCell(
           Text(cfdi.total != null ? '\$${cfdi.total}' : 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
         ),
       );
     }
@@ -778,7 +785,7 @@ class _CFDITableViewState extends State<CFDITableView> {
                 fontWeight: FontWeight.bold,
                 color: _getColorForTipoComprobante(cfdi.tipoDeComprobante),
               )),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
         ),
       );
     }
@@ -789,7 +796,7 @@ class _CFDITableViewState extends State<CFDITableView> {
         DataCell(
           Text(cfdi.timbreFiscalDigital?.uuid ?? 'N/A',
               style: const TextStyle(fontSize: 12)),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
         ),
       );
     }
@@ -839,12 +846,12 @@ Color _getColorForTipoComprobante(String? tipo) {
   }
 }
 
-void _mostrarDetalles(CFDI cfdi, BuildContext context) {
+void _mostrarDetalles(CFDI cfdi, List<CFDI> cfdis, BuildContext context) {
   Navigator.of(context).push(
     PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) {
-        return CFDIDetailScreen(cfdi: cfdi);
+        return CFDIDetailScreen(cfdi: cfdi, cfdis: cfdis);
       },
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);

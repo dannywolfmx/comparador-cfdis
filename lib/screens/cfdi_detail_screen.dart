@@ -11,8 +11,10 @@ import 'package:pdf/widgets.dart' as pw;
 
 class CFDIDetailScreen extends StatelessWidget {
   final CFDI cfdi;
+  final List<CFDI> cfdis;
 
-  const CFDIDetailScreen({Key? key, required this.cfdi}) : super(key: key);
+  const CFDIDetailScreen({Key? key, required this.cfdi, required this.cfdis})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1066,7 +1068,9 @@ class CFDIDetailScreen extends StatelessWidget {
                                               size: 20),
                                           tooltip: 'Abrir CFDI relacionado',
                                           onPressed: () => _searchRelatedCFDI(
-                                              buttonContext, doc.idDocumento!),
+                                              buttonContext,
+                                              doc.idDocumento!,
+                                              cfdis),
                                         ),
                                       ),
                                   ],
@@ -1287,15 +1291,16 @@ class CFDIDetailScreen extends StatelessWidget {
   }
 
   // Método para buscar y navegar al CFDI relacionado por UUID
-  void _searchRelatedCFDI(BuildContext context, String uuid) {
-    final relatedCFDI = CFDIBloc.findCFDIByUUID(uuid);
+  void _searchRelatedCFDI(BuildContext context, String uuid, List<CFDI> cfdis) {
+    final relatedCFDI = CFDIBloc.findCFDIByUUID(uuid, cfdis);
 
     if (relatedCFDI != null && relatedCFDI.timbreFiscalDigital?.uuid != null) {
       // CFDI encontrado, navegar a él
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CFDIDetailScreen(cfdi: relatedCFDI),
+          builder: (context) =>
+              CFDIDetailScreen(cfdi: relatedCFDI, cfdis: cfdis),
         ),
       );
     } else {
