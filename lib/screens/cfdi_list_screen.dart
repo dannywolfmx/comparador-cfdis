@@ -1,3 +1,4 @@
+import 'package:comparador_cfdis/widgets/load_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/cfdi_bloc.dart';
@@ -5,6 +6,7 @@ import '../bloc/cfdi_event.dart';
 import '../bloc/cfdi_state.dart';
 import '../models/cfdi.dart';
 import '../providers/column_visibility_provider.dart';
+import '../widgets/filter_drawer.dart'; // Add this import for the FilterDrawer
 import 'package:provider/provider.dart';
 import 'cfdi_detail_screen.dart';
 
@@ -19,206 +21,172 @@ class CFDIListScreen extends StatelessWidget {
         create: (context) => CFDIBloc(),
         child: Builder(
           builder: (context) => Scaffold(
+            drawer: const FilterDrawer(),
             appBar: AppBar(
               title: const Text('Tabla de CFDIs'),
+              // Acciones de la AppBar (estas estarán arriva a la derecha)
               actions: [
+                // Botón para abrir el drawer de filtros
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  tooltip: 'Filtros',
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                ),
                 // Menú para configurar columnas
-                BlocBuilder<CFDIBloc, CFDIState>(
-                  builder: (context, state) {
-                    if (state is CFDILoaded) {
-                      // Usamos Consumer en lugar de acceder directamente al Provider
-                      return Consumer<ColumnVisibilityProvider>(
-                          builder: (context, columnProvider, _) {
-                        return PopupMenuButton<String>(
-                          icon: const Icon(Icons.view_column),
-                          tooltip: 'Configurar columnas',
-                          onSelected: (value) {
-                            // Si se selecciona "reset", restauramos la visibilidad predeterminada
-                            if (value == 'reset') {
-                              Provider.of<ColumnVisibilityProvider>(context,
-                                      listen: false)
-                                  .resetToDefault();
-                              return;
-                            }
-                            // Alternamos la visibilidad de la columna seleccionada
+                BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+                  if (state is CFDILoaded) {
+                    // Usamos Consumer en lugar de acceder directamente al Provider
+                    return Consumer<ColumnVisibilityProvider>(
+                        builder: (context, columnProvider, _) {
+                      return PopupMenuButton<String>(
+                        icon: const Icon(Icons.view_column),
+                        tooltip: 'Configurar columnas',
+                        onSelected: (value) {
+                          // Si se selecciona "reset", restauramos la visibilidad predeterminada
+                          if (value == 'reset') {
                             Provider.of<ColumnVisibilityProvider>(context,
                                     listen: false)
-                                .toggleVisibility(value);
-                          },
-                          itemBuilder: (context) {
-                            // Ya no necesitamos obtener el provider aquí
-                            // porque lo tenemos disponible desde el Consumer
+                                .resetToDefault();
+                            return;
+                          }
+                          // Alternamos la visibilidad de la columna seleccionada
+                          Provider.of<ColumnVisibilityProvider>(context,
+                                  listen: false)
+                              .toggleVisibility(value);
+                        },
+                        itemBuilder: (context) {
+                          // Ya no necesitamos obtener el provider aquí
+                          // porque lo tenemos disponible desde el Consumer
 
-                            return [
-                              // Opción para emisor
-                              CheckedPopupMenuItem(
-                                checked: columnProvider.isVisible('emisor'),
-                                value: 'emisor',
-                                child: const Text('Emisor'),
-                              ),
-                              // Opción para receptor
-                              CheckedPopupMenuItem(
-                                checked: columnProvider.isVisible('receptor'),
-                                value: 'receptor',
-                                child: const Text('Receptor'),
-                              ),
-                              // Opción para fecha
-                              CheckedPopupMenuItem(
-                                checked: columnProvider.isVisible('fecha'),
-                                value: 'fecha',
-                                child: const Text('Fecha'),
-                              ),
-                              // Opción para total
-                              CheckedPopupMenuItem(
-                                checked: columnProvider.isVisible('total'),
-                                value: 'total',
-                                child: const Text('Total'),
-                              ),
-                              // Opción para tipo
-                              CheckedPopupMenuItem(
-                                checked: columnProvider.isVisible('tipo'),
-                                value: 'tipo',
-                                child: const Text('Tipo'),
-                              ),
-                              // Opción para UUID
-                              CheckedPopupMenuItem(
-                                checked: columnProvider.isVisible('uuid'),
-                                value: 'uuid',
-                                child: const Text('UUID'),
-                              ),
-                              // Separador
-                              const PopupMenuDivider(),
-                              // Opción para restaurar valores predeterminados
-                              const PopupMenuItem(
-                                value: 'reset',
-                                child: Text('Restaurar columnas'),
-                              ),
-                            ];
-                          },
-                        );
-                      });
-                    }
-                    return Container();
-                  },
-                ),
-                // Botón para limpiar la tabla (existente)
-                BlocBuilder<CFDIBloc, CFDIState>(
-                  builder: (context, state) {
-                    if (state is CFDILoaded) {
-                      return IconButton(
-                        icon: const Icon(Icons.clear_all),
-                        tooltip: 'Limpiar tabla',
-                        onPressed: () {
-                          context.read<CFDIBloc>().add(ClearCFDIs());
+                          return [
+                            // Opción para emisor
+                            CheckedPopupMenuItem(
+                              checked: columnProvider.isVisible('emisor'),
+                              value: 'emisor',
+                              child: const Text('Emisor'),
+                            ),
+                            // Opción para receptor
+                            CheckedPopupMenuItem(
+                              checked: columnProvider.isVisible('receptor'),
+                              value: 'receptor',
+                              child: const Text('Receptor'),
+                            ),
+                            // Opción para fecha
+                            CheckedPopupMenuItem(
+                              checked: columnProvider.isVisible('fecha'),
+                              value: 'fecha',
+                              child: const Text('Fecha'),
+                            ),
+                            // Opción para total
+                            CheckedPopupMenuItem(
+                              checked: columnProvider.isVisible('total'),
+                              value: 'total',
+                              child: const Text('Total'),
+                            ),
+                            // Opción para tipo
+                            CheckedPopupMenuItem(
+                              checked: columnProvider.isVisible('tipo'),
+                              value: 'tipo',
+                              child: const Text('Tipo'),
+                            ),
+                            // Opción para UUID
+                            CheckedPopupMenuItem(
+                              checked: columnProvider.isVisible('uuid'),
+                              value: 'uuid',
+                              child: const Text('UUID'),
+                            ),
+                            // Separador
+                            const PopupMenuDivider(),
+                            // Opción para restaurar valores predeterminados
+                            const PopupMenuItem(
+                              value: 'reset',
+                              child: Text('Restaurar columnas'),
+                            ),
+                          ];
                         },
                       );
-                    }
-                    return Container();
-                  },
-                ),
+                    });
+                  }
+                  return Container();
+                }),
               ],
             ),
-            body: BlocBuilder<CFDIBloc, CFDIState>(
-              builder: (context, state) {
-                if (state is CFDIInitial) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'No hay CFDIs cargados',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            context
-                                .read<CFDIBloc>()
-                                .add(LoadCFDIsFromDirectory());
-                          },
-                          icon: const Icon(Icons.folder_open),
-                          label: const Text('Abrir directorio'),
-                        ),
-                        const SizedBox(height: 10),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            context.read<CFDIBloc>().add(LoadCFDIsFromFile());
-                          },
-                          icon: const Icon(Icons.file_open),
-                          label: const Text('Abrir archivo CFDI'),
-                        ),
-                      ],
-                    ),
-                  );
-                } else if (state is CFDILoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (state is CFDILoaded) {
-                  return AdaptiveCFDIView(cfdis: state.cfdis);
-                } else if (state is CFDIError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 60,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Error: ${state.message}',
-                          style: const TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            context
-                                .read<CFDIBloc>()
-                                .add(LoadCFDIsFromDirectory());
-                          },
-                          child: const Text('Intentar de nuevo'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                return Container();
-              },
-            ),
-            floatingActionButton: BlocBuilder<CFDIBloc, CFDIState>(
-              builder: (context, state) {
-                if (state is CFDILoaded) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
+            //Pantalla central
+            body: BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+              if (state is CFDIInitial) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      FloatingActionButton(
-                        heroTag: 'addFile',
-                        onPressed: () {
-                          context.read<CFDIBloc>().add(LoadCFDIsFromFile());
-                        },
-                        tooltip: 'Añadir archivo CFDI',
-                        child: const Icon(Icons.add_to_photos),
+                      Text(
+                        'No hay CFDIs cargados',
+                        style: TextStyle(fontSize: 18),
                       ),
-                      const SizedBox(height: 10),
-                      FloatingActionButton(
-                        heroTag: 'addDirectory',
-                        onPressed: () {
-                          context
-                              .read<CFDIBloc>()
-                              .add(LoadCFDIsFromDirectory());
-                        },
-                        tooltip: 'Cargar directorio',
-                        child: const Icon(Icons.create_new_folder),
-                      ),
+                      SizedBox(height: 20),
+                      LoadButtons(),
                     ],
-                  );
-                }
-                return Container();
-              },
-            ),
+                  ),
+                );
+              } else if (state is CFDILoading) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (state is CFDILoaded) {
+                return AdaptiveCFDIView(cfdis: state.cfdis);
+              } else if (state is CFDIError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 60,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error: ${state.message}',
+                        style: const TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      const LoadButtons(),
+                    ],
+                  ),
+                );
+              }
+              return Container();
+            }),
+            floatingActionButton:
+                BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+              if (state is CFDILoaded) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'addFile',
+                      onPressed: () {
+                        context.read<CFDIBloc>().add(LoadCFDIsFromFile());
+                      },
+                      tooltip: 'Añadir archivo CFDI',
+                      child: const Icon(Icons.add_to_photos),
+                    ),
+                    const SizedBox(height: 10),
+                    FloatingActionButton(
+                      heroTag: 'addDirectory',
+                      onPressed: () {
+                        context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
+                      },
+                      tooltip: 'Cargar directorio',
+                      child: const Icon(Icons.create_new_folder),
+                    ),
+                  ],
+                );
+              }
+              return Container();
+            }),
           ),
         ),
       ),
@@ -406,7 +374,7 @@ class _CFDITableViewState extends State<CFDITableView> {
   bool _sortAscending = true;
   late List<CFDI> _sortedCfdis;
   final Set<CFDI> _selectedCfdis = {}; // Conjunto para CFDIs seleccionados
-  bool _showSidePanel = false;
+  final bool _showSidePanel = false;
 
   @override
   void initState() {
@@ -631,11 +599,10 @@ class _CFDITableViewState extends State<CFDITableView> {
             ),
           ),
         ),
-
         // Panel lateral (solo visible cuando hay elementos seleccionados)
         if (_selectedCfdis.isNotEmpty)
           Container(
-            width: 300,
+            width: 400,
             height: MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               border: Border(
@@ -683,14 +650,10 @@ class _CFDITableViewState extends State<CFDITableView> {
                     ],
                   ),
                 ),
-
                 // Contenido del panel
                 Expanded(
-                  child: _selectedCfdis.length == 1
-                      ? _buildSingleCFDIPanel(_selectedCfdis.first)
-                      : _buildMultipleCFDIPanel(_selectedCfdis.toList()),
+                  child: CFDIDetailScreen(cfdi: _selectedCfdis.first),
                 ),
-
                 // Botones de acción
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -702,10 +665,11 @@ class _CFDITableViewState extends State<CFDITableView> {
                             ? () =>
                                 _mostrarDetalles(_selectedCfdis.first, context)
                             : null,
-                        icon: const Icon(Icons.visibility),
-                        label: const Text('Ver detalle'),
+                        icon: const Icon(Icons.fullscreen),
+                        label: const Text('Expandir'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
+                          foregroundColor: Colors.white,
                         ),
                       ),
                       ElevatedButton.icon(
@@ -717,7 +681,9 @@ class _CFDITableViewState extends State<CFDITableView> {
                         icon: const Icon(Icons.clear),
                         label: const Text('Deseleccionar'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          foregroundColor: Colors.white,
                         ),
                       ),
                     ],
@@ -726,252 +692,6 @@ class _CFDITableViewState extends State<CFDITableView> {
               ],
             ),
           ),
-      ],
-    );
-  }
-
-  // Widget para mostrar detalles de un solo CFDI seleccionado
-  Widget _buildSingleCFDIPanel(CFDI cfdi) {
-    String? fechaFormateada;
-    if (cfdi.fecha != null) {
-      try {
-        final fechaObj = DateTime.parse(cfdi.fecha!);
-        fechaFormateada = '${fechaObj.day}/${fechaObj.month}/${fechaObj.year}';
-      } catch (_) {
-        fechaFormateada = cfdi.fecha;
-      }
-    }
-
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        // Información del emisor
-        const Text('Emisor:', style: TextStyle(fontWeight: FontWeight.bold)),
-        Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(cfdi.emisor?.nombre ?? 'No disponible',
-                    style: const TextStyle(fontSize: 15)),
-                const SizedBox(height: 4),
-                Text('RFC: ${cfdi.emisor?.rfc ?? 'No disponible'}',
-                    style: const TextStyle(fontSize: 13, color: Colors.grey)),
-              ],
-            ),
-          ),
-        ),
-
-        // Información del receptor
-        const Text('Receptor:', style: TextStyle(fontWeight: FontWeight.bold)),
-        Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(cfdi.receptor?.nombre ?? 'No disponible',
-                    style: const TextStyle(fontSize: 15)),
-                const SizedBox(height: 4),
-                Text('RFC: ${cfdi.receptor?.rfc ?? 'No disponible'}',
-                    style: const TextStyle(fontSize: 13, color: Colors.grey)),
-              ],
-            ),
-          ),
-        ),
-
-        // Información del comprobante
-        const Text('Comprobante:',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Fecha: ${fechaFormateada ?? 'No disponible'}'),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color:
-                            _getColorForTipoComprobante(cfdi.tipoDeComprobante)
-                                .withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                            color: _getColorForTipoComprobante(
-                                cfdi.tipoDeComprobante)),
-                      ),
-                      child: Text(
-                        _formatTipoComprobante(cfdi.tipoDeComprobante),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: _getColorForTipoComprobante(
-                              cfdi.tipoDeComprobante),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                    'Total: ${cfdi.total != null ? '\$${cfdi.total}' : 'No disponible'}',
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text('Subtotal: ${cfdi.subTotal ?? 'No disponible'}'),
-                if (cfdi.timbreFiscalDigital?.uuid != null) ...[
-                  const SizedBox(height: 8),
-                  const Text('UUID:',
-                      style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  SelectableText(
-                    cfdi.timbreFiscalDigital!.uuid!,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Widget para mostrar resumen de múltiples CFDIs seleccionados
-  Widget _buildMultipleCFDIPanel(List<CFDI> cfdis) {
-    // Calcular totales
-    double totalIngreso = 0;
-    double totalEgreso = 0;
-    double totalNeto = 0;
-
-    // Mapas para contar emisores y receptores
-    final Map<String, int> emisoresCount = {};
-    final Map<String, int> receptoresCount = {};
-
-    // Procesar cada CFDI
-    for (var cfdi in cfdis) {
-      // Contar emisores
-      final emisorNombre = cfdi.emisor?.nombre ?? 'No disponible';
-      emisoresCount[emisorNombre] = (emisoresCount[emisorNombre] ?? 0) + 1;
-
-      // Contar receptores
-      final receptorNombre = cfdi.receptor?.nombre ?? 'No disponible';
-      receptoresCount[receptorNombre] =
-          (receptoresCount[receptorNombre] ?? 0) + 1;
-
-      // Calcular totales
-      if (cfdi.total != null) {
-        try {
-          final total = double.parse(cfdi.total!);
-          if (cfdi.tipoDeComprobante?.toUpperCase() == 'I') {
-            totalIngreso += total;
-            totalNeto += total;
-          } else if (cfdi.tipoDeComprobante?.toUpperCase() == 'E') {
-            totalEgreso += total;
-            totalNeto -= total;
-          }
-        } catch (_) {}
-      }
-    }
-
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        // Resumen de totales
-        Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          color: Theme.of(context).primaryColor.withOpacity(0.1),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Resumen Financiero',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total Ingresos:'),
-                    Text('\$${totalIngreso.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                            color: Colors.green, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total Egresos:'),
-                    Text('\$${totalEgreso.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Balance Neto:'),
-                    Text('\$${totalNeto.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: totalNeto >= 0 ? Colors.green : Colors.red,
-                          fontSize: 16,
-                        )),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // Lista de emisores más comunes
-        const Text('Emisores', style: TextStyle(fontWeight: FontWeight.bold)),
-        Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: ListView(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: emisoresCount.entries
-                .toList()
-                .take(5)
-                .map((entry) => ListTile(
-                      dense: true,
-                      title: Text(entry.key),
-                      trailing: Text('${entry.value}'),
-                    ))
-                .toList(),
-          ),
-        ),
-
-        // Lista de receptores más comunes
-        const Text('Receptores', style: TextStyle(fontWeight: FontWeight.bold)),
-        Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: ListView(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: receptoresCount.entries
-                .toList()
-                .take(5)
-                .map((entry) => ListTile(
-                      dense: true,
-                      title: Text(entry.key),
-                      trailing: Text('${entry.value}'),
-                    ))
-                .toList(),
-          ),
-        ),
       ],
     );
   }

@@ -27,9 +27,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Comparador CFDIs',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        // Agregamos configuración adicional para el drawer
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Colors.white,
+          elevation: 2.0,
+        ),
       ),
       home: const CFDIListScreen(),
     );
