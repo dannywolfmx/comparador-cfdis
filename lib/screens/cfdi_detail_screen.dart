@@ -13,12 +13,10 @@ import 'package:pdf/widgets.dart' as pw;
 
 class CFDIDetailScreen extends StatelessWidget {
   final CFDI cfdi;
-  final List<CFDI> allCfdis; // Add this field to store all CFDIs
 
   const CFDIDetailScreen({
     Key? key,
     required this.cfdi,
-    this.allCfdis = const [], // Default value as empty list
   }) : super(key: key);
 
   @override
@@ -1296,17 +1294,38 @@ class CFDIDetailScreen extends StatelessWidget {
   // Método para buscar y navegar al CFDI relacionado por UUID
   void _searchRelatedCFDI(BuildContext context, String uuid) {
     // Use the allCfdis list directly without needing the BlocProvider
+    final state = context.read<CFDIBloc>().state;
+
+    if (state is! CFDILoaded) return;
+
+    final allCfdis = state.cfdis;
+
     final relatedCFDI = _findCFDIByUUID(uuid, allCfdis);
 
     if (relatedCFDI != null && relatedCFDI.timbreFiscalDigital?.uuid != null) {
       // CFDI found, navigate to it, passing the full list again
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CFDIDetailScreen(
-            cfdi: relatedCFDI,
-            allCfdis: allCfdis, // Pass the list again
-          ),
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (_, animation, secondaryAnimation) {
+            return BlocProvider.value(
+              value: BlocProvider.of<CFDIBloc>(context),
+              child: CFDIDetailScreen(
+                cfdi: relatedCFDI,
+              ),
+            );
+          },
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end);
+            final curvedAnimation =
+                CurvedAnimation(parent: animation, curve: Curves.ease);
+            return SlideTransition(
+              position: tween.animate(curvedAnimation),
+              child: child,
+            );
+          },
         ),
       );
     } else {

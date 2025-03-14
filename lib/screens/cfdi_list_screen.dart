@@ -7,7 +7,6 @@ import '../bloc/cfdi_event.dart';
 import '../bloc/cfdi_state.dart';
 import '../models/cfdi.dart';
 import '../providers/column_visibility_provider.dart';
-import '../widgets/filter_drawer.dart'; // Add this import for the FilterDrawer
 import 'package:provider/provider.dart';
 import 'cfdi_detail_screen.dart';
 
@@ -22,7 +21,6 @@ class CFDIListScreen extends StatelessWidget {
         create: (context) => CFDIBloc(),
         child: Builder(
           builder: (context) => Scaffold(
-            drawer: const FilterDrawer(),
             appBar: AppBar(
               title: const Text('Tabla de CFDIs'),
               // Acciones de la AppBar (estas estarán arriva a la derecha)
@@ -822,23 +820,16 @@ Color _getColorForTipoComprobante(String? tipo) {
 
 // Modify the _mostrarDetalles function to pass the full list of CFDIs
 void _mostrarDetalles(CFDI cfdi, BuildContext context) {
-  // Get the current list of CFDIs from the BlocProvider
-  final CFDIState state = context.read<CFDIBloc>().state;
-  List<CFDI> allCfdis = [];
-
-  // Only get the list if the state is CFDILoaded
-  if (state is CFDILoaded) {
-    allCfdis = state.cfdis;
-  }
-
   Navigator.of(context).push(
     PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (context, animation, secondaryAnimation) {
+      pageBuilder: (_, animation, secondaryAnimation) {
         // Pass the complete list of CFDIs along with the selected CFDI
-        return CFDIDetailScreen(
-          cfdi: cfdi,
-          allCfdis: allCfdis, // Pass all CFDIs to the detail screen
+        return BlocProvider.value(
+          value: BlocProvider.of<CFDIBloc>(context),
+          child: CFDIDetailScreen(
+            cfdi: cfdi,
+          ),
         );
       },
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
