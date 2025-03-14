@@ -292,34 +292,9 @@ class CFDIListView extends StatelessWidget {
             child: Text(tipoComprobante.substring(0, 1)),
           ),
           isThreeLine: true,
-          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
+          onTap: () => _mostrarDetalles(cfdi, context),
         );
       },
-    );
-  }
-
-  void _mostrarDetalles(CFDI cfdi, List<CFDI> cfdis, BuildContext context) {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 300),
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return CFDIDetailScreen(
-            cfdi: cfdi,
-            cfdis: cfdis,
-          );
-        },
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          final tween = Tween(begin: begin, end: end);
-          final curvedAnimation =
-              CurvedAnimation(parent: animation, curve: Curves.ease);
-          return SlideTransition(
-            position: tween.animate(curvedAnimation),
-            child: child,
-          );
-        },
-      ),
     );
   }
 
@@ -658,8 +633,7 @@ class _CFDITableViewState extends State<CFDITableView> {
                 ),
                 // Contenido del panel
                 Expanded(
-                  child: CFDIDetailScreen(
-                      cfdi: _selectedCfdis.first, cfdis: _sortedCfdis),
+                  child: CFDIDetailScreen(cfdi: _selectedCfdis.first),
                 ),
                 // Botones de acción
                 Padding(
@@ -669,8 +643,8 @@ class _CFDITableViewState extends State<CFDITableView> {
                     children: [
                       ElevatedButton.icon(
                         onPressed: _selectedCfdis.length == 1
-                            ? () => _mostrarDetalles(
-                                _selectedCfdis.first, _sortedCfdis, context)
+                            ? () =>
+                                _mostrarDetalles(_selectedCfdis.first, context)
                             : null,
                         icon: const Icon(Icons.fullscreen),
                         label: const Text('Expandir'),
@@ -741,7 +715,7 @@ class _CFDITableViewState extends State<CFDITableView> {
       visibleCells.add(
         DataCell(
           Text(cfdi.emisor?.nombre ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
+          onTap: () => _mostrarDetalles(cfdi, context),
         ),
       );
     }
@@ -751,7 +725,7 @@ class _CFDITableViewState extends State<CFDITableView> {
       visibleCells.add(
         DataCell(
           Text(cfdi.receptor?.nombre ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
+          onTap: () => _mostrarDetalles(cfdi, context),
         ),
       );
     }
@@ -761,7 +735,7 @@ class _CFDITableViewState extends State<CFDITableView> {
       visibleCells.add(
         DataCell(
           Text(fechaFormateada ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
+          onTap: () => _mostrarDetalles(cfdi, context),
         ),
       );
     }
@@ -771,7 +745,7 @@ class _CFDITableViewState extends State<CFDITableView> {
       visibleCells.add(
         DataCell(
           Text(cfdi.total != null ? '\$${cfdi.total}' : 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
+          onTap: () => _mostrarDetalles(cfdi, context),
         ),
       );
     }
@@ -785,7 +759,7 @@ class _CFDITableViewState extends State<CFDITableView> {
                 fontWeight: FontWeight.bold,
                 color: _getColorForTipoComprobante(cfdi.tipoDeComprobante),
               )),
-          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
+          onTap: () => _mostrarDetalles(cfdi, context),
         ),
       );
     }
@@ -796,7 +770,7 @@ class _CFDITableViewState extends State<CFDITableView> {
         DataCell(
           Text(cfdi.timbreFiscalDigital?.uuid ?? 'N/A',
               style: const TextStyle(fontSize: 12)),
-          onTap: () => _mostrarDetalles(cfdi, cfdis, context),
+          onTap: () => _mostrarDetalles(cfdi, context),
         ),
       );
     }
@@ -846,12 +820,26 @@ Color _getColorForTipoComprobante(String? tipo) {
   }
 }
 
-void _mostrarDetalles(CFDI cfdi, List<CFDI> cfdis, BuildContext context) {
+// Modify the _mostrarDetalles function to pass the full list of CFDIs
+void _mostrarDetalles(CFDI cfdi, BuildContext context) {
+  // Get the current list of CFDIs from the BlocProvider
+  final CFDIState state = context.read<CFDIBloc>().state;
+  List<CFDI> allCfdis = [];
+
+  // Only get the list if the state is CFDILoaded
+  if (state is CFDILoaded) {
+    allCfdis = state.cfdis;
+  }
+
   Navigator.of(context).push(
     PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) {
-        return CFDIDetailScreen(cfdi: cfdi, cfdis: cfdis);
+        // Pass the complete list of CFDIs along with the selected CFDI
+        return CFDIDetailScreen(
+          cfdi: cfdi,
+          allCfdis: allCfdis, // Pass all CFDIs to the detail screen
+        );
       },
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);

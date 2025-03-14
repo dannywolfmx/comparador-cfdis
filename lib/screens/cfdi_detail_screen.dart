@@ -1,7 +1,9 @@
+import 'package:comparador_cfdis/bloc/cfdi_state.dart';
 import 'package:comparador_cfdis/models/concepto.dart';
 import 'package:comparador_cfdis/models/pago.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/cfdi.dart';
 import '../services/file_service.dart';
 import '../bloc/cfdi_bloc.dart';
@@ -11,10 +13,13 @@ import 'package:pdf/widgets.dart' as pw;
 
 class CFDIDetailScreen extends StatelessWidget {
   final CFDI cfdi;
-  final List<CFDI> cfdis;
+  final List<CFDI> allCfdis; // Add this field to store all CFDIs
 
-  const CFDIDetailScreen({Key? key, required this.cfdi, required this.cfdis})
-      : super(key: key);
+  const CFDIDetailScreen({
+    Key? key,
+    required this.cfdi,
+    this.allCfdis = const [], // Default value as empty list
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1062,15 +1067,13 @@ class CFDIDetailScreen extends StatelessWidget {
                                     ),
                                     if (doc.idDocumento != null)
                                       Builder(
-                                        builder: (buttonContext) => IconButton(
+                                        builder: (context) => IconButton(
                                           icon: const Icon(
                                               Icons.description_outlined,
                                               size: 20),
                                           tooltip: 'Abrir CFDI relacionado',
                                           onPressed: () => _searchRelatedCFDI(
-                                              buttonContext,
-                                              doc.idDocumento!,
-                                              cfdis),
+                                              context, doc.idDocumento!),
                                         ),
                                       ),
                                   ],
@@ -1291,20 +1294,23 @@ class CFDIDetailScreen extends StatelessWidget {
   }
 
   // Método para buscar y navegar al CFDI relacionado por UUID
-  void _searchRelatedCFDI(BuildContext context, String uuid, List<CFDI> cfdis) {
-    final relatedCFDI = CFDIBloc.findCFDIByUUID(uuid, cfdis);
+  void _searchRelatedCFDI(BuildContext context, String uuid) {
+    // Use the allCfdis list directly without needing the BlocProvider
+    final relatedCFDI = _findCFDIByUUID(uuid, allCfdis);
 
     if (relatedCFDI != null && relatedCFDI.timbreFiscalDigital?.uuid != null) {
-      // CFDI encontrado, navegar a él
+      // CFDI found, navigate to it, passing the full list again
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              CFDIDetailScreen(cfdi: relatedCFDI, cfdis: cfdis),
+          builder: (context) => CFDIDetailScreen(
+            cfdi: relatedCFDI,
+            allCfdis: allCfdis, // Pass the list again
+          ),
         ),
       );
     } else {
-      // CFDI no encontrado, mostrar mensaje
+      // CFDI not found, show message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -1314,5 +1320,15 @@ class CFDIDetailScreen extends StatelessWidget {
         ),
       );
     }
+  }
+
+  // Método auxiliar para buscar un CFDI por UUID en una lista
+  CFDI? _findCFDIByUUID(String uuid, List<CFDI> cfdis) {
+    for (var cfdi in cfdis) {
+      if (cfdi.timbreFiscalDigital?.uuid == uuid) {
+        return cfdi;
+      }
+    }
+    return null;
   }
 }
