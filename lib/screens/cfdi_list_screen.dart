@@ -2,6 +2,7 @@ import 'package:comparador_cfdis/widgets/filter.dart';
 import 'package:comparador_cfdis/widgets/load_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:math';
 import '../bloc/cfdi_bloc.dart';
 import '../bloc/cfdi_event.dart';
 import '../bloc/cfdi_state.dart';
@@ -907,45 +908,55 @@ class _CFDITableViewState extends State<CFDITableView> {
           ),
         ),
 
-        // Tabla paginada
+        // Tabla paginada con scroll
         Expanded(
-          child: PaginatedDataTable(
-            header: null, // Ya mostramos información en nuestra propia UI
-            rowsPerPage: _rowsPerPage,
-            availableRowsPerPage: const [5, 10, 15, 20, 50, 100],
-            onRowsPerPageChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _rowsPerPage = value;
-                });
-              }
-            },
-            sortColumnIndex: _sortColumnIndex < visibleColumns.length - 1
-                ? _sortColumnIndex +
-                    1 // +1 porque la primera columna es el checkbox
-                : null,
-            sortAscending: _sortAscending,
-            columns: visibleColumns,
-            source: _CFDIDataSource(
-              _isSearching ? _filteredCfdis : _sortedCfdis,
-              _selectedCfdis,
-              context,
-              columnProvider,
-              _mostrarDetalles,
-              (cfdi, selected) {
-                // Callback para manejar la selección/deselección
-                setState(() {
-                  if (selected) {
-                    _selectedCfdis.add(cfdi);
-                  } else {
-                    _selectedCfdis.remove(cfdi);
-                  }
-                });
-              },
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              // Aseguramos un ancho mínimo para evitar contenido apretado
+              width: max(MediaQuery.of(context).size.width * 0.7, 800),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: PaginatedDataTable(
+                  header: null, // Ya mostramos información en nuestra propia UI
+                  rowsPerPage: _rowsPerPage,
+                  availableRowsPerPage: const [5, 10, 15, 20, 50, 100],
+                  onRowsPerPageChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _rowsPerPage = value;
+                      });
+                    }
+                  },
+                  sortColumnIndex: _sortColumnIndex < visibleColumns.length - 1
+                      ? _sortColumnIndex +
+                          1 // +1 porque la primera columna es el checkbox
+                      : null,
+                  sortAscending: _sortAscending,
+                  columns: visibleColumns,
+                  source: _CFDIDataSource(
+                    _isSearching ? _filteredCfdis : _sortedCfdis,
+                    _selectedCfdis,
+                    context,
+                    columnProvider,
+                    _mostrarDetalles,
+                    (cfdi, selected) {
+                      // Callback para manejar la selección/deselección
+                      setState(() {
+                        if (selected) {
+                          _selectedCfdis.add(cfdi);
+                        } else {
+                          _selectedCfdis.remove(cfdi);
+                        }
+                      });
+                    },
+                  ),
+                  showCheckboxColumn: false,
+                  showFirstLastButtons: true,
+                  horizontalMargin: 12,
+                ),
+              ),
             ),
-            showCheckboxColumn: true,
-            showFirstLastButtons: true,
-            horizontalMargin: 12,
           ),
         ),
       ],
