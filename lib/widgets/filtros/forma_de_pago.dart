@@ -1,6 +1,6 @@
 import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
 import 'package:comparador_cfdis/bloc/cfdi_event.dart';
-import 'package:comparador_cfdis/models/forma_pago.dart';
+import 'package:comparador_cfdis/models/filter_forma_pago.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,12 +27,7 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
           ),
         ),
         //Lista de checkbox para seleccionar la forma de pago
-        SizedBox(
-          height: 300,
-          child: SingleChildScrollView(
-            child: _buildFormasDePago(),
-          ),
-        ),
+        _buildFormasDePago(),
       ],
     );
   }

@@ -30,7 +30,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
       }
 
       // Apply all filters
-      List<CFDI> cfdis = FilterFactory(_filters).apply(_repository.cfdis);
+      List<CFDI> cfdis = await FilterFactory(_filters).apply(_repository.cfdis);
       emit(CFDILoaded(cfdis));
     }
   }

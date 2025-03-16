@@ -348,13 +348,30 @@ class _CFDITableViewState extends State<CFDITableView> {
   bool _sortAscending = true;
   late List<CFDI> _sortedCfdis;
   final Set<CFDI> _selectedCfdis = {}; // Conjunto para CFDIs seleccionados
-  final bool _showSidePanel = false;
+
+  // Opciones para paginación
+  int _rowsPerPage = 10;
+  final TextEditingController _searchController = TextEditingController();
+  List<CFDI> _filteredCfdis = [];
+  bool _isSearching = false;
+
+  // Lista de opciones para el número de filas por página
+  final List<int> _rowsPerPageOptions = [5, 10, 15, 20, 50, 100];
 
   @override
   void initState() {
     super.initState();
     _sortedCfdis = List.from(widget.cfdis);
+    _filteredCfdis = _sortedCfdis;
     _sortData();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -362,8 +379,44 @@ class _CFDITableViewState extends State<CFDITableView> {
     super.didUpdateWidget(oldWidget);
     if (widget.cfdis != oldWidget.cfdis) {
       _sortedCfdis = List.from(widget.cfdis);
+      _applySearchFilter(); // Aplica el filtro actual a los nuevos datos
       _sortData();
     }
+  }
+
+  void _onSearchChanged() {
+    _applySearchFilter();
+  }
+
+  void _applySearchFilter() {
+    final searchTerm = _searchController.text.toLowerCase().trim();
+    setState(() {
+      _isSearching = searchTerm.isNotEmpty;
+      if (_isSearching) {
+        _filteredCfdis = _sortedCfdis.where((cfdi) {
+          final emisorMatch =
+              cfdi.emisor?.nombre?.toLowerCase().contains(searchTerm) ?? false;
+          final receptorMatch =
+              cfdi.receptor?.nombre?.toLowerCase().contains(searchTerm) ??
+                  false;
+          final uuidMatch = cfdi.timbreFiscalDigital?.uuid
+                  ?.toLowerCase()
+                  .contains(searchTerm) ??
+              false;
+          final tipoMatch = _formatTipoComprobante(cfdi.tipoDeComprobante)
+              .toLowerCase()
+              .contains(searchTerm);
+          final totalMatch = cfdi.total?.contains(searchTerm) ?? false;
+          return emisorMatch ||
+              receptorMatch ||
+              uuidMatch ||
+              tipoMatch ||
+              totalMatch;
+        }).toList();
+      } else {
+        _filteredCfdis = _sortedCfdis;
+      }
+    });
   }
 
   void _sortData() {
@@ -389,6 +442,9 @@ class _CFDITableViewState extends State<CFDITableView> {
           return 0;
       }
     });
+
+    // Después de ordenar, aplicamos el filtro de búsqueda si es necesario
+    _applySearchFilter();
   }
 
   int _compareNullableStrings(String? a, String? b, bool ascending) {
@@ -543,36 +599,12 @@ class _CFDITableViewState extends State<CFDITableView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Expanded(flex: 2, child: FilterColumn()),
-        // Tabla principal (ahora con Expanded para que funcione dentro de Row)
+        // Tabla principal (ahora con PaginatedDataTable para mejorar rendimiento)
         Expanded(
           flex: 6,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: MediaQuery.of(context).size.width -
-                      (_selectedCfdis.isNotEmpty ? 300 : 0),
-                ),
-                child: DataTable(
-                  sortColumnIndex: _sortColumnIndex <
-                          visibleColumns.length -
-                              1 // Ajuste para la columna de checkbox
-                      ? _sortColumnIndex +
-                          1 // +1 porque la primera columna es el checkbox
-                      : null,
-                  sortAscending: _sortAscending,
-                  columnSpacing: 20.0,
-                  horizontalMargin: 10.0,
-                  columns: visibleColumns,
-                  rows: _sortedCfdis
-                      .map((cfdi) => _buildDataRow(
-                          cfdi, _sortedCfdis, context, columnProvider))
-                      .toList(),
-                ),
-              ),
-            ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _buildPaginatedDataTable(context, columnProvider),
           ),
         ),
         // Panel lateral (solo visible cuando hay elementos seleccionados)
@@ -672,8 +704,277 @@ class _CFDITableViewState extends State<CFDITableView> {
     );
   }
 
-  DataRow _buildDataRow(CFDI cfdi, List<CFDI> cfdis, BuildContext context,
-      ColumnVisibilityProvider columnProvider) {
+  Widget _buildPaginatedDataTable(
+      BuildContext context, ColumnVisibilityProvider columnProvider) {
+    // Crear la lista de columnas visibles para usar en este método
+    final List<DataColumn> visibleColumns = [
+      // Columna de selección (checkbox)
+      DataColumn(
+        label: Checkbox(
+          value: _selectedCfdis.isNotEmpty &&
+              _selectedCfdis.length == _sortedCfdis.length,
+          tristate: _selectedCfdis.isNotEmpty &&
+              _selectedCfdis.length < _sortedCfdis.length,
+          onChanged: (bool? value) {
+            setState(() {
+              if (value == true) {
+                // Seleccionar todos
+                _selectedCfdis.addAll(_sortedCfdis);
+              } else {
+                // Deseleccionar todos
+                _selectedCfdis.clear();
+              }
+            });
+          },
+        ),
+      ),
+    ];
+
+    // Agregar el resto de columnas visibles
+    if (columnProvider.isVisible('emisor')) {
+      visibleColumns.add(
+        DataColumn(
+          label: const Text('Emisor'),
+          onSort: (columnIndex, ascending) {
+            setState(() {
+              _sortColumnIndex = 0;
+              _sortAscending = ascending;
+              _sortData();
+            });
+          },
+        ),
+      );
+    }
+
+    // Columna Receptor
+    if (columnProvider.isVisible('receptor')) {
+      visibleColumns.add(
+        DataColumn(
+          label: const Text('Receptor'),
+          onSort: (columnIndex, ascending) {
+            setState(() {
+              _sortColumnIndex = 1;
+              _sortAscending = ascending;
+              _sortData();
+            });
+          },
+        ),
+      );
+    }
+
+    // Columna Fecha
+    if (columnProvider.isVisible('fecha')) {
+      visibleColumns.add(
+        DataColumn(
+          label: const Text('Fecha'),
+          onSort: (columnIndex, ascending) {
+            setState(() {
+              _sortColumnIndex = 2;
+              _sortAscending = ascending;
+              _sortData();
+            });
+          },
+        ),
+      );
+    }
+
+    // Columna Total
+    if (columnProvider.isVisible('total')) {
+      visibleColumns.add(
+        DataColumn(
+          label: const Text('Total'),
+          numeric: true,
+          onSort: (columnIndex, ascending) {
+            setState(() {
+              _sortColumnIndex = 3;
+              _sortAscending = ascending;
+              _sortData();
+            });
+          },
+        ),
+      );
+    }
+
+    // Columna Tipo
+    if (columnProvider.isVisible('tipo')) {
+      visibleColumns.add(
+        DataColumn(
+          label: const Text('Tipo'),
+          onSort: (columnIndex, ascending) {
+            setState(() {
+              _sortColumnIndex = 4;
+              _sortAscending = ascending;
+              _sortData();
+            });
+          },
+        ),
+      );
+    }
+
+    // Columna UUID
+    if (columnProvider.isVisible('uuid')) {
+      visibleColumns.add(
+        DataColumn(
+          label: const Text('UUID'),
+          onSort: (columnIndex, ascending) {
+            setState(() {
+              _sortColumnIndex = 5;
+              _sortAscending = ascending;
+              _sortData();
+            });
+          },
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Barra de herramientas con búsqueda y controles
+        Card(
+          elevation: 2.0,
+          margin: const EdgeInsets.only(bottom: 16.0),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                // Campo de búsqueda
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por emisor, receptor, UUID, etc...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Dropdown para seleccionar filas por página
+                DropdownButton<int>(
+                  value: _rowsPerPage,
+                  items: _rowsPerPageOptions.map((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text('$value filas'),
+                    );
+                  }).toList(),
+                  onChanged: (int? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _rowsPerPage = newValue;
+                      });
+                    }
+                  },
+                  hint: const Text('Filas por página'),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Información sobre los resultados
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _isSearching
+                    ? 'Mostrando ${_filteredCfdis.length} de ${_sortedCfdis.length} CFDIs'
+                    : 'Total: ${_sortedCfdis.length} CFDIs',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              if (_selectedCfdis.isNotEmpty)
+                Text(
+                  '${_selectedCfdis.length} CFDIs seleccionados',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        // Tabla paginada
+        Expanded(
+          child: PaginatedDataTable(
+            header: null, // Ya mostramos información en nuestra propia UI
+            rowsPerPage: _rowsPerPage,
+            availableRowsPerPage: const [5, 10, 15, 20, 50, 100],
+            onRowsPerPageChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _rowsPerPage = value;
+                });
+              }
+            },
+            sortColumnIndex: _sortColumnIndex < visibleColumns.length - 1
+                ? _sortColumnIndex +
+                    1 // +1 porque la primera columna es el checkbox
+                : null,
+            sortAscending: _sortAscending,
+            columns: visibleColumns,
+            source: _CFDIDataSource(
+              _isSearching ? _filteredCfdis : _sortedCfdis,
+              _selectedCfdis,
+              context,
+              columnProvider,
+              _mostrarDetalles,
+              (cfdi, selected) {
+                // Callback para manejar la selección/deselección
+                setState(() {
+                  if (selected) {
+                    _selectedCfdis.add(cfdi);
+                  } else {
+                    _selectedCfdis.remove(cfdi);
+                  }
+                });
+              },
+            ),
+            showCheckboxColumn: true,
+            showFirstLastButtons: true,
+            horizontalMargin: 12,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CFDIDataSource extends DataTableSource {
+  final List<CFDI> _cfdis;
+  final Set<CFDI> _selectedCfdis;
+  final BuildContext _context;
+  final ColumnVisibilityProvider _columnProvider;
+  final Function(CFDI, BuildContext) _mostrarDetalles;
+  final Function(CFDI, bool) _onSelectChanged;
+
+  _CFDIDataSource(
+    this._cfdis,
+    this._selectedCfdis,
+    this._context,
+    this._columnProvider,
+    this._mostrarDetalles,
+    this._onSelectChanged,
+  );
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= _cfdis.length) return null;
+    final cfdi = _cfdis[index];
+
     String? fechaFormateada;
     if (cfdi.fecha != null) {
       try {
@@ -693,87 +994,122 @@ class _CFDITableViewState extends State<CFDITableView> {
         Checkbox(
           value: _selectedCfdis.contains(cfdi),
           onChanged: (bool? selected) {
-            setState(() {
-              if (selected == true) {
-                _selectedCfdis.add(cfdi);
-              } else {
-                _selectedCfdis.remove(cfdi);
-              }
-            });
+            if (selected != null) {
+              _onSelectChanged(cfdi, selected);
+              notifyListeners();
+            }
           },
         ),
       ),
     ];
 
-    // Agregar el resto de las celdas
-    if (columnProvider.isVisible('emisor')) {
+    // Agregar el resto de las celdas de forma eficiente
+    if (_columnProvider.isVisible('emisor')) {
       visibleCells.add(
         DataCell(
           Text(cfdi.emisor?.nombre ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, _context),
         ),
       );
     }
 
     // Celda Receptor
-    if (columnProvider.isVisible('receptor')) {
+    if (_columnProvider.isVisible('receptor')) {
       visibleCells.add(
         DataCell(
           Text(cfdi.receptor?.nombre ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, _context),
         ),
       );
     }
 
     // Celda Fecha
-    if (columnProvider.isVisible('fecha')) {
+    if (_columnProvider.isVisible('fecha')) {
       visibleCells.add(
         DataCell(
           Text(fechaFormateada ?? 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, _context),
         ),
       );
     }
 
     // Celda Total
-    if (columnProvider.isVisible('total')) {
+    if (_columnProvider.isVisible('total')) {
       visibleCells.add(
         DataCell(
           Text(cfdi.total != null ? '\$${cfdi.total}' : 'N/A'),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          onTap: () => _mostrarDetalles(cfdi, _context),
         ),
       );
     }
 
-    // Celda Tipo
-    if (columnProvider.isVisible('tipo')) {
+    // Celda Tipo con estilos de color según el tipo
+    if (_columnProvider.isVisible('tipo')) {
+      final tipoColor = _getColorForTipoComprobante(cfdi.tipoDeComprobante);
       visibleCells.add(
         DataCell(
-          Text(tipoComprobante,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: tipoColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              tipoComprobante,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: _getColorForTipoComprobante(cfdi.tipoDeComprobante),
-              )),
-          onTap: () => _mostrarDetalles(cfdi, context),
+                color: tipoColor,
+              ),
+            ),
+          ),
+          onTap: () => _mostrarDetalles(cfdi, _context),
         ),
       );
     }
 
     // Celda UUID
-    if (columnProvider.isVisible('uuid')) {
+    if (_columnProvider.isVisible('uuid')) {
       visibleCells.add(
         DataCell(
-          Text(cfdi.timbreFiscalDigital?.uuid ?? 'N/A',
-              style: const TextStyle(fontSize: 12)),
-          onTap: () => _mostrarDetalles(cfdi, context),
+          Text(
+            cfdi.timbreFiscalDigital?.uuid ?? 'N/A',
+            style: const TextStyle(fontSize: 12),
+          ),
+          onTap: () => _mostrarDetalles(cfdi, _context),
         ),
       );
     }
 
-    return DataRow(
+    // Utilizamos DataRow.byIndex para mejor rendimiento
+    return DataRow.byIndex(
+      index: index,
       cells: visibleCells,
+      selected: _selectedCfdis.contains(cfdi),
+      onSelectChanged: (selected) {
+        if (selected != null) {
+          _onSelectChanged(cfdi, selected);
+          notifyListeners();
+        }
+      },
+      color: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return Theme.of(_context).colorScheme.primary.withOpacity(0.1);
+          }
+          return null;
+        },
+      ),
     );
   }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => _cfdis.length;
+
+  @override
+  int get selectedRowCount => _selectedCfdis.length;
 }
 
 // Funciones auxiliares que pueden ser compartidas entre ambas vistas

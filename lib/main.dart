@@ -1,5 +1,5 @@
 import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
-import 'package:comparador_cfdis/models/forma_pago.dart';
+import 'package:comparador_cfdis/models/filter.dart';
 import 'package:comparador_cfdis/repositories/cfdi_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

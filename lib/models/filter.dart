@@ -1,5 +1,8 @@
 import 'package:comparador_cfdis/models/cfdi.dart';
-import 'package:comparador_cfdis/models/forma_pago.dart';
+import 'package:comparador_cfdis/models/filter_forma_pago.dart';
+import 'package:comparador_cfdis/models/filter_metodo_pago.dart';
+import 'package:comparador_cfdis/models/filter_tipo_comprobante.dart';
+import 'package:comparador_cfdis/models/filter_uso_de_cfdi.dart';
 
 abstract class FilterOption {
   final String id;
@@ -51,9 +54,12 @@ class FilterFactory {
   FilterFactory(Set<FilterOption> filters) {
     //Crear una cadena de filtros para cada combinación de filtros
     chains.add(FormaDePagoFilter(filters));
+    chains.add(MetodoDePagoFilter(filters));
+    chains.add(UsoDeCFDIFilter(filters));
+    chains.add(TipoComprobanteFilter(filters));
   }
 
-  List<CFDI> apply(List<CFDI> cfdis) {
+  Future<List<CFDI>> apply(List<CFDI> cfdis) async {
     return chains.apply(cfdis);
   }
 }

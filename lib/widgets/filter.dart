@@ -2,6 +2,9 @@ import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
 import 'package:comparador_cfdis/bloc/cfdi_event.dart';
 import 'package:comparador_cfdis/bloc/cfdi_state.dart';
 import 'package:comparador_cfdis/widgets/filtros/forma_de_pago.dart';
+import 'package:comparador_cfdis/widgets/filtros/metodo_de_pago.dart';
+import 'package:comparador_cfdis/widgets/filtros/tipo_comprobante.dart';
+import 'package:comparador_cfdis/widgets/filtros/uso_de_cfdi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,7 +38,24 @@ class FilterColumn extends StatelessWidget {
           const SizedBox(height: 16),
           // Filtro por forma de pago
           BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-            return const FiltroFormaPago();
+            return const Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FiltroFormaPago(),
+                    SizedBox(height: 16),
+                    // Filtro por método de pago
+                    FiltroMetodoDePago(),
+                    SizedBox(height: 16),
+                    FiltroUsoDeCFDI(),
+                    SizedBox(height: 16),
+                    FiltroTipoComprobante(),
+                    SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            );
           }),
 
           // Contador de CFDIs
