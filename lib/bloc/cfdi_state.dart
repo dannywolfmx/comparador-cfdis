@@ -14,8 +14,10 @@ class CFDILoading extends CFDIState {}
 // En este estado ya se puede consumir la lista de CFDIs
 class CFDILoaded extends CFDIState {
   final List<CFDI> cfdis;
-
-  CFDILoaded(this.cfdis);
+  int total = 0;
+  CFDILoaded(this.cfdis) {
+    total = cfdis.length;
+  }
 }
 
 // En este estado hay un error al cargar los CFDIs

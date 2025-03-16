@@ -1,24 +1,38 @@
+import 'package:comparador_cfdis/models/filter.dart';
+import 'package:comparador_cfdis/repositories/cfdi_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../services/cfdi_parser.dart';
 import 'cfdi_event.dart';
 import 'cfdi_state.dart';
 import '../models/cfdi.dart';
 
 class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
-  // Instancia singleton
-  static CFDIBloc? _instance;
+  final CFDIRepository _repository;
+  //List of filters options
+  final Set<FilterOption> _filters;
 
   // Constructor factory para implementar singleton
-  factory CFDIBloc() {
-    _instance ??= CFDIBloc._internal();
-    return _instance!;
-  }
 
-  // Constructor privado interno
-  CFDIBloc._internal() : super(CFDIInitial()) {
+  CFDIBloc(this._repository, this._filters) : super(CFDIInitial()) {
     on<LoadCFDIsFromDirectory>(_onLoadFromDirectory);
     on<LoadCFDIsFromFile>(_onLoadFromFile);
+    on<FilterCFDIs>(_onFilter);
     on<ClearCFDIs>(_onClear);
+  }
+
+  Future<void> _onFilter(FilterCFDIs event, Emitter<CFDIState> emit) async {
+    if (state is CFDILoaded) {
+      final filter = event.filter;
+
+      if (_filters.contains(filter)) {
+        _filters.remove(filter);
+      } else {
+        _filters.add(filter);
+      }
+
+      // Apply all filters
+      List<CFDI> cfdis = FilterFactory(_filters).apply(_repository.cfdis);
+      emit(CFDILoaded(cfdis));
+    }
   }
 
   Future<void> _onLoadFromDirectory(
@@ -28,7 +42,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
     emit(CFDILoading());
 
     try {
-      final cfdis = await CFDIParser.parseDirectoryCFDIs();
+      final cfdis = await _repository.loadCFDIsFromDirectory();
       if (cfdis.isEmpty) {
         emit(
             CFDIError('No se encontraron CFDIs en el directorio seleccionado'));
@@ -47,7 +61,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
     emit(CFDILoading());
 
     try {
-      final cfdi = await CFDIParser.pickAndParseXml();
+      final cfdi = await _repository.loadCFDIFromFile();
       if (cfdi != null) {
         emit(CFDILoaded([cfdi]));
       } else {
@@ -64,6 +78,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
   }
 
   void _onClear(ClearCFDIs event, Emitter<CFDIState> emit) {
+    _repository.clearCFDIs();
     emit(CFDIInitial());
   }
 

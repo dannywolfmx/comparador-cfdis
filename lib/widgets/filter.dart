@@ -1,4 +1,9 @@
+import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
+import 'package:comparador_cfdis/bloc/cfdi_event.dart';
+import 'package:comparador_cfdis/bloc/cfdi_state.dart';
+import 'package:comparador_cfdis/widgets/filtros/forma_de_pago.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FilterColumn extends StatelessWidget {
   const FilterColumn({super.key});
@@ -28,52 +33,27 @@ class FilterColumn extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          // Sección de filtro por fechas
-          ListTile(
-            title: const Text('Fecha de Inicio'),
-            subtitle: const Text('No seleccionada'),
-            trailing: const Icon(Icons.calendar_today),
-            onTap: () async {
-              //Show date picker
-              final date = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
+          // Filtro por forma de pago
+          BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+            return const FiltroFormaPago();
+          }),
+
+          // Contador de CFDIs
+          BlocBuilder<CFDIBloc, CFDIState>(
+            builder: (context, state) {
+              if (state is! CFDILoaded) {
+                return const SizedBox.shrink();
+              }
+              return Text(
+                'Total de CFDIs: ${state.total}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
               );
             },
           ),
-          ListTile(
-            title: const Text('Fecha de Fin'),
-            subtitle: const Text('No seleccionada'),
-            trailing: const Icon(Icons.calendar_today),
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              );
-            },
-          ),
-          const Divider(color: Colors.white),
-          // Sección de filtro por estatus
-          ListTile(
-            title: const Text('Estatus'),
-            subtitle: const Text('No seleccionado'),
-            trailing: const Icon(Icons.filter_list),
-            onTap: () async {
-              // Aquí puedes agregar la lógica para seleccionar el estatus
-            },
-          ),
-          const Divider(color: Colors.white),
-          // Botón para aplicar los filtros
-          ElevatedButton(
-            onPressed: () {
-              // Aquí puedes agregar la lógica para aplicar los filtros
-            },
-            child: const Text('Aplicar filtros'),
-          ),
+          // Botón para limpiar los filtros
         ],
       ),
     );

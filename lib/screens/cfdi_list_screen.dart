@@ -17,176 +17,173 @@ class CFDIListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ColumnVisibilityProvider(),
-      child: BlocProvider(
-        create: (context) => CFDIBloc(),
-        child: Builder(
-          builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: const Text('Tabla de CFDIs'),
-              // Acciones de la AppBar (estas estarán arriva a la derecha)
-              actions: [
-                // Botón para abrir el drawer de filtros
-                IconButton(
-                  icon: const Icon(Icons.filter_list),
-                  tooltip: 'Filtros',
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer();
-                  },
-                ),
-                // Menú para configurar columnas
-                BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-                  if (state is CFDILoaded) {
-                    // Usamos Consumer en lugar de acceder directamente al Provider
-                    return Consumer<ColumnVisibilityProvider>(
-                        builder: (context, columnProvider, _) {
-                      return PopupMenuButton<String>(
-                        icon: const Icon(Icons.view_column),
-                        tooltip: 'Configurar columnas',
-                        onSelected: (value) {
-                          // Si se selecciona "reset", restauramos la visibilidad predeterminada
-                          if (value == 'reset') {
-                            Provider.of<ColumnVisibilityProvider>(context,
-                                    listen: false)
-                                .resetToDefault();
-                            return;
-                          }
-                          // Alternamos la visibilidad de la columna seleccionada
+      child: Builder(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Tabla de CFDIs'),
+            // Acciones de la AppBar (estas estarán arriva a la derecha)
+            actions: [
+              // Botón para abrir el drawer de filtros
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                tooltip: 'Filtros',
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
+              // Menú para configurar columnas
+              BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+                if (state is CFDILoaded) {
+                  // Usamos Consumer en lugar de acceder directamente al Provider
+                  return Consumer<ColumnVisibilityProvider>(
+                      builder: (context, columnProvider, _) {
+                    return PopupMenuButton<String>(
+                      icon: const Icon(Icons.view_column),
+                      tooltip: 'Configurar columnas',
+                      onSelected: (value) {
+                        // Si se selecciona "reset", restauramos la visibilidad predeterminada
+                        if (value == 'reset') {
                           Provider.of<ColumnVisibilityProvider>(context,
                                   listen: false)
-                              .toggleVisibility(value);
-                        },
-                        itemBuilder: (context) {
-                          // Ya no necesitamos obtener el provider aquí
-                          // porque lo tenemos disponible desde el Consumer
+                              .resetToDefault();
+                          return;
+                        }
+                        // Alternamos la visibilidad de la columna seleccionada
+                        Provider.of<ColumnVisibilityProvider>(context,
+                                listen: false)
+                            .toggleVisibility(value);
+                      },
+                      itemBuilder: (context) {
+                        // Ya no necesitamos obtener el provider aquí
+                        // porque lo tenemos disponible desde el Consumer
 
-                          return [
-                            // Opción para emisor
-                            CheckedPopupMenuItem(
-                              checked: columnProvider.isVisible('emisor'),
-                              value: 'emisor',
-                              child: const Text('Emisor'),
-                            ),
-                            // Opción para receptor
-                            CheckedPopupMenuItem(
-                              checked: columnProvider.isVisible('receptor'),
-                              value: 'receptor',
-                              child: const Text('Receptor'),
-                            ),
-                            // Opción para fecha
-                            CheckedPopupMenuItem(
-                              checked: columnProvider.isVisible('fecha'),
-                              value: 'fecha',
-                              child: const Text('Fecha'),
-                            ),
-                            // Opción para total
-                            CheckedPopupMenuItem(
-                              checked: columnProvider.isVisible('total'),
-                              value: 'total',
-                              child: const Text('Total'),
-                            ),
-                            // Opción para tipo
-                            CheckedPopupMenuItem(
-                              checked: columnProvider.isVisible('tipo'),
-                              value: 'tipo',
-                              child: const Text('Tipo'),
-                            ),
-                            // Opción para UUID
-                            CheckedPopupMenuItem(
-                              checked: columnProvider.isVisible('uuid'),
-                              value: 'uuid',
-                              child: const Text('UUID'),
-                            ),
-                            // Separador
-                            const PopupMenuDivider(),
-                            // Opción para restaurar valores predeterminados
-                            const PopupMenuItem(
-                              value: 'reset',
-                              child: Text('Restaurar columnas'),
-                            ),
-                          ];
-                        },
-                      );
-                    });
-                  }
-                  return Container();
-                }),
-              ],
-            ),
-            //Pantalla central
-            body: BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-              if (state is CFDIInitial) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'No hay CFDIs cargados',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      SizedBox(height: 20),
-                      LoadButtons(),
-                    ],
-                  ),
-                );
-              } else if (state is CFDILoading) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (state is CFDILoaded) {
-                return AdaptiveCFDIView(cfdis: state.cfdis);
-              } else if (state is CFDIError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 60,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error: ${state.message}',
-                        style: const TextStyle(fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-                      const LoadButtons(),
-                    ],
-                  ),
-                );
-              }
-              return Container();
-            }),
-            floatingActionButton:
-                BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-              if (state is CFDILoaded) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FloatingActionButton(
-                      heroTag: 'addFile',
-                      onPressed: () {
-                        context.read<CFDIBloc>().add(LoadCFDIsFromFile());
+                        return [
+                          // Opción para emisor
+                          CheckedPopupMenuItem(
+                            checked: columnProvider.isVisible('emisor'),
+                            value: 'emisor',
+                            child: const Text('Emisor'),
+                          ),
+                          // Opción para receptor
+                          CheckedPopupMenuItem(
+                            checked: columnProvider.isVisible('receptor'),
+                            value: 'receptor',
+                            child: const Text('Receptor'),
+                          ),
+                          // Opción para fecha
+                          CheckedPopupMenuItem(
+                            checked: columnProvider.isVisible('fecha'),
+                            value: 'fecha',
+                            child: const Text('Fecha'),
+                          ),
+                          // Opción para total
+                          CheckedPopupMenuItem(
+                            checked: columnProvider.isVisible('total'),
+                            value: 'total',
+                            child: const Text('Total'),
+                          ),
+                          // Opción para tipo
+                          CheckedPopupMenuItem(
+                            checked: columnProvider.isVisible('tipo'),
+                            value: 'tipo',
+                            child: const Text('Tipo'),
+                          ),
+                          // Opción para UUID
+                          CheckedPopupMenuItem(
+                            checked: columnProvider.isVisible('uuid'),
+                            value: 'uuid',
+                            child: const Text('UUID'),
+                          ),
+                          // Separador
+                          const PopupMenuDivider(),
+                          // Opción para restaurar valores predeterminados
+                          const PopupMenuItem(
+                            value: 'reset',
+                            child: Text('Restaurar columnas'),
+                          ),
+                        ];
                       },
-                      tooltip: 'Añadir archivo CFDI',
-                      child: const Icon(Icons.add_to_photos),
-                    ),
-                    const SizedBox(height: 10),
-                    FloatingActionButton(
-                      heroTag: 'addDirectory',
-                      onPressed: () {
-                        context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
-                      },
-                      tooltip: 'Cargar directorio',
-                      child: const Icon(Icons.create_new_folder),
-                    ),
-                  ],
-                );
-              }
-              return Container();
-            }),
+                    );
+                  });
+                }
+                return Container();
+              }),
+            ],
           ),
+          //Pantalla central
+          body: BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+            if (state is CFDIInitial) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'No hay CFDIs cargados',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 20),
+                    LoadButtons(),
+                  ],
+                ),
+              );
+            } else if (state is CFDILoading) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (state is CFDILoaded) {
+              return AdaptiveCFDIView(cfdis: state.cfdis);
+            } else if (state is CFDIError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 60,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error: ${state.message}',
+                      style: const TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    const LoadButtons(),
+                  ],
+                ),
+              );
+            }
+            return Container();
+          }),
+          floatingActionButton:
+              BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+            if (state is CFDILoaded) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FloatingActionButton(
+                    heroTag: 'addFile',
+                    onPressed: () {
+                      context.read<CFDIBloc>().add(LoadCFDIsFromFile());
+                    },
+                    tooltip: 'Añadir archivo CFDI',
+                    child: const Icon(Icons.add_to_photos),
+                  ),
+                  const SizedBox(height: 10),
+                  FloatingActionButton(
+                    heroTag: 'addDirectory',
+                    onPressed: () {
+                      context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
+                    },
+                    tooltip: 'Cargar directorio',
+                    child: const Icon(Icons.create_new_folder),
+                  ),
+                ],
+              );
+            }
+            return Container();
+          }),
         ),
       ),
     );
