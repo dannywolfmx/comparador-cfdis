@@ -1,3 +1,4 @@
+import 'package:comparador_cfdis/models/cfdi_information.dart';
 import 'package:comparador_cfdis/models/filter.dart';
 import 'package:comparador_cfdis/repositories/cfdi_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,7 +32,9 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
 
       // Apply all filters
       List<CFDI> cfdis = await FilterFactory(_filters).apply(_repository.cfdis);
-      emit(CFDILoaded(cfdis));
+      //GET CFDI information
+      final cfdiInformation = calculateTotals(cfdis);
+      emit(CFDILoaded(cfdis, cfdiInformation));
     }
   }
 
@@ -47,7 +50,8 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
         emit(
             CFDIError('No se encontraron CFDIs en el directorio seleccionado'));
       } else {
-        emit(CFDILoaded(cfdis));
+        final cfdiInformation = calculateTotals(cfdis);
+        emit(CFDILoaded(cfdis, cfdiInformation));
       }
     } catch (e) {
       emit(CFDIError('Error al cargar los CFDIs: $e'));
@@ -63,7 +67,8 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
     try {
       final cfdi = await _repository.loadCFDIFromFile();
       if (cfdi != null) {
-        emit(CFDILoaded([cfdi]));
+        final cfdiInformation = calculateTotals([cfdi]);
+        emit(CFDILoaded([cfdi], cfdiInformation));
       } else {
         if (state is CFDILoaded) {
           // Mantener el estado actual si ya hay CFDIs cargados
@@ -89,5 +94,18 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
       (cfdi) => cfdi.timbreFiscalDigital?.uuid?.toUpperCase() == normalizedUuid,
       orElse: () => CFDI(),
     );
+  }
+
+  // calculate the subtotal, discount and total of the CFDIs
+  static CFDIInformation calculateTotals(List<CFDI> cfdis) {
+    final subtotal = cfdis.fold<double>(
+        0, (prev, cfdi) => prev + (double.tryParse(cfdi.subTotal ?? '0') ?? 0));
+    final descuento = cfdis.fold<double>(0,
+        (prev, cfdi) => prev + (double.tryParse(cfdi.descuento ?? '0') ?? 0));
+    final total = cfdis.fold<double>(
+        0, (prev, cfdi) => prev + (double.tryParse(cfdi.total ?? '0') ?? 0));
+
+    return CFDIInformation(
+        subtotal: subtotal, descuento: descuento, total: total);
   }
 }

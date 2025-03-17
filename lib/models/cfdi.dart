@@ -11,6 +11,7 @@ class CFDI {
   String? noCertificado;
   String? certificado;
   String? condicionesDePago;
+  String? descuento;
   String? subTotal;
   String? moneda;
   String? tipoCambio;
@@ -35,6 +36,7 @@ class CFDI {
     this.noCertificado,
     this.certificado,
     this.condicionesDePago,
+    this.descuento,
     this.subTotal,
     this.moneda,
     this.tipoCambio,
@@ -80,6 +82,7 @@ class CFDI {
       noCertificado: json['NoCertificado'],
       certificado: json['Certificado'],
       condicionesDePago: json['CondicionesDePago'],
+      descuento: json['Descuento'],
       subTotal: json['SubTotal'],
       moneda: json['Moneda'],
       tipoCambio: json['TipoCambio'],

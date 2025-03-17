@@ -1,3 +1,5 @@
+import 'package:comparador_cfdis/models/cfdi_information.dart';
+
 import '../models/cfdi.dart';
 
 // Clase abstracta para los estados de la carga de CFDIs
@@ -14,9 +16,10 @@ class CFDILoading extends CFDIState {}
 // En este estado ya se puede consumir la lista de CFDIs
 class CFDILoaded extends CFDIState {
   final List<CFDI> cfdis;
-  int total = 0;
-  CFDILoaded(this.cfdis) {
-    total = cfdis.length;
+  int count = 0;
+  CFDIInformation cfdiInformation;
+  CFDILoaded(this.cfdis, this.cfdiInformation) {
+    count = cfdis.length;
   }
 }
 

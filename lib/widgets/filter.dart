@@ -153,13 +153,40 @@ class _FilterColumnState extends State<FilterColumn> {
                 if (state is! CFDILoaded) {
                   return const SizedBox.shrink();
                 }
-                return Row(
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Add the CFDIInformation
+                    Text(
+                      'SubTotal: ${state.cfdiInformation.subtotal}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Descuento: ${state.cfdiInformation.descuento}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Total: ${state.cfdiInformation.total}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const Icon(Icons.article, color: Colors.white),
                     const SizedBox(width: 8),
                     Text(
-                      'Total: ${state.total} CFDIs',
+                      'Total: ${state.count} CFDIs',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
