@@ -147,7 +147,7 @@ class Receptor {
       nombre: json['Nombre'],
       domicilioFiscalReceptor: json['DomicilioFiscalReceptor'],
       regimenFiscalReceptor: json['RegimenFiscalReceptor'],
-      usoCFDI: json['UsoCFDI'],
+      usoCFDI: json['UsoCFDI']?.trim(),
     );
   }
 }

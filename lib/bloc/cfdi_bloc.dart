@@ -98,12 +98,21 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
 
   // calculate the subtotal, discount and total of the CFDIs
   static CFDIInformation calculateTotals(List<CFDI> cfdis) {
-    final subtotal = cfdis.fold<double>(
-        0, (prev, cfdi) => prev + (double.tryParse(cfdi.subTotal ?? '0') ?? 0));
-    final descuento = cfdis.fold<double>(0,
-        (prev, cfdi) => prev + (double.tryParse(cfdi.descuento ?? '0') ?? 0));
-    final total = cfdis.fold<double>(
-        0, (prev, cfdi) => prev + (double.tryParse(cfdi.total ?? '0') ?? 0));
+    final subtotal = cfdis.fold<double>(0, (prev, cfdi) {
+      double tipoCambio = double.tryParse(cfdi.tipoCambio ?? '1') ?? 1;
+      double valor = double.tryParse(cfdi.subTotal ?? '0') ?? 0;
+      return prev + (tipoCambio > 1 ? valor * tipoCambio : valor);
+    });
+    final descuento = cfdis.fold<double>(0, (prev, cfdi) {
+      double tipoCambio = double.tryParse(cfdi.tipoCambio ?? '1') ?? 1;
+      double valor = double.tryParse(cfdi.descuento ?? '0') ?? 0;
+      return prev + (tipoCambio > 1 ? valor * tipoCambio : valor);
+    });
+    final total = cfdis.fold<double>(0, (prev, cfdi) {
+      double tipoCambio = double.tryParse(cfdi.tipoCambio ?? '1') ?? 1;
+      double valor = double.tryParse(cfdi.total ?? '0') ?? 0;
+      return prev + (tipoCambio > 1 ? valor * tipoCambio : valor);
+    });
 
     return CFDIInformation(
         subtotal: subtotal, descuento: descuento, total: total);

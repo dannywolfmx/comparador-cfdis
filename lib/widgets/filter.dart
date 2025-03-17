@@ -153,49 +153,160 @@ class _FilterColumnState extends State<FilterColumn> {
                 if (state is! CFDILoaded) {
                   return const SizedBox.shrink();
                 }
+
+                // Formato para valores monetarios
+                String formatCurrency(double value) {
+                  return '\$${value.toStringAsFixed(2).replaceAll(RegExp(r'(?<=\d)(?=(\d{3})+(?!\d))'), ',')}';
+                }
+
                 return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Add the CFDIInformation
-                    Text(
-                      'SubTotal: ${state.cfdiInformation.subtotal}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        'Resumen de CFDIs',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Descuento: ${state.cfdiInformation.descuento}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+
+                    // Línea divisoria decorativa
+                    Container(
+                      height: 1,
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white24,
+                            Colors.white70,
+                            Colors.white24
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Total: ${state.cfdiInformation.total}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+
+                    // Subtotal con icono
+                    _buildInfoRow(
+                      icon: Icons.account_balance,
+                      label: 'SubTotal:',
+                      value: formatCurrency(state.cfdiInformation.subtotal),
                     ),
-                    const Icon(Icons.article, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Total: ${state.count} CFDIs',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+
+                    // Descuento con icono
+                    _buildInfoRow(
+                      icon: Icons.discount,
+                      label: 'Descuento:',
+                      value: formatCurrency(state.cfdiInformation.descuento),
+                      valueColor: Colors.amber,
+                    ),
+
+                    // Subtotal - Descuento
+                    _buildInfoRow(
+                      icon: Icons.discount,
+                      label: 'SubTotal - Descuento:',
+                      value: formatCurrency(state.cfdiInformation.subtotal -
+                          state.cfdiInformation.descuento),
+                      valueColor: Colors.greenAccent,
+                    ),
+
+                    // Línea divisoria antes del total
+                    Divider(
+                        color: Colors.white.withOpacity(0.3),
+                        thickness: 1,
+                        height: 16),
+
+                    // Total con icono y estilo destacado
+                    _buildInfoRow(
+                      icon: Icons.price_check,
+                      label: 'Total:',
+                      value: formatCurrency(state.cfdiInformation.total),
+                      valueColor: Colors.greenAccent,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+
+                    //SubTotal - Descuento + IVA
+                    _buildInfoRow(
+                      icon: Icons.price_check,
+                      label: 'SubTotal - Descuento + IVA:',
+                      value: formatCurrency((state.cfdiInformation.subtotal -
+                              state.cfdiInformation.descuento) *
+                          1.16),
+                      valueColor: Colors.greenAccent,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+
+                    // Contador de CFDIs con animación sutil
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.article, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${state.count} CFDIs',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 );
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget auxiliar para construir las filas de información
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    Color valueColor = Colors.white,
+    double fontSize = 16,
+    FontWeight fontWeight = FontWeight.w500,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white70, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 16,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: TextStyle(
+              color: valueColor,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
             ),
           ),
         ],
