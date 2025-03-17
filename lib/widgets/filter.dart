@@ -19,6 +19,8 @@ class _FilterColumnState extends State<FilterColumn> {
   bool _expandedMetodoPago = false;
   bool _expandedUsoCFDI = false;
   bool _expandedTipoComprobante = false;
+  bool _expandedResumen =
+      true; // Variable para controlar la expansión del resumen
 
   @override
   Widget build(BuildContext context) {
@@ -141,13 +143,13 @@ class _FilterColumnState extends State<FilterColumn> {
           }),
 
           // Contador de CFDIs
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            margin: const EdgeInsets.all(8),
+          _buildExpandableFilter(
+            title: 'Resumen de CFDIs',
+            icon: Icons.summarize,
+            expanded: _expandedResumen,
+            onTap: () => setState(() {
+              _expandedResumen = !_expandedResumen;
+            }),
             child: BlocBuilder<CFDIBloc, CFDIState>(
               builder: (context, state) {
                 if (state is! CFDILoaded) {
@@ -162,34 +164,6 @@ class _FilterColumnState extends State<FilterColumn> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 8.0),
-                      child: Text(
-                        'Resumen de CFDIs',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-                    // Línea divisoria decorativa
-                    Container(
-                      height: 1,
-                      margin: const EdgeInsets.only(bottom: 10),
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white24,
-                            Colors.white70,
-                            Colors.white24
-                          ],
-                        ),
-                      ),
-                    ),
-
                     // Subtotal con icono
                     _buildInfoRow(
                       icon: Icons.account_balance,
@@ -289,27 +263,77 @@ class _FilterColumnState extends State<FilterColumn> {
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white70, size: 20),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 16,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              color: valueColor,
-              fontSize: fontSize,
-              fontWeight: fontWeight,
-            ),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Si el espacio es reducido, usamos una disposición vertical
+          if (constraints.maxWidth < 300) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, color: Colors.white70, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 28.0, top: 4.0),
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      color: valueColor,
+                      fontSize: fontSize,
+                      fontWeight: fontWeight,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          // Disposición horizontal para espacios más amplios
+          return Row(
+            children: [
+              Icon(icon, color: Colors.white70, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    color: valueColor,
+                    fontSize: fontSize,
+                    fontWeight: fontWeight,
+                  ),
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
