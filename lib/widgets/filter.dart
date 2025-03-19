@@ -19,31 +19,25 @@ class _FilterColumnState extends State<FilterColumn> {
   bool _expandedMetodoPago = false;
   bool _expandedUsoCFDI = false;
   bool _expandedTipoComprobante = false;
-  bool _expandedResumen =
-      true; // Variable para controlar la expansión del resumen
+  bool _expandedResumen = true;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withBlue(
-                  (Theme.of(context).primaryColor.blue * 0.8).round(),
-                ),
+            Color(0xFF333333),
+            Color(0xFF222222),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -51,7 +45,7 @@ class _FilterColumnState extends State<FilterColumn> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -59,23 +53,25 @@ class _FilterColumnState extends State<FilterColumn> {
                   'Filtros',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
                   ),
                 ),
-                // Botón para limpiar todos los filtros
                 BlocBuilder<CFDIBloc, CFDIState>(
                   builder: (context, state) {
                     if (state is! CFDILoaded) {
                       return const SizedBox.shrink();
                     }
                     return IconButton(
-                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      icon: const Icon(Icons.refresh,
+                          color: Colors.white, size: 20),
                       tooltip: 'Limpiar filtros',
-                      onPressed: () {
-                        setState(() {});
-                      },
+                      onPressed: () {},
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                      padding: EdgeInsets.zero,
                     );
                   },
                 ),
@@ -83,12 +79,13 @@ class _FilterColumnState extends State<FilterColumn> {
             ),
           ),
           const Divider(color: Colors.white30, height: 1, thickness: 1),
+
           // Filtros con BlocBuilder
           BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
             return Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -142,7 +139,7 @@ class _FilterColumnState extends State<FilterColumn> {
             );
           }),
 
-          // Contador de CFDIs
+          // Contador de CFDIs y Resumen
           _buildExpandableFilter(
             title: 'Resumen de CFDIs',
             icon: Icons.summarize,
@@ -164,77 +161,84 @@ class _FilterColumnState extends State<FilterColumn> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Subtotal con icono
-                    _buildInfoRow(
-                      icon: Icons.account_balance,
-                      label: 'SubTotal:',
-                      value: formatCurrency(state.cfdiInformation.subtotal),
+                    // Grid para mostrar información más compacta
+                    GridView.count(
+                      crossAxisCount: 2,
+                      childAspectRatio: 3.0,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 4,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      children: [
+                        // Subtotal
+                        _buildCompactInfoTile(
+                          icon: Icons.account_balance,
+                          label: 'SubTotal:',
+                          value: formatCurrency(state.cfdiInformation.subtotal),
+                        ),
+
+                        // Descuento
+                        _buildCompactInfoTile(
+                          icon: Icons.discount,
+                          label: 'Descuento:',
+                          value:
+                              formatCurrency(state.cfdiInformation.descuento),
+                          valueColor: Colors.amber,
+                        ),
+
+                        // Subtotal - Descuento
+                        _buildCompactInfoTile(
+                          icon: Icons.calculate,
+                          label: 'SubT. - Desc.:',
+                          value: formatCurrency(state.cfdiInformation.subtotal -
+                              state.cfdiInformation.descuento),
+                          valueColor: Colors.greenAccent,
+                        ),
+
+                        // Total con icono
+                        _buildCompactInfoTile(
+                          icon: Icons.price_check,
+                          label: 'Total:',
+                          value: formatCurrency(state.cfdiInformation.total),
+                          valueColor: Colors.greenAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ],
                     ),
 
-                    // Descuento con icono
-                    _buildInfoRow(
-                      icon: Icons.discount,
-                      label: 'Descuento:',
-                      value: formatCurrency(state.cfdiInformation.descuento),
-                      valueColor: Colors.amber,
-                    ),
-
-                    // Subtotal - Descuento
-                    _buildInfoRow(
-                      icon: Icons.discount,
-                      label: 'SubTotal - Descuento:',
-                      value: formatCurrency(state.cfdiInformation.subtotal -
-                          state.cfdiInformation.descuento),
-                      valueColor: Colors.greenAccent,
-                    ),
-
-                    // Línea divisoria antes del total
-                    Divider(
-                        color: Colors.white.withOpacity(0.3),
-                        thickness: 1,
-                        height: 16),
-
-                    // Total con icono y estilo destacado
+                    // SubTotal - Descuento + IVA
                     _buildInfoRow(
                       icon: Icons.price_check,
-                      label: 'Total:',
-                      value: formatCurrency(state.cfdiInformation.total),
-                      valueColor: Colors.greenAccent,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-
-                    //SubTotal - Descuento + IVA
-                    _buildInfoRow(
-                      icon: Icons.price_check,
-                      label: 'SubTotal - Descuento + IVA:',
+                      label: 'SubTotal - Desc. + IVA:',
                       value: formatCurrency((state.cfdiInformation.subtotal -
                               state.cfdiInformation.descuento) *
                           1.16),
                       valueColor: Colors.greenAccent,
-                      fontSize: 18,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
 
-                    // Contador de CFDIs con animación sutil
+                    // Contador de CFDIs con diseño compacto
                     Padding(
-                      padding: const EdgeInsets.only(top: 10),
+                      padding: const EdgeInsets.only(top: 6),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.article, color: Colors.white),
-                            const SizedBox(width: 8),
+                            const Icon(Icons.article,
+                                color: Colors.white, size: 16),
+                            const SizedBox(width: 6),
                             Text(
                               '${state.count} CFDIs',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -252,13 +256,62 @@ class _FilterColumnState extends State<FilterColumn> {
     );
   }
 
+  // Widget para mostrar información en el formato de mosaico compacto
+  Widget _buildCompactInfoTile({
+    required IconData icon,
+    required String label,
+    required String value,
+    Color valueColor = Colors.white,
+    FontWeight fontWeight = FontWeight.w400,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: Colors.white70, size: 14),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(
+              color: valueColor,
+              fontSize: 13,
+              fontWeight: fontWeight,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
   // Widget auxiliar para construir las filas de información
   Widget _buildInfoRow({
     required IconData icon,
     required String label,
     required String value,
     Color valueColor = Colors.white,
-    double fontSize = 16,
+    double fontSize = 14,
     FontWeight fontWeight = FontWeight.w500,
   }) {
     return Padding(
@@ -266,20 +319,20 @@ class _FilterColumnState extends State<FilterColumn> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           // Si el espacio es reducido, usamos una disposición vertical
-          if (constraints.maxWidth < 300) {
+          if (constraints.maxWidth < 240) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(icon, color: Colors.white70, size: 20),
-                    const SizedBox(width: 8),
+                    Icon(icon, color: Colors.white70, size: 16),
+                    const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         label,
                         style: const TextStyle(
                           color: Colors.white70,
-                          fontSize: 16,
+                          fontSize: 13,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -287,7 +340,7 @@ class _FilterColumnState extends State<FilterColumn> {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 28.0, top: 4.0),
+                  padding: const EdgeInsets.only(left: 20.0, top: 2.0),
                   child: Text(
                     value,
                     style: TextStyle(
@@ -304,20 +357,20 @@ class _FilterColumnState extends State<FilterColumn> {
           // Disposición horizontal para espacios más amplios
           return Row(
             children: [
-              Icon(icon, color: Colors.white70, size: 20),
-              const SizedBox(width: 8),
+              Icon(icon, color: Colors.white70, size: 16),
+              const SizedBox(width: 4),
               Expanded(
                 flex: 3,
                 child: Text(
                   label,
                   style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 16,
+                    fontSize: 13,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 2),
               Expanded(
                 flex: 2,
                 child: Text(
@@ -346,34 +399,38 @@ class _FilterColumnState extends State<FilterColumn> {
     required Widget child,
   }) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 2),
       elevation: 0,
       color: Colors.white.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       child: Column(
         children: [
           ListTile(
             onTap: onTap,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: Icon(icon, color: Colors.white),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+            minLeadingWidth: 16,
+            leading: Icon(icon, color: Colors.white, size: 18),
             title: Text(
               title,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
             trailing: Icon(
               expanded ? Icons.expand_less : Icons.expand_more,
               color: Colors.white,
+              size: 18,
             ),
           ),
           if (expanded)
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(4.0),
                 child: child,
               ),
             ),
