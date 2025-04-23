@@ -21,6 +21,9 @@ dependencies:
   open_file: ^3.3.2
   printing: ^5.11.0  # Asegurarnos de que es la última versión
   pdf: ^3.10.7
+  # data_table_2: ^2.6.0 # Comentar o eliminar esta línea
+  syncfusion_flutter_datagrid: ^25.1.37 # Añadir esta línea
+  syncfusion_flutter_core: ^25.1.37 # Necesario para SfDataGrid
 
 dev_dependencies:
   flutter_test:

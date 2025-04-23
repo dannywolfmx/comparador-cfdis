@@ -1,8 +1,9 @@
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:syncfusion_flutter_core/theme.dart'; // Necesario para el tema
 import 'package:comparador_cfdis/widgets/filter.dart';
 import 'package:comparador_cfdis/widgets/load_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dart:math';
 import '../bloc/cfdi_bloc.dart';
 import '../bloc/cfdi_event.dart';
 import '../bloc/cfdi_state.dart';
@@ -253,26 +254,48 @@ class CFDITableView extends StatefulWidget {
 }
 
 class _CFDITableViewState extends State<CFDITableView> {
-  int _sortColumnIndex = 0;
-  bool _sortAscending = true;
+  final int _sortColumnIndex = 0;
+  final bool _sortAscending = true;
   late List<CFDI> _sortedCfdis;
   final Set<CFDI> _selectedCfdis = {}; // Conjunto para CFDIs seleccionados
-
-  // Opciones para paginación
+  late _CFDIDataGridSource _cfdiDataGridSource;
+  final DataGridController _dataGridController = DataGridController();
+  // Quitar final de _rowsPerPage para poder cambiarlo
   int _rowsPerPage = 10;
+  // Lista de opciones para el número de filas por página
+  final List<int> _rowsPerPageOptions = [5, 10, 15, 20, 50, 100];
+
+  // Controlador para el SfDataPager
+  final DataPagerController _dataPagerController = DataPagerController();
+
   final TextEditingController _searchController = TextEditingController();
   List<CFDI> _filteredCfdis = [];
   bool _isSearching = false;
 
-  // Lista de opciones para el número de filas por página
-  final List<int> _rowsPerPageOptions = [5, 10, 15, 20, 50, 100];
+  // Mapa para almacenar los anchos personalizados de las columnas
+  final Map<String, double> _columnWidths = {
+    'emisor': 150.0,
+    'receptor': 150.0,
+    'fecha': 100.0,
+    'total': 80.0,
+    'tipo': 90.0,
+    'uuid': 250.0, // UUID necesita más espacio por ser más largo
+  };
 
   @override
   void initState() {
     super.initState();
     _sortedCfdis = List.from(widget.cfdis);
     _filteredCfdis = _sortedCfdis;
-    _sortData();
+    _cfdiDataGridSource = _CFDIDataGridSource(
+      cfdis: _isSearching ? _filteredCfdis : _sortedCfdis,
+      selectedCfdis: _selectedCfdis,
+      context: context,
+      columnProvider:
+          Provider.of<ColumnVisibilityProvider>(context, listen: false),
+      rowsPerPage: _rowsPerPage, // Pasar rowsPerPage inicial
+    );
+    _sortData(); // Orden inicial
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -280,6 +303,8 @@ class _CFDITableViewState extends State<CFDITableView> {
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
+    _dataGridController.dispose();
+    _dataPagerController.dispose(); // Dispose del pager controller
     super.dispose();
   }
 
@@ -288,13 +313,25 @@ class _CFDITableViewState extends State<CFDITableView> {
     super.didUpdateWidget(oldWidget);
     if (widget.cfdis != oldWidget.cfdis) {
       _sortedCfdis = List.from(widget.cfdis);
-      _applySearchFilter(); // Aplica el filtro actual a los nuevos datos
+      // Recrear la fuente de datos con la nueva lista y rowsPerPage actual
+      _cfdiDataGridSource = _CFDIDataGridSource(
+        cfdis: _isSearching ? _filteredCfdis : _sortedCfdis,
+        selectedCfdis: _selectedCfdis,
+        context: context,
+        columnProvider:
+            Provider.of<ColumnVisibilityProvider>(context, listen: false),
+        rowsPerPage: _rowsPerPage, // Pasar rowsPerPage actual
+      );
       _sortData();
+      // Resetear el paginador a la primera página si los datos cambian
+      _dataPagerController.selectedPageIndex = 0;
     }
   }
 
   void _onSearchChanged() {
     _applySearchFilter();
+    // Resetear el paginador a la primera página al buscar
+    _dataPagerController.selectedPageIndex = 0;
   }
 
   void _applySearchFilter() {
@@ -323,14 +360,25 @@ class _CFDITableViewState extends State<CFDITableView> {
               totalMatch;
         }).toList();
       } else {
-        _filteredCfdis = _sortedCfdis;
+        _filteredCfdis = List.from(_sortedCfdis);
       }
+      // Actualizar la fuente de datos con los datos filtrados
+      // La fuente de datos ahora necesita saber el total para el paginador
+      _cfdiDataGridSource.updateDataSource(newData: _filteredCfdis);
+      // Notificar al paginador sobre el cambio en el número total de filas
+      _cfdiDataGridSource.handlePageChange(
+          0, _rowsPerPage); // Volver a la página 0
     });
   }
 
   void _sortData() {
+    // Ordena la lista base
     _sortedCfdis.sort((a, b) {
-      switch (_sortColumnIndex) {
+      // Asegurarse que los índices coincidan con _buildGridColumns
+      int effectiveSortIndex =
+          _sortColumnIndex; // Ajustar si hay columna de checkbox implícita
+
+      switch (effectiveSortIndex) {
         case 0: // Emisor
           return _compareNullableStrings(
               a.emisor?.nombre, b.emisor?.nombre, _sortAscending);
@@ -341,9 +389,11 @@ class _CFDITableViewState extends State<CFDITableView> {
           return _compareNullableStrings(a.fecha, b.fecha, _sortAscending);
         case 3: // Total
           return _compareNullableNumeric(a.total, b.total, _sortAscending);
-        case 4: // Tipo de Comprobante
+        case 4: // Tipo
           return _compareNullableStrings(
-              a.tipoDeComprobante, b.tipoDeComprobante, _sortAscending);
+              _formatTipoComprobante(a.tipoDeComprobante),
+              _formatTipoComprobante(b.tipoDeComprobante),
+              _sortAscending);
         case 5: // UUID
           return _compareNullableStrings(a.timbreFiscalDigital?.uuid,
               b.timbreFiscalDigital?.uuid, _sortAscending);
@@ -351,16 +401,19 @@ class _CFDITableViewState extends State<CFDITableView> {
           return 0;
       }
     });
-
-    // Después de ordenar, aplicamos el filtro de búsqueda si es necesario
+    // Actualizar la fuente de datos después de ordenar la lista base
+    // y reaplicar el filtro actual a la lista ordenada.
     _applySearchFilter();
+    // Resetear el paginador a la primera página al ordenar
+    _dataPagerController.selectedPageIndex = 0;
   }
 
   int _compareNullableStrings(String? a, String? b, bool ascending) {
     if (a == null && b == null) return 0;
     if (a == null) return ascending ? -1 : 1;
     if (b == null) return ascending ? 1 : -1;
-    return ascending ? a.compareTo(b) : b.compareTo(a);
+    int result = a.compareTo(b);
+    return ascending ? result : -result;
   }
 
   int _compareNullableNumeric(String? a, String? b, bool ascending) {
@@ -368,155 +421,234 @@ class _CFDITableViewState extends State<CFDITableView> {
     if (a == null) return ascending ? -1 : 1;
     if (b == null) return ascending ? 1 : -1;
 
-    double valA, valB;
-    try {
-      valA = double.parse(a);
-      valB = double.parse(b);
-      return ascending ? valA.compareTo(valB) : valB.compareTo(valA);
-    } catch (e) {
-      return ascending ? a.compareTo(b) : b.compareTo(a);
-    }
+    double? valA = double.tryParse(a);
+    double? valB = double.tryParse(b);
+
+    if (valA == null && valB == null)
+      return 0; // Ambos no son numéricos, comparar como string
+    if (valA == null) return ascending ? -1 : 1; // A no es numérico
+    if (valB == null) return ascending ? 1 : -1; // B no es numérico
+
+    int result = valA.compareTo(valB);
+    return ascending ? result : -result;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Obtener el provider de visibilidad de columnas
     final columnProvider = Provider.of<ColumnVisibilityProvider>(context);
-
-    // Crear la lista de columnas visibles
-    final List<DataColumn> visibleColumns = [
-      // Columna de selección (checkbox)
-      DataColumn(
-        label: Checkbox(
-          value: _selectedCfdis.isNotEmpty &&
-              _selectedCfdis.length == _sortedCfdis.length,
-          tristate: _selectedCfdis.isNotEmpty &&
-              _selectedCfdis.length < _sortedCfdis.length,
-          onChanged: (bool? value) {
-            setState(() {
-              if (value == true) {
-                // Seleccionar todos
-                _selectedCfdis.addAll(_sortedCfdis);
-              } else {
-                // Deseleccionar todos
-                _selectedCfdis.clear();
-              }
-            });
-          },
-        ),
-      ),
-    ];
-
-    // Agregar el resto de columnas visibles
-    if (columnProvider.isVisible('emisor')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Emisor'),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 0;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
-    }
-
-    // Columna Receptor
-    if (columnProvider.isVisible('receptor')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Receptor'),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 1;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
-    }
-
-    // Columna Fecha
-    if (columnProvider.isVisible('fecha')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Fecha'),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 2;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
-    }
-
-    // Columna Total
-    if (columnProvider.isVisible('total')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Total'),
-          numeric: true,
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 3;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
-    }
-
-    // Columna Tipo
-    if (columnProvider.isVisible('tipo')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Tipo'),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 4;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
-    }
-
-    // Columna UUID
-    if (columnProvider.isVisible('uuid')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('UUID'),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 5;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
-    }
+    List<GridColumn> gridColumns = _buildGridColumns(columnProvider);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Expanded(flex: 2, child: FilterColumn()),
-        // Tabla principal (ahora con PaginatedDataTable para mejorar rendimiento)
         Expanded(
           flex: 6,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: _buildPaginatedDataTable(context, columnProvider),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Card(
+                  elevation: 2.0,
+                  margin: const EdgeInsets.only(bottom: 8.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            style: const TextStyle(fontSize: 13),
+                            decoration: InputDecoration(
+                              hintText:
+                                  'Buscar por emisor, receptor, UUID, etc...',
+                              hintStyle: const TextStyle(fontSize: 13),
+                              prefixIcon: const Icon(Icons.search, size: 18),
+                              suffixIcon: _searchController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, size: 18),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                      },
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(
+                                          maxHeight: 32, maxWidth: 32),
+                                    )
+                                  : null,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 10.0),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Dropdown para filas por página (sin funcionalidad por ahora)
+                        DropdownButton<int>(
+                          value: _rowsPerPage,
+                          isDense: true,
+                          items: _rowsPerPageOptions.map((int value) {
+                            return DropdownMenuItem<int>(
+                              value: value,
+                              child: Text('$value filas',
+                                  style: const TextStyle(fontSize: 12)),
+                            );
+                          }).toList(),
+                          onChanged:
+                              null, // Deshabilitado hasta implementar SfDataPager
+                          /* (int? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                _rowsPerPage = newValue;
+                                // Aquí iría la lógica para actualizar SfDataPager
+                              });
+                            }
+                          }, */
+                          hint: const Text('Filas',
+                              style: TextStyle(fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _isSearching
+                            ? 'Mostrando ${_cfdiDataGridSource.effectiveRows.length} de ${_sortedCfdis.length} CFDIs'
+                            : 'Total: ${_cfdiDataGridSource.effectiveRows.length} CFDIs',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                      if (_selectedCfdis.isNotEmpty)
+                        Text(
+                          '${_selectedCfdis.length} seleccionados',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    // Envolver SfDataGrid y SfDataPager en una columna
+                    children: [
+                      Expanded(
+                        child: SfDataGridTheme(
+                          data: const SfDataGridThemeData(
+                              // headerColor: Colors.grey[200],
+                              ),
+                          child: SfDataGrid(
+                            source: _cfdiDataGridSource,
+                            controller: _dataGridController,
+                            columns: gridColumns,
+                            columnWidthMode: ColumnWidthMode.fill,
+                            allowColumnsResizing: true,
+                            columnResizeMode: ColumnResizeMode.onResizeEnd,
+                            allowSorting: true,
+                            selectionMode: SelectionMode.multiple,
+                            navigationMode: GridNavigationMode.cell,
+                            gridLinesVisibility: GridLinesVisibility.both,
+                            headerGridLinesVisibility: GridLinesVisibility.both,
+                            onColumnResizeUpdate:
+                                (ColumnResizeUpdateDetails details) {
+                              setState(() {
+                                // Guardar el nuevo ancho de la columna en nuestro mapa
+                                _columnWidths[details.column.columnName] =
+                                    details.width;
+                              });
+                              return true; // Permitir el redimensionamiento
+                            },
+                            // --- Eventos ---
+                            onCellTap: (DataGridCellTapDetails details) {
+                              // Ignorar taps en el encabezado
+                              if (details.rowColumnIndex.rowIndex == 0) return;
+                              // Obtener el índice de la fila de datos (restando 1 por el encabezado)
+                              int dataRowIndex =
+                                  details.rowColumnIndex.rowIndex - 1;
+                              // Obtener la DataGridRow correspondiente a la página actual
+                              if (dataRowIndex <
+                                  _cfdiDataGridSource.rows.length) {
+                                final DataGridRow dataRow =
+                                    _cfdiDataGridSource.rows[dataRowIndex];
+                                // Obtener el CFDI de la fila usando el método robusto
+                                final cfdi =
+                                    _cfdiDataGridSource.getCFDIFromRow(dataRow);
+                                if (cfdi != null) {
+                                  _mostrarDetalles(cfdi, context);
+                                }
+                              }
+                            },
+                            onSelectionChanged: (List<DataGridRow> addedRows,
+                                List<DataGridRow> removedRows) {
+                              setState(() {
+                                for (var row in addedRows) {
+                                  // Usar getCFDIFromRow que es más fiable con paginación
+                                  final cfdi =
+                                      _cfdiDataGridSource.getCFDIFromRow(row);
+                                  if (cfdi != null) _selectedCfdis.add(cfdi);
+                                }
+                                for (var row in removedRows) {
+                                  // Usar getCFDIFromRow que es más fiable con paginación
+                                  final cfdi =
+                                      _cfdiDataGridSource.getCFDIFromRow(row);
+                                  if (cfdi != null) _selectedCfdis.remove(cfdi);
+                                }
+                              });
+                            },
+                            // --- Ordenación (Manejada por SfDataGrid y DataGridSource) ---
+                            // onSortColumnsChanged: (List<SortColumnDetails> added, List<SortColumnDetails> removed) {
+                            //   // Opcional: Lógica adicional si se necesita al cambiar la ordenación
+                            // },
+                          ),
+                        ),
+                      ),
+                      // Añadir SfDataPager
+                      SfDataPager(
+                        controller: _dataPagerController, // Usar el controller
+                        delegate:
+                            _cfdiDataGridSource, // Conectar con la fuente de datos
+                        // Calcular pageCount basado en el total de filas de la fuente
+                        pageCount:
+                            (_cfdiDataGridSource.getRowCount() / _rowsPerPage)
+                                .ceilToDouble(),
+                        direction: Axis.horizontal,
+                        // rowsPerPage: _rowsPerPage, // No es un parámetro directo del constructor
+                        availableRowsPerPage:
+                            _rowsPerPageOptions, // Opciones disponibles
+                        onRowsPerPageChanged: (int? newRowsPerPage) {
+                          if (newRowsPerPage != null) {
+                            setState(() {
+                              _rowsPerPage = newRowsPerPage;
+                              // Notificar a la fuente de datos sobre el cambio
+                              // El delegate (handlePageChange) será llamado por el SfDataPager
+                              // pero necesitamos actualizar la fuente con el nuevo rowsPerPage
+                              _cfdiDataGridSource
+                                  .updateRowsPerPage(_rowsPerPage);
+                              // Actualizar el paginador volviendo a la página 0
+                              _dataPagerController.selectedPageIndex = 0;
+                              // _dataPagerController.rowsPerPage = _rowsPerPage; // No existe esta propiedad
+                              // SfDataPager se actualizará visualmente debido a setState y al delegate
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        // Panel lateral (solo visible cuando hay elementos seleccionados)
+        // Panel lateral (sin cambios)
         if (_selectedCfdis.isNotEmpty)
           Container(
             width: 400,
@@ -613,471 +745,320 @@ class _CFDITableViewState extends State<CFDITableView> {
     );
   }
 
-  Widget _buildPaginatedDataTable(
-      BuildContext context, ColumnVisibilityProvider columnProvider) {
-    // Crear la lista de columnas visibles para usar en este método
-    final List<DataColumn> visibleColumns = [
-      // Columna de selección (checkbox)
-      DataColumn(
-        label: Checkbox(
-          value: _selectedCfdis.isNotEmpty &&
-              _selectedCfdis.length == _sortedCfdis.length,
-          tristate: _selectedCfdis.isNotEmpty &&
-              _selectedCfdis.length < _sortedCfdis.length,
-          onChanged: (bool? value) {
-            setState(() {
-              if (value == true) {
-                // Seleccionar todos
-                _selectedCfdis.addAll(_sortedCfdis);
-              } else {
-                // Deseleccionar todos
-                _selectedCfdis.clear();
-              }
-            });
-          },
-        ),
-      ),
-    ];
+  // Método para construir las columnas del SfDataGrid
+  List<GridColumn> _buildGridColumns(ColumnVisibilityProvider columnProvider) {
+    List<GridColumn> columns = [];
 
-    // Estilo compacto para los encabezados de columnas
-    const headerTextStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 13, // Tamaño reducido para encabezados
-    );
+    // Columna de Checkbox (manejada por SfDataGrid con showCheckboxColumn)
+    // O se puede crear una columna personalizada si se necesita más control
 
-    // Agregar el resto de columnas visibles con estilo compacto
     if (columnProvider.isVisible('emisor')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Emisor', style: headerTextStyle),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 0;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
+      columns.add(GridColumn(
+          columnName: 'emisor',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.centerLeft,
+              child: const Text('Emisor', overflow: TextOverflow.ellipsis)),
+          allowSorting: true,
+          width: _columnWidths['emisor'] ?? 150.0));
     }
-
     if (columnProvider.isVisible('receptor')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Receptor', style: headerTextStyle),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 1;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
+      columns.add(GridColumn(
+          columnName: 'receptor',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.centerLeft,
+              child: const Text('Receptor', overflow: TextOverflow.ellipsis)),
+          allowSorting: true,
+          width: _columnWidths['receptor'] ?? 150.0));
     }
-
     if (columnProvider.isVisible('fecha')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Fecha', style: headerTextStyle),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 2;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
+      columns.add(GridColumn(
+          columnName: 'fecha',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.centerLeft,
+              child: const Text('Fecha', overflow: TextOverflow.ellipsis)),
+          allowSorting: true,
+          width: _columnWidths['fecha'] ?? 100.0));
     }
-
     if (columnProvider.isVisible('total')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Total', style: headerTextStyle),
-          numeric: true,
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 3;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
+      columns.add(GridColumn(
+          columnName: 'total',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.centerRight,
+              child: const Text('Total', overflow: TextOverflow.ellipsis)),
+          allowSorting: true,
+          width: _columnWidths['total'] ?? 80.0));
     }
-
     if (columnProvider.isVisible('tipo')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('Tipo', style: headerTextStyle),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 4;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
+      columns.add(GridColumn(
+          columnName: 'tipo',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.center,
+              child: const Text('Tipo', overflow: TextOverflow.ellipsis)),
+          allowSorting: true,
+          width: _columnWidths['tipo'] ?? 90.0));
     }
-
     if (columnProvider.isVisible('uuid')) {
-      visibleColumns.add(
-        DataColumn(
-          label: const Text('UUID', style: headerTextStyle),
-          onSort: (columnIndex, ascending) {
-            setState(() {
-              _sortColumnIndex = 5;
-              _sortAscending = ascending;
-              _sortData();
-            });
-          },
-        ),
-      );
+      columns.add(GridColumn(
+          columnName: 'uuid',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.centerLeft,
+              child: const Text('UUID', overflow: TextOverflow.ellipsis)),
+          allowSorting: true,
+          width: _columnWidths['uuid'] ?? 250.0));
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Barra de herramientas con búsqueda y controles
-        Card(
-          elevation: 2.0,
-          margin: const EdgeInsets.only(bottom: 8.0), // Reducido de 16 a 8
-          child: Padding(
-            padding: const EdgeInsets.all(6.0), // Reducido de 8 a 6
-            child: Row(
-              children: [
-                // Campo de búsqueda
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    style: const TextStyle(fontSize: 13), // Texto más pequeño
-                    decoration: InputDecoration(
-                      hintText: 'Buscar por emisor, receptor, UUID, etc...',
-                      hintStyle: const TextStyle(fontSize: 13), // Más pequeño
-                      prefixIcon:
-                          const Icon(Icons.search, size: 18), // Más pequeño
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, size: 18),
-                              onPressed: () {
-                                _searchController.clear();
-                              },
-                              padding: EdgeInsets.zero, // Sin padding
-                              constraints: const BoxConstraints(
-                                  maxHeight: 32, maxWidth: 32), // Más compacto
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4.0), // Más pequeño
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 10.0), // Más compacto
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8), // Reducido de 16 a 8
-                // Dropdown para seleccionar filas por página - más compacto
-                DropdownButton<int>(
-                  value: _rowsPerPage,
-                  isDense: true, // Hace el dropdown más compacto
-                  items: _rowsPerPageOptions.map((int value) {
-                    return DropdownMenuItem<int>(
-                      value: value,
-                      child: Text('$value filas',
-                          style: const TextStyle(fontSize: 12)),
-                    );
-                  }).toList(),
-                  onChanged: (int? newValue) {
-                    if (newValue != null) {
-                      setState(() {
-                        _rowsPerPage = newValue;
-                      });
-                    }
-                  },
-                  hint: const Text('Filas', style: TextStyle(fontSize: 12)),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // Información sobre los resultados
-        Padding(
-          padding:
-              const EdgeInsets.symmetric(vertical: 4.0), // Reducido de 8 a 4
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _isSearching
-                    ? 'Mostrando ${_filteredCfdis.length} de ${_sortedCfdis.length} CFDIs'
-                    : 'Total: ${_sortedCfdis.length} CFDIs',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12, // Más pequeño
-                ),
-              ),
-              if (_selectedCfdis.isNotEmpty)
-                Text(
-                  '${_selectedCfdis.length} seleccionados',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12, // Más pequeño
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-            ],
-          ),
-        ),
-
-        // Tabla paginada que ocupa todo el espacio disponible
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  // Usar todo el ancho disponible, con un mínimo para evitar problemas en pantallas muy pequeñas
-                  width: max(constraints.maxWidth, 600),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: PaginatedDataTable(
-                      header: null,
-                      rowsPerPage: _rowsPerPage,
-                      availableRowsPerPage: const [5, 10, 15, 20, 50, 100],
-                      onRowsPerPageChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _rowsPerPage = value;
-                          });
-                        }
-                      },
-                      sortColumnIndex:
-                          _sortColumnIndex < visibleColumns.length - 1
-                              ? _sortColumnIndex + 1
-                              : null,
-                      sortAscending: _sortAscending,
-                      columns: visibleColumns,
-                      source: _CFDIDataSource(
-                        _isSearching ? _filteredCfdis : _sortedCfdis,
-                        _selectedCfdis,
-                        context,
-                        columnProvider,
-                        _mostrarDetalles,
-                        (cfdi, selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedCfdis.add(cfdi);
-                            } else {
-                              _selectedCfdis.remove(cfdi);
-                            }
-                          });
-                        },
-                      ),
-                      showCheckboxColumn: false,
-                      showFirstLastButtons: true,
-                      horizontalMargin: 8, // Reducido de 12 a 8
-                      dataRowMinHeight: 38, // Altura mínima reducida
-                      dataRowMaxHeight: 42, // Altura máxima reducida
-                      headingRowHeight: 42, // Altura del encabezado reducida
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
+    return columns;
   }
 }
 
-class _CFDIDataSource extends DataTableSource {
-  final List<CFDI> _cfdis;
+// --- _CFDIDataGridSource ---
+class _CFDIDataGridSource extends DataGridSource {
+  late List<DataGridRow> _paginatedRows; // Filas para la página actual
+  List<CFDI> _cfdis; // Lista completa (filtrada/ordenada)
   final Set<CFDI> _selectedCfdis;
   final BuildContext _context;
   final ColumnVisibilityProvider _columnProvider;
-  final Function(CFDI, BuildContext) _mostrarDetalles;
-  final Function(CFDI, bool) _onSelectChanged;
+  int _rowsPerPage; // Guardar rowsPerPage
 
-  _CFDIDataSource(
-    this._cfdis,
-    this._selectedCfdis,
-    this._context,
-    this._columnProvider,
-    this._mostrarDetalles,
-    this._onSelectChanged,
-  );
+  _CFDIDataGridSource({
+    required List<CFDI> cfdis,
+    required Set<CFDI> selectedCfdis,
+    required BuildContext context,
+    required ColumnVisibilityProvider columnProvider,
+    required int rowsPerPage,
+  })  : _cfdis = cfdis,
+        _selectedCfdis = selectedCfdis,
+        _context = context,
+        _columnProvider = columnProvider,
+        _rowsPerPage = rowsPerPage,
+        // Inicializar directamente usando la función auxiliar estática
+        _paginatedRows =
+            _buildInitialRows(cfdis, columnProvider, 0, rowsPerPage) {
+    // El cuerpo del constructor ahora está vacío o puede contener otra lógica si es necesario
+  }
+  // Función auxiliar estática para construir las filas iniciales (o cualquier página)
+  static List<DataGridRow> _buildInitialRows(
+      List<CFDI> sourceCfdis,
+      ColumnVisibilityProvider columnProvider,
+      int startIndex,
+      int rowsPerPage) {
+    // Verificar que el índice inicial esté dentro del rango válido
+    if (sourceCfdis.isEmpty) {
+      return []; // Si la lista está vacía, devolver una lista vacía de filas
+    }
 
+    // Asegurarse de que startIndex esté dentro del rango válido
+    startIndex = startIndex.clamp(0, sourceCfdis.length - 1);
+
+    int endIndex = startIndex + rowsPerPage;
+    if (endIndex > sourceCfdis.length) {
+      endIndex = sourceCfdis.length;
+    }
+
+    // Solo obtener el rango si hay elementos para mostrar
+    List<CFDI> currentPageCfdis = startIndex < endIndex
+        ? sourceCfdis.getRange(startIndex, endIndex).toList()
+        : [];
+
+    return currentPageCfdis.map<DataGridRow>((cfdi) {
+      // Formateo de datos (usando las funciones globales)
+      String? fechaFormateada;
+      if (cfdi.fecha != null) {
+        try {
+          final fechaObj = DateTime.parse(cfdi.fecha!);
+          fechaFormateada =
+              '${fechaObj.day}/${fechaObj.month}/${fechaObj.year}';
+        } catch (_) {
+          fechaFormateada = cfdi.fecha;
+        }
+      }
+      // Usar la función global _formatTipoComprobante
+      String tipoComprobante = _formatTipoComprobante(cfdi.tipoDeComprobante);
+
+      // Crear celdas basadas en columnas visibles
+      List<DataGridCell> cells = [];
+      if (columnProvider.isVisible('emisor')) {
+        cells.add(DataGridCell<String>(
+            columnName: 'emisor', value: cfdi.emisor?.nombre ?? 'N/A'));
+      }
+      if (columnProvider.isVisible('receptor')) {
+        cells.add(DataGridCell<String>(
+            columnName: 'receptor', value: cfdi.receptor?.nombre ?? 'N/A'));
+      }
+      if (columnProvider.isVisible('fecha')) {
+        cells.add(DataGridCell<String>(
+            columnName: 'fecha', value: fechaFormateada ?? 'N/A'));
+      }
+      if (columnProvider.isVisible('total')) {
+        double? totalValue =
+            cfdi.total != null ? double.tryParse(cfdi.total!) : null;
+        cells
+            .add(DataGridCell<double?>(columnName: 'total', value: totalValue));
+      }
+      if (columnProvider.isVisible('tipo')) {
+        cells.add(
+            DataGridCell<String>(columnName: 'tipo', value: tipoComprobante));
+      }
+      if (columnProvider.isVisible('uuid')) {
+        cells.add(DataGridCell<String>(
+            columnName: 'uuid',
+            value: cfdi.timbreFiscalDigital?.uuid ?? 'N/A'));
+      }
+
+      return DataGridRow(cells: cells);
+    }).toList();
+  }
+
+  // Método para actualizar las filas paginadas (llamado por handlePageChange)
+  void _updatePaginatedRows(int startIndex, int rowsPerPage) {
+    _paginatedRows =
+        _buildInitialRows(_cfdis, _columnProvider, startIndex, rowsPerPage);
+  }
+
+  // Actualiza la fuente de datos y reconstruye las filas paginadas
+  void updateDataSource({List<CFDI>? newData}) {
+    if (newData != null) {
+      _cfdis = newData;
+    }
+    // Reconstruir para la primera página por defecto al actualizar datos
+    // Llama a _updatePaginatedRows y notifyListeners
+    handlePageChange(0, 0);
+  }
+
+  // Método para actualizar rowsPerPage desde el State
+  void updateRowsPerPage(int newRowsPerPage) {
+    _rowsPerPage = newRowsPerPage;
+    // Reconstruir para la primera página con el nuevo tamaño
+    // Llama a _updatePaginatedRows y notifyListeners
+    handlePageChange(0, 0);
+  }
+
+  // Devuelve las filas de la página actual (ahora garantizado que está inicializado)
   @override
-  DataRow? getRow(int index) {
-    if (index >= _cfdis.length) return null;
-    final cfdi = _cfdis[index];
+  List<DataGridRow> get rows => _paginatedRows;
 
-    String? fechaFormateada;
-    if (cfdi.fecha != null) {
+  // Método para obtener el número total de filas (para el paginador)
+  int getRowCount() {
+    return _cfdis.length;
+  }
+
+  // Obtener CFDI desde DataGridRow (más fiable con paginación)
+  CFDI? getCFDIFromRow(DataGridRow row) {
+    // Asumiendo que UUID es único y está presente en las celdas
+    final uuidCell = row.getCells().firstWhere(
+        (cell) => cell.columnName == 'uuid',
+        orElse: () => const DataGridCell(columnName: 'uuid', value: null));
+    final uuid = uuidCell.value as String?;
+    if (uuid != null && uuid != 'N/A') {
+      // Asegurarse que no sea el valor por defecto 'N/A'
       try {
-        final fechaObj = DateTime.parse(cfdi.fecha!);
-        fechaFormateada = '${fechaObj.day}/${fechaObj.month}/${fechaObj.year}';
-      } catch (_) {
-        fechaFormateada = cfdi.fecha;
+        // Buscar en la lista completa (_cfdis)
+        return _cfdis
+            .firstWhere((cfdi) => cfdi.timbreFiscalDigital?.uuid == uuid);
+      } catch (e) {
+        // No encontrado en la lista completa (esto no debería pasar si los datos son consistentes)
+        print('Error: CFDI con UUID $uuid no encontrado en la lista completa.');
+        return null;
       }
     }
-
-    // Convertir el tipo de comprobante a un formato más legible
-    String tipoComprobante = _formatTipoComprobante(cfdi.tipoDeComprobante);
-
-    // Estilo compacto para el texto de las celdas
-    const cellTextStyle = TextStyle(fontSize: 12);
-
-    // Crear la lista de celdas visibles, empezando con el checkbox
-    final List<DataCell> visibleCells = [
-      DataCell(
-        Checkbox(
-          value: _selectedCfdis.contains(cfdi),
-          onChanged: (bool? selected) {
-            if (selected != null) {
-              _onSelectChanged(cfdi, selected);
-              notifyListeners();
-            }
-          },
-          materialTapTargetSize:
-              MaterialTapTargetSize.shrinkWrap, // Más pequeño
-          visualDensity: VisualDensity.compact, // Más compacto
-        ),
-      ),
-    ];
-
-    // Agregar el resto de las celdas con estilo más compacto
-    if (_columnProvider.isVisible('emisor')) {
-      visibleCells.add(
-        DataCell(
-          Text(
-            cfdi.emisor?.nombre ?? 'N/A',
-            style: cellTextStyle,
-            overflow: TextOverflow.ellipsis,
-          ),
-          onTap: () => _mostrarDetalles(cfdi, _context),
-          // Padding reducido
-        ),
-      );
-    }
-
-    // Celda Receptor - compacta
-    if (_columnProvider.isVisible('receptor')) {
-      visibleCells.add(
-        DataCell(
-          Text(
-            cfdi.receptor?.nombre ?? 'N/A',
-            style: cellTextStyle,
-            overflow: TextOverflow.ellipsis,
-          ),
-          onTap: () => _mostrarDetalles(cfdi, _context),
-        ),
-      );
-    }
-
-    // Celda Fecha - compacta
-    if (_columnProvider.isVisible('fecha')) {
-      visibleCells.add(
-        DataCell(
-          Text(
-            fechaFormateada ?? 'N/A',
-            style: cellTextStyle,
-          ),
-          onTap: () => _mostrarDetalles(cfdi, _context),
-        ),
-      );
-    }
-
-    // Celda Total - compacta
-    if (_columnProvider.isVisible('total')) {
-      visibleCells.add(
-        DataCell(
-          Text(
-            cfdi.total != null ? '\$${cfdi.total}' : 'N/A',
-            style: cellTextStyle,
-          ),
-          onTap: () => _mostrarDetalles(cfdi, _context),
-        ),
-      );
-    }
-
-    // Celda Tipo con estilos de color según el tipo - más compacta
-    if (_columnProvider.isVisible('tipo')) {
-      final tipoColor = _getColorForTipoComprobante(cfdi.tipoDeComprobante);
-      visibleCells.add(
-        DataCell(
-          Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 4, vertical: 1), // Más pequeño
-            constraints: const BoxConstraints(maxWidth: 60), // Ancho máximo
-            decoration: BoxDecoration(
-              color: tipoColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(2), // Más pequeño
-            ),
-            child: Text(
-              tipoComprobante,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 11, // Más pequeño
-                color: tipoColor,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          onTap: () => _mostrarDetalles(cfdi, _context),
-        ),
-      );
-    }
-
-    // Celda UUID - compacta
-    if (_columnProvider.isVisible('uuid')) {
-      visibleCells.add(
-        DataCell(
-          Text(
-            cfdi.timbreFiscalDigital?.uuid ?? 'N/A',
-            style: const TextStyle(fontSize: 10), // Más pequeño para UUIDs
-            overflow: TextOverflow.ellipsis,
-          ),
-          onTap: () => _mostrarDetalles(cfdi, _context),
-        ),
-      );
-    }
-
-    // Utilizamos DataRow.byIndex para mejor rendimiento, con altura reducida
-    return DataRow.byIndex(
-      index: index,
-      cells: visibleCells,
-      selected: _selectedCfdis.contains(cfdi),
-      onSelectChanged: (selected) {
-        if (selected != null) {
-          _onSelectChanged(cfdi, selected);
-          notifyListeners();
-        }
-      },
-      color: WidgetStateProperty.resolveWith<Color?>(
-        (Set<WidgetState> states) {
-          if (states.contains(WidgetState.selected)) {
-            return Theme.of(_context).colorScheme.primary.withOpacity(0.1);
-          }
-          return null;
-        },
-      ),
-    );
+    print('Advertencia: No se pudo obtener UUID de la fila para buscar CFDI.');
+    return null; // No se pudo encontrar por UUID
   }
 
   @override
-  bool get isRowCountApproximate => false;
+  DataGridRowAdapter? buildRow(DataGridRow row) {
+    final cfdi = getCFDIFromRow(row);
+    if (cfdi == null) {
+      // Si no podemos encontrar el CFDI, mostrar una fila con celdas de error
+      // Corregir la generación de la lista de celdas de error
+      return DataGridRowAdapter(
+          cells: List.generate(
+              row.getCells().length,
+              (index) => Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(8.0),
+                    color: Colors.red
+                        .withOpacity(0.1), // Indicar error visualmente
+                    child: const Text('Error',
+                        style: TextStyle(color: Colors.red, fontSize: 10)),
+                  )));
+    }
 
-  @override
-  int get rowCount => _cfdis.length;
+    // --- El resto de la lógica de buildRow usa el 'cfdi' obtenido ---
+    final bool isSelected = _selectedCfdis.contains(cfdi);
+    Color? rowColor = isSelected
+        ? Theme.of(_context).colorScheme.primary.withOpacity(0.1)
+        : null;
+    const cellTextStyle = TextStyle(fontSize: 12);
 
+    return DataGridRowAdapter(
+        cells: row.getCells().map<Widget>((dataGridCell) {
+      String displayValue = dataGridCell.value?.toString() ?? 'N/A';
+      Alignment alignment = Alignment.centerLeft;
+      Widget cellWidget = Text(displayValue,
+          style: cellTextStyle, overflow: TextOverflow.ellipsis);
+      Color? cellColor = rowColor; // Aplicar color de fila por defecto
+
+      if (dataGridCell.columnName == 'total') {
+        alignment = Alignment.centerRight;
+        // Formatear el valor numérico para mostrar
+        displayValue = dataGridCell.value != null
+            ? '\$${(dataGridCell.value as double).toStringAsFixed(2)}'
+            : 'N/A';
+        cellWidget = Text(displayValue,
+            style: cellTextStyle, overflow: TextOverflow.ellipsis);
+      } else if (dataGridCell.columnName == 'tipo') {
+        alignment = Alignment.center;
+        final tipoColor = _getColorForTipoComprobante(
+            cfdi.tipoDeComprobante); // Usar el 'cfdi' recuperado
+        cellWidget = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          constraints: const BoxConstraints(maxWidth: 60),
+          decoration: BoxDecoration(
+            color: tipoColor.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: Text(
+            displayValue,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+              color: tipoColor,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      } else if (dataGridCell.columnName == 'uuid') {
+        cellWidget = Text(displayValue,
+            style: const TextStyle(fontSize: 10),
+            overflow: TextOverflow.ellipsis);
+      }
+
+      return Container(
+        color: cellColor,
+        alignment: alignment,
+        padding: const EdgeInsets.all(8.0),
+        child: cellWidget,
+      );
+    }).toList());
+  }
+
+  // --- Manejo de Paginación ---
   @override
-  int get selectedRowCount => _selectedCfdis.length;
+  Future<bool> handlePageChange(int oldPageIndex, int newPageIndex) async {
+    int startIndex = newPageIndex * _rowsPerPage;
+    // Usar el método renombrado para actualizar las filas
+    _updatePaginatedRows(startIndex, _rowsPerPage);
+    notifyListeners(); // Notifica a SfDataGrid y SfDataPager
+    return true;
+  }
 }
 
 // Funciones auxiliares que pueden ser compartidas entre ambas vistas
