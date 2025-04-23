@@ -21,81 +21,114 @@ class CFDIListScreen extends StatelessWidget {
       create: (_) => ColumnVisibilityProvider(),
       child: Builder(
         builder: (context) => Scaffold(
-          body: BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-            if (state is CFDIInitial) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'No hay CFDIs cargados',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    SizedBox(height: 20),
-                    LoadButtons(),
-                  ],
-                ),
-              );
-            } else if (state is CFDILoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (state is CFDILoaded) {
-              return AdaptiveCFDIView(cfdis: state.cfdis);
-            } else if (state is CFDIError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 60,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error: ${state.message}',
-                      style: const TextStyle(fontSize: 16),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    const LoadButtons(),
-                  ],
-                ),
-              );
-            }
-            return Container();
-          }),
-          floatingActionButton:
-              BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-            if (state is CFDILoaded) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FloatingActionButton(
-                    heroTag: 'addFile',
-                    onPressed: () {
-                      context.read<CFDIBloc>().add(LoadCFDIsFromFile());
-                    },
-                    tooltip: 'Añadir archivo CFDI',
-                    child: const Icon(Icons.add_to_photos),
-                  ),
-                  const SizedBox(height: 10),
-                  FloatingActionButton(
-                    heroTag: 'addDirectory',
-                    onPressed: () {
-                      context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
-                    },
-                    tooltip: 'Cargar directorio',
-                    child: const Icon(Icons.create_new_folder),
-                  ),
-                ],
-              );
-            }
-            return Container();
-          }),
+          body: _buildBody(context),
+          floatingActionButton: _buildFloatingActionButtons(context),
         ),
       ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+      switch (state.runtimeType) {
+        case CFDIInitial:
+          return _buildInitialState();
+        case CFDILoading:
+          return _buildLoadingState();
+        case CFDILoaded:
+          return _buildLoadedState(state as CFDILoaded);
+        case CFDIError:
+          return _buildErrorState(state as CFDIError);
+        default:
+          return Container();
+      }
+    });
+  }
+
+  Widget _buildInitialState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'No hay CFDIs cargados',
+            style: TextStyle(fontSize: 18),
+          ),
+          SizedBox(height: 20),
+          LoadButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildLoadedState(CFDILoaded state) {
+    return AdaptiveCFDIView(cfdis: state.cfdis);
+  }
+
+  Widget _buildErrorState(CFDIError state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            color: Colors.red,
+            size: 60,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Error: ${state.message}',
+            style: const TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          const LoadButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionButtons(BuildContext context) {
+    return BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
+      if (state is CFDILoaded) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildAddFileButton(context),
+            const SizedBox(height: 10),
+            _buildAddDirectoryButton(context),
+          ],
+        );
+      }
+      return Container();
+    });
+  }
+
+  Widget _buildAddFileButton(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'addFile',
+      onPressed: () {
+        context.read<CFDIBloc>().add(LoadCFDIsFromFile());
+      },
+      tooltip: 'Añadir archivo CFDI',
+      child: const Icon(Icons.add_to_photos),
+    );
+  }
+
+  Widget _buildAddDirectoryButton(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'addDirectory',
+      onPressed: () {
+        context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
+      },
+      tooltip: 'Cargar directorio',
+      child: const Icon(Icons.create_new_folder),
     );
   }
 }
