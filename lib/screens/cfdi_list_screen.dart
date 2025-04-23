@@ -1,3 +1,4 @@
+import 'package:comparador_cfdis/widgets/adaptive_view.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:syncfusion_flutter_core/theme.dart'; // Necesario para el tema
 import 'package:comparador_cfdis/widgets/filter.dart';
@@ -130,150 +131,6 @@ class CFDIListScreen extends StatelessWidget {
       tooltip: 'Cargar directorio',
       child: const Icon(Icons.create_new_folder),
     );
-  }
-}
-
-// Nuevo widget adaptativo que elige entre tabla y lista según el tamaño
-class AdaptiveCFDIView extends StatelessWidget {
-  final List<CFDI> cfdis;
-
-  const AdaptiveCFDIView({Key? key, required this.cfdis}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // Usamos LayoutBuilder para obtener las restricciones de tamaño disponible
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Si el ancho es menor que un umbral (por ejemplo, 600), mostramos lista
-        if (constraints.maxWidth < 600) {
-          return CFDIListView(cfdis: cfdis);
-        } else {
-          // Si hay espacio suficiente, mostramos la tabla
-          return CFDITableView(cfdis: cfdis);
-        }
-      },
-    );
-  }
-}
-
-// Widget para mostrar CFDIs en formato de lista (para pantallas pequeñas)
-class CFDIListView extends StatelessWidget {
-  final List<CFDI> cfdis;
-
-  const CFDIListView({Key? key, required this.cfdis}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      itemCount: cfdis.length,
-      separatorBuilder: (context, index) => const Divider(),
-      itemBuilder: (context, index) {
-        final cfdi = cfdis[index];
-        final emisor = cfdi.emisor;
-        final receptor = cfdi.receptor;
-        final timbreFiscal = cfdi.timbreFiscalDigital;
-
-        // Formato de fecha
-        String? fechaFormateada;
-        if (cfdi.fecha != null) {
-          try {
-            final fechaObj = DateTime.parse(cfdi.fecha!);
-            fechaFormateada =
-                '${fechaObj.day}/${fechaObj.month}/${fechaObj.year}';
-          } catch (_) {
-            fechaFormateada = cfdi.fecha;
-          }
-        }
-
-        // Formatear el tipo de comprobante
-        final tipoComprobante = _formatTipoComprobante(cfdi.tipoDeComprobante);
-        final tipoColor = _getColorForTipoComprobante(cfdi.tipoDeComprobante);
-
-        return ListTile(
-          title: Row(
-            children: [
-              Text(emisor?.nombre ?? 'Sin emisor'),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: tipoColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: tipoColor),
-                ),
-                child: Text(
-                  tipoComprobante,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: tipoColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (receptor?.nombre != null) Text('Para: ${receptor!.nombre}'),
-              if (fechaFormateada != null) Text('Fecha: $fechaFormateada'),
-              if (cfdi.total != null)
-                Text('Total: \$${cfdi.total}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-              if (timbreFiscal?.uuid != null)
-                Text('UUID: ${timbreFiscal!.uuid}',
-                    style: const TextStyle(fontSize: 12)),
-            ],
-          ),
-          leading: CircleAvatar(
-            backgroundColor: tipoColor.withOpacity(0.8),
-            child: Text(tipoComprobante.substring(0, 1)),
-          ),
-          isThreeLine: true,
-          onTap: () => _mostrarDetalles(cfdi, context),
-        );
-      },
-    );
-  }
-
-  // Método para formatear el tipo de comprobante de forma más legible
-  String _formatTipoComprobante(String? tipo) {
-    if (tipo == null) return 'N/A';
-
-    switch (tipo.toUpperCase()) {
-      case 'I':
-        return 'Ingreso';
-      case 'E':
-        return 'Egreso';
-      case 'T':
-        return 'Traslado';
-      case 'N':
-        return 'Nómina';
-      case 'P':
-        return 'Pago';
-      default:
-        return tipo;
-    }
-  }
-
-  // Método para asignar un color según el tipo de comprobante
-  Color _getColorForTipoComprobante(String? tipo) {
-    if (tipo == null) return Colors.grey;
-
-    switch (tipo.toUpperCase()) {
-      case 'I':
-        return Colors.green;
-      case 'E':
-        return Colors.red;
-      case 'T':
-        return Colors.blue;
-      case 'N':
-        return Colors.purple;
-      case 'P':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
   }
 }
 
@@ -1160,4 +1017,13 @@ void _mostrarDetalles(CFDI cfdi, BuildContext context) {
       },
     ),
   );
+}
+
+class MostrarDetalles extends StatelessWidget {
+  const MostrarDetalles({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
 }
