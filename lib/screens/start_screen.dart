@@ -2,7 +2,8 @@ import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
 import 'package:comparador_cfdis/bloc/cfdi_event.dart';
 import 'package:comparador_cfdis/bloc/cfdi_state.dart';
 import 'package:comparador_cfdis/providers/column_visibility_provider.dart';
-import 'package:comparador_cfdis/widgets/adaptive_view.dart';
+import 'package:comparador_cfdis/screens/cfdi_list_screen.dart';
+import 'package:comparador_cfdis/widgets/cfdi_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -119,7 +120,17 @@ class StartScreen extends StatelessWidget {
   }
 
   Widget _buildLoadedState(CFDILoaded state) {
-    return AdaptiveCFDIView(cfdis: state.cfdis);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Si el ancho es menor que un umbral (por ejemplo, 600), mostramos lista
+        if (constraints.maxWidth < 600) {
+          return CFDIListView(cfdis: state.cfdis);
+        } else {
+          // Si hay espacio suficiente, mostramos la tabla
+          return CFDITableView(cfdis: state.cfdis);
+        }
+      },
+    );
   }
 
   Widget _buildErrorState(CFDIError state, BuildContext context) {
