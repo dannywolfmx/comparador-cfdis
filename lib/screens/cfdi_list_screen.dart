@@ -1,138 +1,14 @@
-import 'package:comparador_cfdis/widgets/adaptive_view.dart';
+import 'package:comparador_cfdis/models/format_tipo_comprobante.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:syncfusion_flutter_core/theme.dart'; // Necesario para el tema
 import 'package:comparador_cfdis/widgets/filter.dart';
-import 'package:comparador_cfdis/widgets/load_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/cfdi_bloc.dart';
-import '../bloc/cfdi_event.dart';
-import '../bloc/cfdi_state.dart';
 import '../models/cfdi.dart';
 import '../providers/column_visibility_provider.dart';
 import 'package:provider/provider.dart';
 import 'cfdi_detail_screen.dart';
-
-class CFDIListScreen extends StatelessWidget {
-  const CFDIListScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ColumnVisibilityProvider(),
-      child: Builder(
-        builder: (context) => Scaffold(
-          body: _buildBody(context),
-          floatingActionButton: _buildFloatingActionButtons(context),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context) {
-    return BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-      switch (state.runtimeType) {
-        case CFDIInitial:
-          return _buildInitialState();
-        case CFDILoading:
-          return _buildLoadingState();
-        case CFDILoaded:
-          return _buildLoadedState(state as CFDILoaded);
-        case CFDIError:
-          return _buildErrorState(state as CFDIError);
-        default:
-          return Container();
-      }
-    });
-  }
-
-  Widget _buildInitialState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'No hay CFDIs cargados',
-            style: TextStyle(fontSize: 18),
-          ),
-          SizedBox(height: 20),
-          LoadButtons(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  }
-
-  Widget _buildLoadedState(CFDILoaded state) {
-    return AdaptiveCFDIView(cfdis: state.cfdis);
-  }
-
-  Widget _buildErrorState(CFDIError state) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            color: Colors.red,
-            size: 60,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Error: ${state.message}',
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          const LoadButtons(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFloatingActionButtons(BuildContext context) {
-    return BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-      if (state is CFDILoaded) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildAddFileButton(context),
-            const SizedBox(height: 10),
-            _buildAddDirectoryButton(context),
-          ],
-        );
-      }
-      return Container();
-    });
-  }
-
-  Widget _buildAddFileButton(BuildContext context) {
-    return FloatingActionButton(
-      heroTag: 'addFile',
-      onPressed: () {
-        context.read<CFDIBloc>().add(LoadCFDIsFromFile());
-      },
-      tooltip: 'Añadir archivo CFDI',
-      child: const Icon(Icons.add_to_photos),
-    );
-  }
-
-  Widget _buildAddDirectoryButton(BuildContext context) {
-    return FloatingActionButton(
-      heroTag: 'addDirectory',
-      onPressed: () {
-        context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
-      },
-      tooltip: 'Cargar directorio',
-      child: const Icon(Icons.create_new_folder),
-    );
-  }
-}
 
 class CFDITableView extends StatefulWidget {
   final List<CFDI> cfdis;
@@ -230,6 +106,8 @@ class _CFDITableViewState extends State<CFDITableView> {
       _isSearching = searchTerm.isNotEmpty;
       if (_isSearching) {
         _filteredCfdis = _sortedCfdis.where((cfdi) {
+          var formatoTipoComprobante =
+              FormatTipoComprobante(cfdi.tipoDeComprobante);
           final emisorMatch =
               cfdi.emisor?.nombre?.toLowerCase().contains(searchTerm) ?? false;
           final receptorMatch =
@@ -239,7 +117,7 @@ class _CFDITableViewState extends State<CFDITableView> {
                   ?.toLowerCase()
                   .contains(searchTerm) ??
               false;
-          final tipoMatch = _formatTipoComprobante(cfdi.tipoDeComprobante)
+          final tipoMatch = formatoTipoComprobante.tipoComprobante
               .toLowerCase()
               .contains(searchTerm);
           final totalMatch = cfdi.total?.contains(searchTerm) ?? false;
@@ -264,6 +142,9 @@ class _CFDITableViewState extends State<CFDITableView> {
   void _sortData() {
     // Ordena la lista base
     _sortedCfdis.sort((a, b) {
+      var formatoTipoComprobanteA = FormatTipoComprobante(a.tipoDeComprobante);
+      var formatoTipoComprobanteB = FormatTipoComprobante(b.tipoDeComprobante);
+
       // Asegurarse que los índices coincidan con _buildGridColumns
       int effectiveSortIndex =
           _sortColumnIndex; // Ajustar si hay columna de checkbox implícita
@@ -281,8 +162,8 @@ class _CFDITableViewState extends State<CFDITableView> {
           return _compareNullableNumeric(a.total, b.total, _sortAscending);
         case 4: // Tipo
           return _compareNullableStrings(
-              _formatTipoComprobante(a.tipoDeComprobante),
-              _formatTipoComprobante(b.tipoDeComprobante),
+              formatoTipoComprobanteA.tipoComprobante,
+              formatoTipoComprobanteB.tipoComprobante,
               _sortAscending);
         case 5: // UUID
           return _compareNullableStrings(a.timbreFiscalDigital?.uuid,
@@ -757,6 +638,8 @@ class _CFDIDataGridSource extends DataGridSource {
         : [];
 
     return currentPageCfdis.map<DataGridRow>((cfdi) {
+      var formatoTipoComprobante =
+          FormatTipoComprobante(cfdi.tipoDeComprobante);
       // Formateo de datos (usando las funciones globales)
       String? fechaFormateada;
       if (cfdi.fecha != null) {
@@ -768,8 +651,6 @@ class _CFDIDataGridSource extends DataGridSource {
           fechaFormateada = cfdi.fecha;
         }
       }
-      // Usar la función global _formatTipoComprobante
-      String tipoComprobante = _formatTipoComprobante(cfdi.tipoDeComprobante);
 
       // Crear celdas basadas en columnas visibles
       List<DataGridCell> cells = [];
@@ -792,8 +673,8 @@ class _CFDIDataGridSource extends DataGridSource {
             .add(DataGridCell<double?>(columnName: 'total', value: totalValue));
       }
       if (columnProvider.isVisible('tipo')) {
-        cells.add(
-            DataGridCell<String>(columnName: 'tipo', value: tipoComprobante));
+        cells.add(DataGridCell<String>(
+            columnName: 'tipo', value: formatoTipoComprobante.tipoComprobante));
       }
       if (columnProvider.isVisible('uuid')) {
         cells.add(DataGridCell<String>(
@@ -882,6 +763,7 @@ class _CFDIDataGridSource extends DataGridSource {
 
     // --- El resto de la lógica de buildRow usa el 'cfdi' obtenido ---
     final bool isSelected = _selectedCfdis.contains(cfdi);
+    var formatoTipoComprobante = FormatTipoComprobante(cfdi.tipoDeComprobante);
     Color? rowColor = isSelected
         ? Theme.of(_context).colorScheme.primary.withOpacity(0.1)
         : null;
@@ -905,8 +787,7 @@ class _CFDIDataGridSource extends DataGridSource {
             style: cellTextStyle, overflow: TextOverflow.ellipsis);
       } else if (dataGridCell.columnName == 'tipo') {
         alignment = Alignment.center;
-        final tipoColor = _getColorForTipoComprobante(
-            cfdi.tipoDeComprobante); // Usar el 'cfdi' recuperado
+        final tipoColor = formatoTipoComprobante.color;
         cellWidget = Container(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
           constraints: const BoxConstraints(maxWidth: 60),
@@ -948,45 +829,6 @@ class _CFDIDataGridSource extends DataGridSource {
     _updatePaginatedRows(startIndex, _rowsPerPage);
     notifyListeners(); // Notifica a SfDataGrid y SfDataPager
     return true;
-  }
-}
-
-// Funciones auxiliares que pueden ser compartidas entre ambas vistas
-String _formatTipoComprobante(String? tipo) {
-  if (tipo == null) return 'N/A';
-
-  switch (tipo.toUpperCase()) {
-    case 'I':
-      return 'Ingreso';
-    case 'E':
-      return 'Egreso';
-    case 'T':
-      return 'Traslado';
-    case 'N':
-      return 'Nómina';
-    case 'P':
-      return 'Pago';
-    default:
-      return tipo;
-  }
-}
-
-Color _getColorForTipoComprobante(String? tipo) {
-  if (tipo == null) return Colors.grey;
-
-  switch (tipo.toUpperCase()) {
-    case 'I':
-      return Colors.green;
-    case 'E':
-      return Colors.red;
-    case 'T':
-      return Colors.blue;
-    case 'N':
-      return Colors.purple;
-    case 'P':
-      return Colors.orange;
-    default:
-      return Colors.grey;
   }
 }
 
