@@ -34,7 +34,8 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
       List<CFDI> cfdis = await FilterFactory(_filters).apply(_repository.cfdis);
       //GET CFDI information
       final cfdiInformation = calculateTotals(cfdis);
-      emit(CFDILoaded(cfdis, cfdiInformation));
+      emit(CFDILoaded(cfdis, cfdiInformation,
+          stateManager: (state as CFDILoaded).stateManager));
     }
   }
 

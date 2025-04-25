@@ -1,4 +1,5 @@
 import 'package:comparador_cfdis/models/cfdi_information.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 import '../models/cfdi.dart';
 
@@ -18,8 +19,23 @@ class CFDILoaded extends CFDIState {
   final List<CFDI> cfdis;
   int count = 0;
   CFDIInformation cfdiInformation;
-  CFDILoaded(this.cfdis, this.cfdiInformation) {
+  PlutoGridStateManager? stateManager;
+  CFDILoaded(this.cfdis, this.cfdiInformation, {this.stateManager}) {
     count = cfdis.length;
+    if (stateManager != null) {
+      stateManager!.removeAllRows();
+      stateManager!.appendRows(cfdis.map((cfdi) => _row(cfdi)).toList());
+    }
+  }
+
+  PlutoRow _row(CFDI cfdi) {
+    return PlutoRow(cells: {
+      'uuid': PlutoCell(value: cfdi.timbreFiscalDigital?.uuid),
+      'rfcEmisor': PlutoCell(value: cfdi.emisor?.nombre),
+      'rfcReceptor': PlutoCell(value: cfdi.receptor?.nombre),
+      'fecha': PlutoCell(value: cfdi.fecha),
+      'total': PlutoCell(value: cfdi.total),
+    });
   }
 }
 

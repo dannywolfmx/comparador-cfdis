@@ -1,6 +1,9 @@
+import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
+import 'package:comparador_cfdis/bloc/cfdi_state.dart';
 import 'package:comparador_cfdis/models/cfdi.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:provider/provider.dart';
 
 class TableCFDI extends StatefulWidget {
   const TableCFDI({super.key, required this.cfdis});
@@ -24,9 +27,12 @@ class _TableCFDIState extends State<TableCFDI> {
       onLoaded: (event) {
         stateManager = event.stateManager;
         stateManager.setShowColumnFilter(showColumn);
+        final state = context.read<CFDIBloc>().state;
+        if (state is CFDILoaded) {
+          state.stateManager = stateManager;
+        }
       },
       onChanged: (event) {},
-      key: UniqueKey(),
     );
   }
 
