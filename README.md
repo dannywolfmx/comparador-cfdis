@@ -36,11 +36,22 @@ To run this application, ensure you have Flutter installed on your machine. You 
    flutter run
    ```
 
-## Features
 
-- A simple home screen built using Flutter's StatelessWidget.
-- Basic project structure for Flutter applications.
-
-## Contributing
-
-Feel free to fork the repository and submit pull requests for any improvements or features you'd like to add!
+## Intructions to compile the project to windows
+1. Open the terminal and navigate to the project directory:
+   ```
+   cd my-flutter-app
+   ```
+2. Get the dependencies:
+   ```
+   flutter pub get
+   ```
+3. Run the application:
+   ```
+   flutter run -d windows
+   ```
+4. If you want to build the application for release, use the following command:
+   ```
+   flutter build windows
+   ```
+5. The compiled application will be located in the `build/windows/runner/Release` directory.

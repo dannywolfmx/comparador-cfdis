@@ -113,77 +113,7 @@ class _CFDITableViewState extends State<CFDITableView> {
         const Expanded(flex: 2, child: FilterColumn()),
         Expanded(
           flex: 6,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Card(
-                  elevation: 2.0,
-                  margin: const EdgeInsets.only(bottom: 8.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            style: const TextStyle(fontSize: 13),
-                            decoration: InputDecoration(
-                              hintText:
-                                  'Buscar por emisor, receptor, UUID, etc...',
-                              hintStyle: const TextStyle(fontSize: 13),
-                              prefixIcon: const Icon(Icons.search, size: 18),
-                              suffixIcon: _searchController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear, size: 18),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                      },
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(
-                                          maxHeight: 32, maxWidth: 32),
-                                    )
-                                  : null,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4.0),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 10.0),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (_selectedCfdis.isNotEmpty)
-                        Text(
-                          '${_selectedCfdis.length} seleccionados',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: TableCFDI(cfdis: widget.cfdis)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          child: TableCFDI(cfdis: widget.cfdis),
         ),
         // Panel lateral (sin cambios)
         if (_selectedCfdis.isNotEmpty)
