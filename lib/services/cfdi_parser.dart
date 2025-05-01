@@ -210,19 +210,29 @@ class CFDIParser {
     return result;
   }
 
-  /// Permite al usuario seleccionar un archivo XML y lo convierte a CFDI
-  static Future<CFDI?> pickAndParseXml() async {
+  /// Permite al usuario seleccionar archivos XML y los convierte a CFDIs
+  static Future<List<CFDI>> pickAndParseXmls() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xml'],
+      allowMultiple: true,
     );
 
-    if (result != null && result.files.single.path != null) {
-      final file = File(result.files.single.path!);
-      return await parseXmlFile(file);
+    List<CFDI> cfdis = [];
+
+    if (result != null) {
+      for (var fileInfo in result.files) {
+        if (fileInfo.path != null) {
+          final file = File(fileInfo.path!);
+          final cfdi = await parseXmlFile(file);
+          if (cfdi != null) {
+            cfdis.add(cfdi);
+          }
+        }
+      }
     }
 
-    return null;
+    return cfdis;
   }
 
   /// Permite al usuario seleccionar un directorio y parsea todos los XML dentro

@@ -66,17 +66,13 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
     emit(CFDILoading());
 
     try {
-      final cfdi = await _repository.loadCFDIFromFile();
-      if (cfdi != null) {
-        final cfdiInformation = calculateTotals([cfdi]);
-        emit(CFDILoaded([cfdi], cfdiInformation));
+      final cfdis = await _repository.loadCFDIFromFile();
+      if (cfdis.isNotEmpty) {
+        final cfdiInformation = calculateTotals(cfdis);
+        emit(CFDILoaded(cfdis, cfdiInformation));
       } else {
-        if (state is CFDILoaded) {
-          // Mantener el estado actual si ya hay CFDIs cargados
-          emit(state);
-        } else {
-          emit(CFDIError('No se pudo cargar el CFDI'));
-        }
+        emit(CFDIError(
+            'No se pudo cargar el CFDI')); // Simplified error handling
       }
     } catch (e) {
       emit(CFDIError('Error al cargar el CFDI: $e'));

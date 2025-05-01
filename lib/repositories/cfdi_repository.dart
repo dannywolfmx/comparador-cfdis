@@ -5,16 +5,11 @@ class CFDIRepository {
   List<CFDI> _cfdis = [];
 
   Future<List<CFDI>> loadCFDIsFromDirectory() async {
-    _cfdis = await CFDIParser.parseDirectoryCFDIs();
-    return _cfdis;
+    return await CFDIParser.parseDirectoryCFDIs();
   }
 
-  Future<CFDI?> loadCFDIFromFile() async {
-    final cfdi = await CFDIParser.pickAndParseXml();
-    if (cfdi != null) {
-      _cfdis.add(cfdi);
-    }
-    return cfdi;
+  Future<List<CFDI>> loadCFDIFromFile() async {
+    return await CFDIParser.pickAndParseXmls();
   }
 
   List<CFDI> get cfdis => _cfdis;
