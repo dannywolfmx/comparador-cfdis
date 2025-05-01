@@ -130,6 +130,7 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
             checkColor: Theme.of(context).primaryColor,
             onChanged: (value) {
               if (value == null) return;
+
               //Apply filter to the list of CFDIs
               context.read<CFDIBloc>().add(FilterCFDIs(formaPago));
               setState(() {

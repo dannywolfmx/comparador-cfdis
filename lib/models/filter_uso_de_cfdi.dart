@@ -32,6 +32,7 @@ final List<UsoDeCFDI> usosDeCFDI = [
       'Depósitos en cuentas para el ahorro, primas que tengan como base planes de pensiones'),
   UsoDeCFDI('D10', 'Pagos por servicios educativos (colegiaturas)'),
   UsoDeCFDI('P01', 'Por definir'),
+  UsoDeCFDI('S01', 'Sin efectos fiscales'),
 ];
 
 class UsoDeCFDIFilter implements FilterStrategy {

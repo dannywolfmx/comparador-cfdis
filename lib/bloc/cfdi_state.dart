@@ -23,8 +23,9 @@ class CFDILoaded extends CFDIState {
   CFDILoaded(this.cfdis, this.cfdiInformation, {this.stateManager}) {
     count = cfdis.length;
     if (stateManager != null) {
-      stateManager!.removeAllRows();
-      stateManager!.appendRows(cfdis.map((cfdi) => _row(cfdi)).toList());
+      stateManager!.removeRows(stateManager!.rows);
+      List<PlutoRow> rows = cfdis.map((cfdi) => _row(cfdi)).toList();
+      stateManager?.appendRows(rows);
     }
   }
 
@@ -35,6 +36,7 @@ class CFDILoaded extends CFDIState {
       'rfcReceptor': PlutoCell(value: cfdi.receptor?.nombre),
       'fecha': PlutoCell(value: cfdi.fecha),
       'total': PlutoCell(value: cfdi.total),
+      'acciones': PlutoCell(value: ''),
     });
   }
 }
