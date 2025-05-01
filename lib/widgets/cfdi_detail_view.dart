@@ -88,26 +88,6 @@ class CFDIDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildOpenFileButton() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ElevatedButton.icon(
-        icon: const Icon(Icons.open_in_new),
-        label: Text(
-            'Abrir XML ${cfdi.filePath != null ? "(${FileService.getFileName(cfdi.filePath!)})" : ""}'),
-        onPressed: cfdi.filePath != null
-            ? () async {
-                final success =
-                    await FileService.openFileWithDefaultApp(cfdi.filePath!);
-                if (!success) {
-                  // Manejar el error si es necesario
-                }
-              }
-            : null,
-      ),
-    );
-  }
-
   Widget _buildHeaderSection() {
     // ...existing code...
     return Container(); // Reemplazar con el código actual

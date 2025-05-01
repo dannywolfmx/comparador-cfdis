@@ -67,7 +67,7 @@ class CFDIListView extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: formatTipoComprobante.color.withOpacity(0.15),
+                  color: formatTipoComprobante.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(

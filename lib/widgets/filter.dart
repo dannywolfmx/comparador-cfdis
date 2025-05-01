@@ -35,7 +35,7 @@ class _FilterColumnState extends State<FilterColumn> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -225,7 +225,7 @@ class _FilterColumnState extends State<FilterColumn> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -267,7 +267,7 @@ class _FilterColumnState extends State<FilterColumn> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
@@ -401,7 +401,7 @@ class _FilterColumnState extends State<FilterColumn> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 2),
       elevation: 0,
-      color: Colors.white.withOpacity(0.1),
+      color: Colors.white.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       child: Column(
         children: [

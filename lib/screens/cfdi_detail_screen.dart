@@ -375,15 +375,11 @@ class CFDIDetailScreen extends StatelessWidget {
             ...conceptos
                 .map((concepto) => pw.TableRow(
                       children: [
+                        _buildPDFTableCell(concepto.cantidad.toString(), font),
+                        _buildPDFTableCell(concepto.descripcion, font),
                         _buildPDFTableCell(
-                            concepto.cantidad.toString() ?? 'N/A', font),
-                        _buildPDFTableCell(
-                            concepto.descripcion ?? 'Sin descripción', font),
-                        _buildPDFTableCell(
-                            '\$${concepto.valorUnitario.toString() ?? 'N/A'}',
-                            font),
-                        _buildPDFTableCell(
-                            '\$${concepto.importe ?? 'N/A'}', font),
+                            '\$${concepto.valorUnitario.toString()}', font),
+                        _buildPDFTableCell('\$${concepto.importe}', font),
                       ],
                     ))
                 .toList(),
@@ -652,7 +648,7 @@ class CFDIDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: tipoColor.withOpacity(0.2),
+                color: tipoColor.withValues(alpha: 0.2),
                 border: Border.all(color: tipoColor),
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -791,18 +787,17 @@ class CFDIDetailScreen extends StatelessWidget {
 
   Widget _buildDetailedConceptoCard(Concepto concepto, int index) {
     // Calcular el total del concepto
-    double? total = concepto.cantidad * concepto.valorUnitario;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16.0),
       elevation: 2,
       child: ExpansionTile(
         title: Text(
-          concepto.descripcion ?? 'Sin descripción',
+          concepto.descripcion,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          'Importe: \$${concepto.importe ?? total.toStringAsFixed(2) ?? 'N/A'}',
+          'Importe: \$${concepto.importe}',
           style: TextStyle(
               color: Colors.green.shade700, fontWeight: FontWeight.bold),
         ),
@@ -813,12 +808,10 @@ class CFDIDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Información principal
+                _buildConceptoInfoRow('Cantidad', concepto.cantidad.toString()),
+                _buildConceptoInfoRow('Unidad', concepto.unidad),
                 _buildConceptoInfoRow(
-                    'Cantidad', concepto.cantidad.toString() ?? 'N/A'),
-                _buildConceptoInfoRow(
-                    'Unidad', concepto.unidad ?? concepto.claveUnidad ?? 'N/A'),
-                _buildConceptoInfoRow(
-                    'Valor unitario', '\$${concepto.valorUnitario ?? 'N/A'}'),
+                    'Valor unitario', '\$${concepto.valorUnitario}'),
                 const Divider(),
 
                 // Información detallada
@@ -848,24 +841,23 @@ class CFDIDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              concepto.descripcion ?? 'Sin descripción',
+              concepto.descripcion,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Cantidad: ${concepto.cantidad ?? 'N/A'}'),
-                Text(
-                    'Unidad: ${concepto.unidad ?? concepto.claveUnidad ?? 'N/A'}'),
+                Text('Cantidad: ${concepto.cantidad}'),
+                Text('Unidad: ${concepto.unidad}'),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Valor unitario: \$${concepto.valorUnitario ?? 'N/A'}'),
-                Text('Importe: \$${concepto.importe ?? 'N/A'}',
+                Text('Valor unitario: \$${concepto.valorUnitario}'),
+                Text('Importe: \$${concepto.importe}',
                     style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),

@@ -5,7 +5,6 @@ import 'package:comparador_cfdis/screens/cfdi_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pluto_grid/pluto_grid.dart';
-import 'package:provider/provider.dart';
 
 class TableCFDI extends StatefulWidget {
   const TableCFDI({super.key, required this.cfdis});

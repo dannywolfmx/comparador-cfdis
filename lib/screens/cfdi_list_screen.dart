@@ -96,8 +96,8 @@ class _CFDITableViewState extends State<CFDITableView> {
     double? valA = double.tryParse(a);
     double? valB = double.tryParse(b);
 
-    if (valA == null && valB == null)
-      return 0; // Ambos no son numéricos, comparar como string
+    // Ambos no son numéricos, comparar como string
+    if (valA == null && valB == null) return 0;
     if (valA == null) return ascending ? -1 : 1; // A no es numérico
     if (valB == null) return ascending ? 1 : -1; // B no es numérico
 
@@ -135,7 +135,8 @@ class _CFDITableViewState extends State<CFDITableView> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     border: Border(
                       bottom: BorderSide(
                         color: Theme.of(context).dividerColor,

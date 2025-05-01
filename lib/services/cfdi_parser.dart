@@ -1,10 +1,15 @@
 import 'dart:io';
+import 'package:comparador_cfdis/utils/log.dart';
+import 'package:logger/logger.dart';
 import 'package:xml/xml.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
 import '../models/cfdi.dart';
 
 class CFDIParser {
+  //Logger
+  static final _logger = Logger();
+
   // Namespace prefijos comunes en CFDI
   static const Map<String, String> _namespaces = {
     'cfdi': 'http://www.sat.gob.mx/cfd/4',
@@ -22,7 +27,7 @@ class CFDIParser {
       final jsonData = xmlToJson(document);
       return CFDI.fromJson(jsonData, filePath: file.path);
     } catch (e) {
-      print('Error al leer el archivo XML: $e');
+      _logger.e('Error al parsear XML a CFDI: $e');
       return null;
     }
   }
@@ -34,7 +39,7 @@ class CFDIParser {
       final jsonData = xmlToJson(document);
       return CFDI.fromJson(jsonData, filePath: filePath);
     } catch (e) {
-      print('Error al parsear XML a CFDI: $e');
+      _logger.e('Error al parsear XML a CFDI: $e');
       return null;
     }
   }
@@ -243,7 +248,7 @@ class CFDIParser {
         }
       }
     } catch (e) {
-      print('Error al leer los archivos XML del directorio: $e');
+      Log.logError('Error al leer los archivos XML del directorio: $e');
     }
 
     return cfdis;

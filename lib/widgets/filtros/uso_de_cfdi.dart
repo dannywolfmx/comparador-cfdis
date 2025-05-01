@@ -41,7 +41,7 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'Buscar uso de CFDI',
-              hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
               prefixIcon: const Icon(Icons.search, color: Colors.white70),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
@@ -84,7 +84,7 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
           padding: const EdgeInsets.all(16.0),
           child: Text(
             'No se encontraron resultados',
-            style: TextStyle(color: Colors.white.withOpacity(0.7)),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
           ),
         ),
       );
@@ -94,7 +94,7 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
       children: filteredUsos.map((usoCFDI) {
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 2),
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),
@@ -105,7 +105,7 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(

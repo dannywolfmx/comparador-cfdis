@@ -25,6 +25,7 @@ dependencies:
   syncfusion_flutter_datagrid: ^25.1.37 # Añadir esta línea
   syncfusion_flutter_core: ^25.1.37 # Necesario para SfDataGrid
   pluto_grid: ^8.0.0
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:
