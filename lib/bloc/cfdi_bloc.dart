@@ -10,6 +10,7 @@ import 'cfdi_event.dart';
 import 'cfdi_state.dart';
 import '../models/cfdi.dart';
 import 'filter_template_bloc.dart';
+import 'filter_template_event.dart';
 import 'filter_template_state.dart';
 import 'dart:async';
 
@@ -66,18 +67,34 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
 
   void _updateFilterSelection(FilterOption filter, bool selected) {
     if (filter is FormaPago) {
-      final formaPago = formasDePago.firstWhere((f) => f.id == filter.id);
-      formaPago.seleccionado = selected;
+      try {
+        final formaPago = formasDePago.firstWhere((f) => f.id == filter.id);
+        formaPago.seleccionado = selected;
+      } catch (e) {
+        // Filtro no encontrado, ignorar
+      }
     } else if (filter is MetodoPago) {
-      final metodoPago = metodosDePago.firstWhere((m) => m.id == filter.id);
-      metodoPago.seleccionado = selected;
+      try {
+        final metodoPago = metodosDePago.firstWhere((m) => m.id == filter.id);
+        metodoPago.seleccionado = selected;
+      } catch (e) {
+        // Filtro no encontrado, ignorar
+      }
     } else if (filter is UsoDeCFDI) {
-      final usoCFDI = usosDeCFDI.firstWhere((u) => u.id == filter.id);
-      usoCFDI.seleccionado = selected;
+      try {
+        final usoCFDI = usosDeCFDI.firstWhere((u) => u.id == filter.id);
+        usoCFDI.seleccionado = selected;
+      } catch (e) {
+        // Filtro no encontrado, ignorar
+      }
     } else if (filter is TipoComprobante) {
-      final tipoComprobante =
-          tiposDeComprobante.firstWhere((t) => t.id == filter.id);
-      tipoComprobante.seleccionado = selected;
+      try {
+        final tipoComprobante =
+            tiposDeComprobante.firstWhere((t) => t.id == filter.id);
+        tipoComprobante.seleccionado = selected;
+      } catch (e) {
+        // Filtro no encontrado, ignorar
+      }
     }
   }
 
@@ -135,6 +152,9 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
       // Limpiar estado de selección en todas las opciones de filtro
       _clearAllFilterSelections();
 
+      // Desactivar todas las plantillas activas
+      _filterTemplateBloc.add(ClearAllTemplates());
+
       // Mostrar todos los CFDIs sin filtros
       final cfdiInformation = calculateTotals(_repository.cfdis);
       emit(CFDILoaded(_repository.cfdis, cfdiInformation,
@@ -164,12 +184,24 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
   Future<void> _onApplyTemplateFilters(
       ApplyTemplateFilters event, Emitter<CFDIState> emit) async {
     if (state is CFDILoaded) {
+      // Primero, limpiar todas las selecciones visuales
+      _clearAllFilterSelections();
+
       // Crear un set con todos los filtros activos (manuales + plantillas)
       Set<FilterOption> allFilters = Set.from(_filters);
 
-      // Agregar filtros de plantillas activas
+      // Agregar filtros de plantillas activas y actualizar estado visual
       for (final template in event.activeTemplates) {
         allFilters.addAll(template.filters);
+        // Actualizar el estado visual de cada filtro de la plantilla
+        for (final filter in template.filters) {
+          _updateFilterSelection(filter, true);
+        }
+      }
+
+      // También actualizar el estado visual de los filtros manuales
+      for (final filter in _filters) {
+        _updateFilterSelection(filter, true);
       }
 
       // Aplicar todos los filtros
