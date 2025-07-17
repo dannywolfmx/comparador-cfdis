@@ -140,7 +140,9 @@ class _CFDITableViewState extends State<CFDITableView> {
                       Container(
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          color: Theme.of(context)
+                              .primaryColor
+                              .withValues(alpha: 0.1),
                           border: Border(
                             bottom: BorderSide(
                               color: Theme.of(context).dividerColor,
@@ -183,7 +185,8 @@ class _CFDITableViewState extends State<CFDITableView> {
                           children: [
                             ElevatedButton.icon(
                               onPressed: _selectedCfdis.length == 1
-                                  ? () => _mostrarDetalles(_selectedCfdis.first, context)
+                                  ? () => _mostrarDetalles(
+                                      _selectedCfdis.first, context)
                                   : null,
                               icon: const Icon(Icons.fullscreen),
                               label: const Text('Expandir'),
@@ -201,7 +204,8 @@ class _CFDITableViewState extends State<CFDITableView> {
                               icon: const Icon(Icons.clear),
                               label: const Text('Deseleccionar'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.secondary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
                                 foregroundColor: Colors.white,
                               ),
                             ),
@@ -214,7 +218,7 @@ class _CFDITableViewState extends State<CFDITableView> {
             ],
           ),
         ),
-        
+
         // Barra de resumen en la parte inferior
         const CFDISummaryCard(),
       ],

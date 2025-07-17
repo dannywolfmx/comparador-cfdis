@@ -27,7 +27,7 @@ void main() async {
     runApp(MyApp(
       cfdiRepository: cfdiRepository,
       filters: filters,
-    ));
+    ),);
   } catch (e, stackTrace) {
     logger.e('Error durante la inicialización', error: e, stackTrace: stackTrace);
     

@@ -34,7 +34,7 @@ void main() {
             folio: '123',
             total: '116.00',
           ),
-        ]);
+        ],);
         return cfdiBloc;
       },
       act: (bloc) => bloc.add(LoadCFDIsFromDirectory()),

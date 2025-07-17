@@ -41,12 +41,12 @@ class CFDIListView extends StatelessWidget {
               var formatTipoComprobante =
                   FormatTipoComprobante(cfdi.tipoDeComprobante);
 
-              return _content(emisor, receptor, fechaFormateada, cfdi, timbreFiscal,
-                  formatTipoComprobante, context);
+              return _content(emisor, receptor, fechaFormateada, cfdi,
+                  timbreFiscal, formatTipoComprobante, context);
             },
           ),
         ),
-        
+
         // Barra de resumen en la parte inferior
         const CFDISummaryCard(),
       ],
