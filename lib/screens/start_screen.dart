@@ -18,7 +18,6 @@ class StartScreen extends StatelessWidget {
       child: Builder(
         builder: (context) => Scaffold(
           body: _buildBody(context),
-          floatingActionButton: _buildFloatingActionButtons(context),
         ),
       ),
     );
@@ -153,44 +152,6 @@ class StartScreen extends StatelessWidget {
           loadButtons(context)
         ],
       ),
-    );
-  }
-
-  Widget _buildFloatingActionButtons(BuildContext context) {
-    return BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-      if (state is CFDILoaded) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildAddFileButton(context),
-            const SizedBox(height: 10),
-            _buildAddDirectoryButton(context),
-          ],
-        );
-      }
-      return Container();
-    });
-  }
-
-  Widget _buildAddFileButton(BuildContext context) {
-    return FloatingActionButton(
-      heroTag: 'addFile',
-      onPressed: () {
-        context.read<CFDIBloc>().add(LoadCFDIsFromFile());
-      },
-      tooltip: 'Añadir archivo CFDI',
-      child: const Icon(Icons.add_to_photos),
-    );
-  }
-
-  Widget _buildAddDirectoryButton(BuildContext context) {
-    return FloatingActionButton(
-      heroTag: 'addDirectory',
-      onPressed: () {
-        context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
-      },
-      tooltip: 'Cargar directorio',
-      child: const Icon(Icons.create_new_folder),
     );
   }
 }

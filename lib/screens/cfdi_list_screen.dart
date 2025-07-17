@@ -1,6 +1,7 @@
 import 'package:comparador_cfdis/models/format_tipo_comprobante.dart';
 import 'package:comparador_cfdis/widgets/table_cfdi.dart';
 import 'package:comparador_cfdis/widgets/filter.dart';
+import 'package:comparador_cfdis/widgets/cfdi_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/cfdi_bloc.dart';
@@ -107,108 +108,115 @@ class _CFDITableViewState extends State<CFDITableView> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        const Expanded(flex: 2, child: FilterColumn()),
+        // Contenido principal con filtros y tabla
         Expanded(
-          flex: 6,
-          child: TableCFDI(cfdis: widget.cfdis),
-        ),
-        // Panel lateral (sin cambios)
-        if (_selectedCfdis.isNotEmpty)
-          Container(
-            width: 400,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              border: Border(
-                left: BorderSide(
-                  color: Theme.of(context).dividerColor,
-                  width: 1.0,
-                ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Expanded(flex: 2, child: FilterColumn()),
+              Expanded(
+                flex: 6,
+                child: TableCFDI(cfdis: widget.cfdis),
               ),
-              color: Theme.of(context).cardColor,
-            ),
-            child: Column(
-              children: [
-                // Encabezado del panel
+              // Panel lateral (sin cambios)
+              if (_selectedCfdis.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.all(16.0),
+                  width: 400,
+                  height: MediaQuery.of(context).size.height,
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     border: Border(
-                      bottom: BorderSide(
+                      left: BorderSide(
                         color: Theme.of(context).dividerColor,
+                        width: 1.0,
                       ),
                     ),
+                    color: Theme.of(context).cardColor,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      Text(
-                        '${_selectedCfdis.length} seleccionado(s)',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      // Encabezado del panel
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Theme.of(context).dividerColor,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${_selectedCfdis.length} seleccionado(s)',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedCfdis.clear();
+                                });
+                              },
+                              tooltip: 'Cerrar panel',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          setState(() {
-                            _selectedCfdis.clear();
-                          });
-                        },
-                        tooltip: 'Cerrar panel',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+                      // Contenido del panel
+                      Expanded(
+                        child: CFDIDetailScreen(cfdi: _selectedCfdis.first),
+                      ),
+                      // Botones de acción
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: _selectedCfdis.length == 1
+                                  ? () => _mostrarDetalles(_selectedCfdis.first, context)
+                                  : null,
+                              icon: const Icon(Icons.fullscreen),
+                              label: const Text('Expandir'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _selectedCfdis.clear();
+                                });
+                              },
+                              icon: const Icon(Icons.clear),
+                              label: const Text('Deseleccionar'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).colorScheme.secondary,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-                // Contenido del panel
-                Expanded(
-                  child: CFDIDetailScreen(cfdi: _selectedCfdis.first),
-                ),
-                // Botones de acción
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _selectedCfdis.length == 1
-                            ? () =>
-                                _mostrarDetalles(_selectedCfdis.first, context)
-                            : null,
-                        icon: const Icon(Icons.fullscreen),
-                        label: const Text('Expandir'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _selectedCfdis.clear();
-                          });
-                        },
-                        icon: const Icon(Icons.clear),
-                        label: const Text('Deseleccionar'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
+        ),
+        
+        // Barra de resumen en la parte inferior
+        const CFDISummaryCard(),
       ],
     );
   }

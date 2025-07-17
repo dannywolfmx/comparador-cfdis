@@ -3,6 +3,7 @@ import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
 import 'package:comparador_cfdis/models/cfdi.dart';
 import 'package:comparador_cfdis/models/format_tipo_comprobante.dart';
 import 'package:comparador_cfdis/screens/cfdi_detail_screen.dart';
+import 'package:comparador_cfdis/widgets/cfdi_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,32 +14,42 @@ class CFDIListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: cfdis.length,
-      itemBuilder: (context, index) {
-        final cfdi = cfdis[index];
-        final emisor = cfdi.emisor;
-        final receptor = cfdi.receptor;
-        final timbreFiscal = cfdi.timbreFiscalDigital;
+    return Column(
+      children: [
+        // Lista de CFDIs
+        Expanded(
+          child: ListView.builder(
+            itemCount: cfdis.length,
+            itemBuilder: (context, index) {
+              final cfdi = cfdis[index];
+              final emisor = cfdi.emisor;
+              final receptor = cfdi.receptor;
+              final timbreFiscal = cfdi.timbreFiscalDigital;
 
-        // Formato de fecha
-        String? fechaFormateada;
-        if (cfdi.fecha != null) {
-          try {
-            final fechaObj = DateTime.parse(cfdi.fecha!);
-            fechaFormateada =
-                '${fechaObj.day}/${fechaObj.month}/${fechaObj.year}';
-          } catch (_) {
-            fechaFormateada = cfdi.fecha;
-          }
-        }
+              // Formato de fecha
+              String? fechaFormateada;
+              if (cfdi.fecha != null) {
+                try {
+                  final fechaObj = DateTime.parse(cfdi.fecha!);
+                  fechaFormateada =
+                      '${fechaObj.day}/${fechaObj.month}/${fechaObj.year}';
+                } catch (_) {
+                  fechaFormateada = cfdi.fecha;
+                }
+              }
 
-        var formatTipoComprobante =
-            FormatTipoComprobante(cfdi.tipoDeComprobante);
+              var formatTipoComprobante =
+                  FormatTipoComprobante(cfdi.tipoDeComprobante);
 
-        return _content(emisor, receptor, fechaFormateada, cfdi, timbreFiscal,
-            formatTipoComprobante, context);
-      },
+              return _content(emisor, receptor, fechaFormateada, cfdi, timbreFiscal,
+                  formatTipoComprobante, context);
+            },
+          ),
+        ),
+        
+        // Barra de resumen en la parte inferior
+        const CFDISummaryCard(),
+      ],
     );
   }
 
