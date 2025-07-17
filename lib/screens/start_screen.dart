@@ -15,10 +15,8 @@ class StartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ColumnVisibilityProvider(),
-      child: Builder(
-        builder: (context) => Scaffold(
-          body: _buildBody(context),
-        ),
+      child: Scaffold(
+        body: _buildBody(context),
       ),
     );
   }

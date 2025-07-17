@@ -1,4 +1,5 @@
 import 'package:comparador_cfdis/models/filter.dart';
+import 'package:comparador_cfdis/models/filter_template.dart';
 
 abstract class CFDIEvent {}
 
@@ -13,3 +14,11 @@ class FilterCFDIs extends CFDIEvent {
 }
 
 class ClearCFDIs extends CFDIEvent {}
+
+class ClearFilters extends CFDIEvent {}
+
+class ApplyTemplateFilters extends CFDIEvent {
+  final List<FilterTemplate> activeTemplates;
+
+  ApplyTemplateFilters(this.activeTemplates);
+}

@@ -1,5 +1,6 @@
 import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
 import 'package:comparador_cfdis/bloc/cfdi_event.dart';
+import 'package:comparador_cfdis/bloc/cfdi_state.dart';
 import 'package:comparador_cfdis/models/filter_uso_de_cfdi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,49 +25,53 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
 
   @override
   Widget build(BuildContext context) {
-    //Lista de checkbox para seleccionar el uso de CFDI
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Campo de búsqueda
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value.toLowerCase();
-              });
-            },
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: 'Buscar uso de CFDI',
-              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-              prefixIcon: const Icon(Icons.search, color: Colors.white70),
-              suffixIcon: _searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.white70),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                        });
-                      },
-                    )
-                  : null,
-              filled: true,
-              fillColor: Colors.white12,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+    return BlocBuilder<CFDIBloc, CFDIState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Campo de búsqueda
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.toLowerCase();
+                  });
+                },
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Buscar uso de CFDI',
+                  hintStyle:
+                      TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                  prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.white70),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: Colors.white12,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
             ),
-          ),
-        ),
-        //Lista de checkbox para seleccionar el uso de CFDI
-        _buildUsosDeCFDI(),
-      ],
+            //Lista de checkbox para seleccionar el uso de CFDI
+            _buildUsosDeCFDI(),
+          ],
+        );
+      },
     );
   }
 
@@ -132,9 +137,7 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
               if (value == null) return;
               //Apply filter to the list of CFDIs
               context.read<CFDIBloc>().add(FilterCFDIs(usoCFDI));
-              setState(() {
-                usoCFDI.seleccionado = value;
-              });
+              // No se actualiza el estado aquí, se deja que el BLoC lo maneje
             },
             dense: true,
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),

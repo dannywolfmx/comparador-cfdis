@@ -1,9 +1,11 @@
 import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
 import 'package:comparador_cfdis/bloc/cfdi_state.dart';
+import 'package:comparador_cfdis/bloc/cfdi_event.dart';
 import 'package:comparador_cfdis/widgets/filtros/forma_de_pago.dart';
 import 'package:comparador_cfdis/widgets/filtros/metodo_de_pago.dart';
 import 'package:comparador_cfdis/widgets/filtros/tipo_comprobante.dart';
 import 'package:comparador_cfdis/widgets/filtros/uso_de_cfdi.dart';
+import 'package:comparador_cfdis/widgets/filter_template_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -65,7 +67,9 @@ class _FilterColumnState extends State<FilterColumn> {
                       icon: const Icon(Icons.refresh,
                           color: Colors.white, size: 20),
                       tooltip: 'Limpiar filtros',
-                      onPressed: () {},
+                      onPressed: () {
+                        context.read<CFDIBloc>().add(ClearFilters());
+                      },
                       constraints: const BoxConstraints(
                         minWidth: 36,
                         minHeight: 36,
@@ -88,6 +92,11 @@ class _FilterColumnState extends State<FilterColumn> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Panel de plantillas de filtros
+                      const FilterTemplatePanel(),
+
+                      const SizedBox(height: 8),
+
                       // Filtro por forma de pago
                       _buildExpandableFilter(
                         title: 'Forma de pago',
