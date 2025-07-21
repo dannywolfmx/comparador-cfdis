@@ -36,3 +36,11 @@ class UpdateStateManager extends CFDIEvent {
 
   UpdateStateManager(this.stateManager);
 }
+
+class SearchGlobal extends CFDIEvent {
+  final String query;
+
+  SearchGlobal(this.query);
+}
+
+class ClearGlobalSearch extends CFDIEvent {}

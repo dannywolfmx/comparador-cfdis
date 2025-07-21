@@ -22,6 +22,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
   late StreamSubscription _filterTemplateSubscription;
   DateTime? _startDate;
   DateTime? _endDate;
+  String? _globalSearchQuery;
 
   CFDIBloc(this._repository, this._manualFilters, this._filterTemplateBloc)
       : super(CFDIInitial()) {
@@ -33,6 +34,8 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
     on<ApplyTemplateFilters>(_onApplyTemplateFilters);
     on<ApplyDateRangeFilter>(_onApplyDateRangeFilter);
     on<UpdateStateManager>(_onUpdateStateManager);
+    on<SearchGlobal>(_onSearchGlobal);
+    on<ClearGlobalSearch>(_onClearGlobalSearch);
 
     _filterTemplateSubscription =
         _filterTemplateBloc.stream.listen((templateState) {
@@ -86,7 +89,13 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
     filterFactory.chains
         .add(DateRangeFilter(startDate: _startDate, endDate: _endDate));
 
-    final filteredCFDIs = await filterFactory.apply(_repository.cfdis);
+    var filteredCFDIs = await filterFactory.apply(_repository.cfdis);
+    
+    // Aplicar búsqueda global si existe
+    if (_globalSearchQuery != null && _globalSearchQuery!.isNotEmpty) {
+      filteredCFDIs = _applyGlobalSearch(filteredCFDIs, _globalSearchQuery!);
+    }
+    
     final cfdiInformation = calculateTotals(filteredCFDIs);
 
     emit(
@@ -171,6 +180,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
       _manualFilters.clear();
       _startDate = null;
       _endDate = null;
+      _globalSearchQuery = null;
       _filterTemplateBloc.add(ClearAllTemplates());
       await _applyAllFilters(emit);
     }
@@ -205,6 +215,59 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
           stateManager: event.stateManager,
         ),
       );
+    }
+  }
+
+  List<CFDI> _applyGlobalSearch(List<CFDI> cfdis, String query) {
+    final searchQuery = query.toLowerCase().trim();
+    
+    return cfdis.where((cfdi) {
+      // Buscar en UUID
+      final uuid = cfdi.timbreFiscalDigital?.uuid?.toLowerCase() ?? '';
+      if (uuid.contains(searchQuery)) return true;
+      
+      // Buscar en RFC del emisor
+      final rfcEmisor = cfdi.emisor?.rfc?.toLowerCase() ?? '';
+      if (rfcEmisor.contains(searchQuery)) return true;
+      
+      // Buscar en nombre del emisor
+      final nombreEmisor = cfdi.emisor?.nombre?.toLowerCase() ?? '';
+      if (nombreEmisor.contains(searchQuery)) return true;
+      
+      // Buscar en RFC del receptor
+      final rfcReceptor = cfdi.receptor?.rfc?.toLowerCase() ?? '';
+      if (rfcReceptor.contains(searchQuery)) return true;
+      
+      // Buscar en nombre del receptor
+      final nombreReceptor = cfdi.receptor?.nombre?.toLowerCase() ?? '';
+      if (nombreReceptor.contains(searchQuery)) return true;
+      
+      // Buscar en serie y folio
+      final serie = cfdi.serie?.toLowerCase() ?? '';
+      final folio = cfdi.folio?.toLowerCase() ?? '';
+      if (serie.contains(searchQuery) || folio.contains(searchQuery)) return true;
+      
+      return false;
+    }).toList();
+  }
+
+  Future<void> _onSearchGlobal(
+    SearchGlobal event,
+    Emitter<CFDIState> emit,
+  ) async {
+    if (state is CFDILoaded) {
+      _globalSearchQuery = event.query;
+      await _applyAllFilters(emit);
+    }
+  }
+
+  Future<void> _onClearGlobalSearch(
+    ClearGlobalSearch event,
+    Emitter<CFDIState> emit,
+  ) async {
+    if (state is CFDILoaded) {
+      _globalSearchQuery = null;
+      await _applyAllFilters(emit);
     }
   }
 

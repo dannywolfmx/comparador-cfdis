@@ -1,6 +1,8 @@
 import 'package:comparador_cfdis/bloc/cfdi_state.dart';
 import 'package:comparador_cfdis/models/concepto.dart';
 import 'package:comparador_cfdis/models/pago.dart';
+import 'package:comparador_cfdis/widgets/accessibility/accessible_widget.dart';
+import 'package:comparador_cfdis/services/accessibility_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +10,7 @@ import '../models/cfdi.dart';
 import '../services/file_service.dart';
 import '../bloc/cfdi_bloc.dart';
 
-class CFDIDetailScreen extends StatelessWidget {
+class CFDIDetailScreen extends StatefulWidget {
   final CFDI cfdi;
 
   const CFDIDetailScreen({
@@ -17,73 +19,98 @@ class CFDIDetailScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<CFDIDetailScreen> createState() => _CFDIDetailScreenState();
+}
+
+class _CFDIDetailScreenState extends State<CFDIDetailScreen> with AccessibilityMixin {
+  CFDI get cfdi => widget.cfdi;
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detalle del CFDI'),
-        actions: [
-          // Botón de impresión
-          IconButton(
-            icon: const Icon(Icons.print),
-            tooltip: 'Imprimir CFDI',
-            onPressed: () => _imprimirCFDI(context),
+    return AccessibilityWrapper(
+      screenName: 'Detalle del CFDI ${cfdi.timbreFiscalDigital?.uuid ?? 'sin UUID'}',
+      child: Scaffold(
+        appBar: AppBar(
+          title: Semantics(
+            label: 'Detalle del CFDI',
+            hint: 'Pantalla de información completa del documento fiscal',
+            child: const Text('Detalle del CFDI'),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Sección de UUID con botones de Copiar y Abrir XML
-            _buildUuidSection(context),
-
-            // Sección de UUID y tipo de comprobante
-            _buildHeaderSection(context),
-
-            const Divider(height: 32),
-
-            // Sección de Emisor
-            _buildSectionTitle('Emisor'),
-            _buildEmisorSection(),
-
-            const Divider(height: 32),
-
-            // Sección de Receptor
-            _buildSectionTitle('Receptor'),
-            _buildReceptorSection(),
-
-            const Divider(height: 32),
-
-            // Sección de detalles generales
-            _buildSectionTitle('Detalles Generales'),
-            _buildGeneralDetailsSection(),
-
-            const Divider(height: 32),
-
-            // Sección de Conceptos (productos/servicios)
-            _buildSectionTitle('Conceptos'),
-            _buildConceptosSection(),
-
-            const Divider(height: 32),
-
-            // Sección de Totales
-            _buildSectionTitle('Totales'),
-            _buildTotalsSection(),
-
-            const Divider(height: 32),
-
-            // Sección de Timbre Fiscal Digital
-            _buildSectionTitle('Timbre Fiscal Digital'),
-            _buildTFDSection(),
-
-            // Sección de Complemento de Pagos (si existe)
-            if (cfdi.isPagoCFDI) ...[
-              const Divider(height: 32),
-              _buildSectionTitle('Complemento de Pagos'),
-              _buildComplementoPagoSection(),
-            ],
+          leading: AccessibleIconButton(
+            icon: Icons.arrow_back,
+            onPressed: () {
+              Navigator.of(context).pop();
+              announceMessage('Regresando a la lista de CFDIs');
+            },
+            tooltip: 'Regresar a la lista',
+            semanticLabel: 'Regresar a la lista de CFDIs',
+          ),
+          actions: [
+            // Botón de impresión
+            AccessibleIconButton(
+              icon: Icons.print,
+              onPressed: () => _imprimirCFDI(context),
+              tooltip: 'Imprimir CFDI',
+              semanticLabel: 'Imprimir documento CFDI',
+              semanticHint: 'Abre las opciones de impresión para este CFDI',
+            ),
           ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Sección de UUID con botones de Copiar y Abrir XML
+              _buildUuidSection(context),
+
+              // Sección de UUID y tipo de comprobante
+              _buildHeaderSection(context),
+
+              const Divider(height: 32),
+
+              // Sección de Emisor
+              _buildSectionTitle('Emisor'),
+              _buildEmisorSection(),
+
+              const Divider(height: 32),
+
+              // Sección de Receptor
+              _buildSectionTitle('Receptor'),
+              _buildReceptorSection(),
+
+              const Divider(height: 32),
+
+              // Sección de detalles generales
+              _buildSectionTitle('Detalles Generales'),
+              _buildGeneralDetailsSection(),
+
+              const Divider(height: 32),
+
+              // Sección de Conceptos (productos/servicios)
+              _buildSectionTitle('Conceptos'),
+              _buildConceptosSection(),
+
+              const Divider(height: 32),
+
+              // Sección de Totales
+              _buildSectionTitle('Totales'),
+              _buildTotalsSection(),
+
+              const Divider(height: 32),
+
+              // Sección de Timbre Fiscal Digital
+              _buildSectionTitle('Timbre Fiscal Digital'),
+              _buildTimbreFiscalSection(),
+
+              // Sección de Complemento de Pagos (si existe)
+              if (cfdi.isPagoCFDI) ...[
+                const Divider(height: 32),
+                _buildSectionTitle('Complemento de Pagos'),
+                _buildComplementoPagoSection(),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -111,66 +138,98 @@ class CFDIDetailScreen extends StatelessWidget {
   }
 
   Widget _buildUuidSection(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'UUID del CFDI:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              cfdi.timbreFiscalDigital?.uuid ?? 'No disponible',
-              style: const TextStyle(fontSize: 15),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.copy),
-                  label: const Text('Copiar UUID'),
-                  onPressed: cfdi.timbreFiscalDigital?.uuid != null
-                      ? () {
-                          Clipboard.setData(
-                            ClipboardData(
-                              text: cfdi.timbreFiscalDigital!.uuid!,
-                            ),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('UUID copiado al portapapeles'),
-                            ),
-                          );
-                        }
-                      : null,
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.open_in_new),
-                  label: const Text('Abrir XML'),
-                  onPressed: cfdi.filePath != null
-                      ? () async {
-                          final success =
-                              await FileService.openFileWithDefaultApp(
-                            cfdi.filePath!,
-                          );
-                          if (!success && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('No se pudo abrir el archivo'),
-                                backgroundColor: Colors.red,
+    return Semantics(
+      label: 'Sección de identificación del CFDI',
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AccessibleText(
+                text: 'UUID del CFDI:',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                isHeader: true,
+                semanticLabel: 'Encabezado: UUID del CFDI',
+              ),
+              const SizedBox(height: 8),
+              AccessibleText(
+                text: cfdi.timbreFiscalDigital?.uuid ?? 'No disponible',
+                style: const TextStyle(fontSize: 15),
+                semanticLabel: 'UUID: ${cfdi.timbreFiscalDigital?.uuid ?? 'No disponible'}',
+                semanticHint: 'Identificador único universal del documento fiscal',
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  AccessibleButton(
+                    onPressed: cfdi.timbreFiscalDigital?.uuid != null
+                        ? () {
+                            Clipboard.setData(
+                              ClipboardData(
+                                text: cfdi.timbreFiscalDigital!.uuid!,
                               ),
                             );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('UUID copiado al portapapeles'),
+                              ),
+                            );
+                            announceMessage('UUID copiado al portapapeles');
+                            provideFeedback(AccessibilityFeedback.success);
                           }
-                        }
-                      : null,
-                ),
-              ],
-            ),
-          ],
+                        : null,
+                    tooltip: 'Copiar UUID al portapapeles',
+                    semanticLabel: 'Copiar UUID',
+                    semanticHint: 'Copia el identificador único del CFDI al portapapeles',
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.copy),
+                        SizedBox(width: 8),
+                        Text('Copiar UUID'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  AccessibleButton(
+                    onPressed: cfdi.filePath != null
+                        ? () async {
+                            final success =
+                                await FileService.openFileWithDefaultApp(
+                              cfdi.filePath!,
+                            );
+                            if (!success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('No se pudo abrir el archivo'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              announceMessage('Error: No se pudo abrir el archivo XML');
+                              provideFeedback(AccessibilityFeedback.error);
+                            } else {
+                              announceMessage('Abriendo archivo XML');
+                              provideFeedback(AccessibilityFeedback.success);
+                            }
+                          }
+                        : null,
+                    tooltip: 'Abrir archivo XML original',
+                    semanticLabel: 'Abrir XML',
+                    semanticHint: 'Abre el archivo XML original de este CFDI',
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.open_in_new),
+                        SizedBox(width: 8),
+                        Text('Abrir XML'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -255,14 +314,19 @@ class CFDIDetailScreen extends StatelessWidget {
   }
 
   Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Colors.blue,
+    return Semantics(
+      label: 'Sección: $title',
+      hint: 'Información detallada de $title',
+      header: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+          ),
         ),
       ),
     );
@@ -502,7 +566,7 @@ class CFDIDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTFDSection() {
+  Widget _buildTimbreFiscalSection() {
     final tfd = cfdi.timbreFiscalDigital;
     if (tfd == null) {
       return const Text('No hay información del timbre fiscal digital');
