@@ -92,7 +92,8 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  semanticHint: 'Usa los botones a continuación para cargar archivos CFDIs',
+                  semanticHint:
+                      'Usa los botones a continuación para cargar archivos CFDIs',
                 ),
                 const SizedBox(height: 32.0),
                 loadButtons(context),
@@ -115,14 +116,16 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
             provideFeedback(AccessibilityFeedback.selection);
           },
           semanticLabel: 'Cargar CFDIs desde directorio',
-          semanticHint: 'Busca y carga todos los archivos XML de CFDIs desde una carpeta',
-          tooltip: 'Selecciona una carpeta para cargar múltiples archivos CFDIs',
-          child: Row(
+          semanticHint:
+              'Busca y carga todos los archivos XML de CFDIs desde una carpeta',
+          tooltip:
+              'Selecciona una carpeta para cargar múltiples archivos CFDIs',
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.folder_open),
-              const SizedBox(width: 8),
-              const Text('Cargar desde directorio'),
+              Icon(Icons.folder_open),
+              SizedBox(width: 8),
+              Text('Cargar desde directorio'),
             ],
           ),
         ),
@@ -136,12 +139,12 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
           semanticLabel: 'Cargar archivo XML individual',
           semanticHint: 'Selecciona un archivo XML específico para cargar',
           tooltip: 'Selecciona un archivo XML de CFDI individual',
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.file_upload),
-              const SizedBox(width: 8),
-              const Text('Cargar archivo XML'),
+              Icon(Icons.file_upload),
+              SizedBox(width: 8),
+              Text('Cargar archivo XML'),
             ],
           ),
         ),
@@ -151,7 +154,7 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
 
   Widget _buildLoadingState() {
     return Builder(
-      builder: (context) => Center(
+      builder: (context) => const Center(
         child: ModernCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -159,7 +162,7 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
               AccessibleLoadingIndicator(
                 loadingMessage: 'Cargando archivos CFDIs, por favor espera...',
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               AccessibleText(
                 text: 'Cargando CFDIs...',
                 isLiveRegion: true,
@@ -174,12 +177,12 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
 
   Widget _buildLoadedState(CFDILoaded state) {
     final isMobile = AppLayout.isMobile(context);
-    
+
     // Anunciar éxito de carga
     WidgetsBinding.instance.addPostFrameCallback((_) {
       announceMessage('${state.cfdis.length} CFDIs cargados exitosamente');
     });
-    
+
     if (isMobile) {
       // En móvil, navegación bottom tabs
       return Scaffold(
@@ -196,22 +199,22 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
               _announceViewChange(index);
               provideFeedback(AccessibilityFeedback.selection);
             },
-            destinations: [
+            destinations: const [
               NavigationDestination(
-                icon: const Icon(Icons.dashboard_outlined),
-                selectedIcon: const Icon(Icons.dashboard),
+                icon: Icon(Icons.dashboard_outlined),
+                selectedIcon: Icon(Icons.dashboard),
                 label: 'Dashboard',
                 tooltip: 'Ver estadísticas y métricas de CFDIs',
               ),
               NavigationDestination(
-                icon: const Icon(Icons.view_list_outlined),
-                selectedIcon: const Icon(Icons.view_list),
+                icon: Icon(Icons.view_list_outlined),
+                selectedIcon: Icon(Icons.view_list),
                 label: 'Lista',
                 tooltip: 'Ver lista detallada de CFDIs',
               ),
               NavigationDestination(
-                icon: const Icon(Icons.filter_list_outlined),
-                selectedIcon: const Icon(Icons.filter_list),
+                icon: Icon(Icons.filter_list_outlined),
+                selectedIcon: Icon(Icons.filter_list),
                 label: 'Filtros',
                 tooltip: 'Configurar filtros de búsqueda',
               ),
@@ -225,7 +228,9 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
         children: [
           // Panel de filtros colapsible
           Semantics(
-            label: _isFilterPanelCollapsed ? 'Panel de filtros colapsado' : 'Panel de filtros expandido',
+            label: _isFilterPanelCollapsed
+                ? 'Panel de filtros colapsado'
+                : 'Panel de filtros expandido',
             hint: 'Usa el botón hamburguesa para alternar',
             child: CollapsibleFilterPanel(
               isCollapsed: _isFilterPanelCollapsed,
@@ -233,7 +238,9 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
                 setState(() {
                   _isFilterPanelCollapsed = !_isFilterPanelCollapsed;
                 });
-                announceMessage(_isFilterPanelCollapsed ? 'Panel de filtros colapsado' : 'Panel de filtros expandido');
+                announceMessage(_isFilterPanelCollapsed
+                    ? 'Panel de filtros colapsado'
+                    : 'Panel de filtros expandido');
                 provideFeedback(AccessibilityFeedback.selection);
               },
             ),
@@ -316,7 +323,7 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
 
   Widget _buildDesktopNavBar() {
     final theme = Theme.of(context);
-    
+
     return Semantics(
       label: 'Barra de navegación principal',
       hint: 'Selecciona una vista',
@@ -338,17 +345,17 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
               label: 'Selector de vista',
               hint: 'Cambia entre Dashboard y Tabla',
               child: SegmentedButton<int>(
-                segments: [
+                segments: const [
                   ButtonSegment<int>(
                     value: 0,
-                    icon: const Icon(Icons.dashboard_outlined),
-                    label: const Text('Dashboard'),
+                    icon: Icon(Icons.dashboard_outlined),
+                    label: Text('Dashboard'),
                     tooltip: 'Ver estadísticas y métricas generales',
                   ),
                   ButtonSegment<int>(
                     value: 1,
-                    icon: const Icon(Icons.table_view_outlined),
-                    label: const Text('Tabla'),
+                    icon: Icon(Icons.table_view_outlined),
+                    label: Text('Tabla'),
                     tooltip: 'Ver tabla detallada de CFDIs',
                   ),
                 ],
@@ -371,7 +378,8 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
                     label: '${state.cfdis.length} CFDIs cargados',
                     hint: 'Número total de documentos fiscales',
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(16),

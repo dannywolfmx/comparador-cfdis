@@ -90,12 +90,12 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
         .add(DateRangeFilter(startDate: _startDate, endDate: _endDate));
 
     var filteredCFDIs = await filterFactory.apply(_repository.cfdis);
-    
+
     // Aplicar búsqueda global si existe
     if (_globalSearchQuery != null && _globalSearchQuery!.isNotEmpty) {
       filteredCFDIs = _applyGlobalSearch(filteredCFDIs, _globalSearchQuery!);
     }
-    
+
     final cfdiInformation = calculateTotals(filteredCFDIs);
 
     emit(
@@ -139,7 +139,8 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
       final cfdis = await _repository.loadCFDIsFromDirectory();
       if (cfdis.isEmpty) {
         emit(
-            CFDIError('No se encontraron CFDIs en el directorio seleccionado'));
+          CFDIError('No se encontraron CFDIs en el directorio seleccionado'),
+        );
       } else {
         final cfdiInformation = calculateTotals(cfdis);
         emit(CFDILoaded(cfdis, cfdiInformation, {}));
@@ -220,33 +221,34 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
 
   List<CFDI> _applyGlobalSearch(List<CFDI> cfdis, String query) {
     final searchQuery = query.toLowerCase().trim();
-    
+
     return cfdis.where((cfdi) {
       // Buscar en UUID
       final uuid = cfdi.timbreFiscalDigital?.uuid?.toLowerCase() ?? '';
       if (uuid.contains(searchQuery)) return true;
-      
+
       // Buscar en RFC del emisor
       final rfcEmisor = cfdi.emisor?.rfc?.toLowerCase() ?? '';
       if (rfcEmisor.contains(searchQuery)) return true;
-      
+
       // Buscar en nombre del emisor
       final nombreEmisor = cfdi.emisor?.nombre?.toLowerCase() ?? '';
       if (nombreEmisor.contains(searchQuery)) return true;
-      
+
       // Buscar en RFC del receptor
       final rfcReceptor = cfdi.receptor?.rfc?.toLowerCase() ?? '';
       if (rfcReceptor.contains(searchQuery)) return true;
-      
+
       // Buscar en nombre del receptor
       final nombreReceptor = cfdi.receptor?.nombre?.toLowerCase() ?? '';
       if (nombreReceptor.contains(searchQuery)) return true;
-      
+
       // Buscar en serie y folio
       final serie = cfdi.serie?.toLowerCase() ?? '';
       final folio = cfdi.folio?.toLowerCase() ?? '';
-      if (serie.contains(searchQuery) || folio.contains(searchQuery)) return true;
-      
+      if (serie.contains(searchQuery) || folio.contains(searchQuery))
+        return true;
+
       return false;
     }).toList();
   }

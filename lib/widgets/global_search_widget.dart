@@ -27,7 +27,7 @@ class _GlobalSearchWidgetState extends State<GlobalSearchWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return BlocBuilder<CFDIBloc, CFDIState>(
       builder: (context, state) {
         return Container(

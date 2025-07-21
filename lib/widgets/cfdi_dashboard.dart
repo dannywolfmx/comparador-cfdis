@@ -3,11 +3,14 @@ import 'package:comparador_cfdis/models/cfdi.dart';
 import 'package:comparador_cfdis/widgets/modern/modern_card.dart';
 import 'package:comparador_cfdis/widgets/cfdi_export_widget.dart';
 import 'package:comparador_cfdis/theme/app_dimensions.dart';
+import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
+import 'package:comparador_cfdis/bloc/cfdi_event.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 class CFDIDashboard extends StatelessWidget {
   final List<CFDI> cfdis;
-  
+
   const CFDIDashboard({
     super.key,
     required this.cfdis,
@@ -17,10 +20,11 @@ class CFDIDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = AppLayout.isMobile(context);
-    
+
     // Calcular estadísticas
     final stats = _calculateStats(cfdis);
-    
+    final summaryMetrics = _calculateSummaryMetrics(cfdis);
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(AppLayout.getHorizontalPadding(context)),
       child: Column(
@@ -55,24 +59,31 @@ class CFDIDashboard extends StatelessWidget {
                   ],
                 ),
               ),
+              // Botones de acción integrados
+              _buildDashboardActions(context),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
+          // Panel de resumen financiero integrado
+          _buildFinancialSummaryPanel(context, summaryMetrics, isMobile),
+
+          const SizedBox(height: 24),
+
           // Grid de estadísticas
           if (isMobile)
             _buildMobileGrid(context, stats)
           else
             _buildDesktopGrid(context, stats),
-            
+
           const SizedBox(height: 24),
-          
+
           // Gráficos y análisis adicionales
           _buildAnalysisSection(context, stats),
-          
+
           const SizedBox(height: 24),
-          
+
           // Widget de exportación
           CFDIExportWidget(cfdis: cfdis),
         ],
@@ -218,12 +229,10 @@ class CFDIDashboard extends StatelessWidget {
     bool isMain = false,
   }) {
     final theme = Theme.of(context);
-    
+
     return ModernCard(
       padding: EdgeInsets.all(isMain ? 20 : 16),
-      color: isMain 
-        ? color.withValues(alpha: 0.1)
-        : theme.colorScheme.surface,
+      color: isMain ? color.withValues(alpha: 0.1) : theme.colorScheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -257,15 +266,15 @@ class CFDIDashboard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       value,
-                      style: isMain 
-                        ? theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: color,
-                          )
-                        : theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
-                          ),
+                      style: isMain
+                          ? theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: color,
+                            )
+                          : theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
                     ),
                     if (subtitle != null) ...[
                       const SizedBox(height: 2),
@@ -289,7 +298,7 @@ class CFDIDashboard extends StatelessWidget {
   Widget _buildAnalysisSection(BuildContext context, CFDIStats stats) {
     final theme = Theme.of(context);
     final isMobile = AppLayout.isMobile(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -300,7 +309,6 @@ class CFDIDashboard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        
         if (isMobile)
           Column(
             children: [
@@ -349,34 +357,39 @@ class CFDIDashboard extends StatelessWidget {
               Text(
                 'Top Emisores',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          ...stats.topEmisores.take(5).map((emisor) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    emisor.nombre.length > 25 
-                      ? '${emisor.nombre.substring(0, 25)}...'
-                      : emisor.nombre,
-                    style: Theme.of(context).textTheme.bodyMedium,
+          ...stats.topEmisores
+              .take(5)
+              .map(
+                (emisor) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          emisor.nombre.length > 25
+                              ? '${emisor.nombre.substring(0, 25)}...'
+                              : emisor.nombre,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      Text(
+                        '${emisor.count}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  '${emisor.count}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          )).toList(),
+              )
+              .toList(),
         ],
       ),
     );
@@ -399,34 +412,39 @@ class CFDIDashboard extends StatelessWidget {
               Text(
                 'Top Receptores',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          ...stats.topReceptores.take(5).map((receptor) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    receptor.nombre.length > 25 
-                      ? '${receptor.nombre.substring(0, 25)}...'
-                      : receptor.nombre,
-                    style: Theme.of(context).textTheme.bodyMedium,
+          ...stats.topReceptores
+              .take(5)
+              .map(
+                (receptor) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          receptor.nombre.length > 25
+                              ? '${receptor.nombre.substring(0, 25)}...'
+                              : receptor.nombre,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      Text(
+                        '${receptor.count}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  '${receptor.count}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          )).toList(),
+              )
+              .toList(),
         ],
       ),
     );
@@ -449,8 +467,8 @@ class CFDIDashboard extends StatelessWidget {
               Text(
                 'Período',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
@@ -461,8 +479,8 @@ class CFDIDashboard extends StatelessWidget {
           Text(
             'Rango: ${stats.diasRango} días',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
         ],
       ),
@@ -478,17 +496,336 @@ class CFDIDashboard extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDashboardActions(BuildContext context) {
+    return Row(
+      children: [
+        _buildActionButton(
+          context,
+          icon: Icons.add_to_photos,
+          label: 'Añadir',
+          onPressed: () {
+            context.read<CFDIBloc>().add(LoadCFDIsFromFile());
+          },
+          color: Colors.blue,
+        ),
+        const SizedBox(width: 8),
+        _buildActionButton(
+          context,
+          icon: Icons.create_new_folder,
+          label: 'Cargar',
+          onPressed: () {
+            context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
+          },
+          color: Colors.green,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required Color color,
+  }) {
+    final isMobile = AppLayout.isMobile(context);
+
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: isMobile ? 16 : 18),
+      label: Text(
+        label,
+        style: TextStyle(fontSize: isMobile ? 12 : 14),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 12 : 16,
+          vertical: isMobile ? 8 : 12,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFinancialSummaryPanel(
+      BuildContext context, SummaryMetrics metrics, bool isMobile) {
+    final theme = Theme.of(context);
+
+    return ModernCard(
+      padding: const EdgeInsets.all(20),
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.account_balance_wallet,
+                color: theme.colorScheme.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Resumen Financiero',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (isMobile)
+            _buildMobileSummaryGrid(context, metrics)
+          else
+            _buildDesktopSummaryGrid(context, metrics),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileSummaryGrid(BuildContext context, SummaryMetrics metrics) {
+    return Column(
+      children: [
+        // Primera fila - métricas principales
+        Row(
+          children: [
+            Expanded(
+              child: _buildSummaryMetric(
+                context,
+                title: 'Subtotal',
+                value: _formatCurrency(metrics.subtotal),
+                icon: Icons.account_balance,
+                color: Colors.blue,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildSummaryMetric(
+                context,
+                title: 'Descuento',
+                value: _formatCurrency(metrics.descuento),
+                icon: Icons.discount,
+                color: Colors.orange,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Segunda fila - totales
+        Row(
+          children: [
+            Expanded(
+              child: _buildSummaryMetric(
+                context,
+                title: 'Sub. - Desc.',
+                value: _formatCurrency(metrics.subtotalMenosDescuento),
+                icon: Icons.calculate,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildSummaryMetric(
+                context,
+                title: 'Total',
+                value: _formatCurrency(metrics.total),
+                icon: Icons.price_check,
+                color: Colors.teal,
+                isHighlighted: true,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Tercera fila - total con IVA (destacado)
+        _buildSummaryMetric(
+          context,
+          title: 'Total + IVA (16%)',
+          value: _formatCurrency(metrics.totalConIva),
+          icon: Icons.calculate_outlined,
+          color: Colors.purple,
+          isHighlighted: true,
+          isMainMetric: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopSummaryGrid(
+      BuildContext context, SummaryMetrics metrics) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildSummaryMetric(
+            context,
+            title: 'Subtotal',
+            value: _formatCurrency(metrics.subtotal),
+            icon: Icons.account_balance,
+            color: Colors.blue,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildSummaryMetric(
+            context,
+            title: 'Descuento',
+            value: _formatCurrency(metrics.descuento),
+            icon: Icons.discount,
+            color: Colors.orange,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildSummaryMetric(
+            context,
+            title: 'Sub. - Desc.',
+            value: _formatCurrency(metrics.subtotalMenosDescuento),
+            icon: Icons.calculate,
+            color: Colors.green,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildSummaryMetric(
+            context,
+            title: 'Total',
+            value: _formatCurrency(metrics.total),
+            icon: Icons.price_check,
+            color: Colors.teal,
+            isHighlighted: true,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildSummaryMetric(
+            context,
+            title: 'Total + IVA (16%)',
+            value: _formatCurrency(metrics.totalConIva),
+            icon: Icons.calculate_outlined,
+            color: Colors.purple,
+            isHighlighted: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSummaryMetric(
+    BuildContext context, {
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    bool isHighlighted = false,
+    bool isMainMetric = false,
+  }) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: EdgeInsets.all(isMainMetric ? 20 : 16),
+      decoration: BoxDecoration(
+        color: isHighlighted
+            ? color.withValues(alpha: 0.1)
+            : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: isHighlighted
+            ? Border.all(color: color.withValues(alpha: 0.3), width: 2)
+            : Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+        boxShadow: isHighlighted
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: isMainMetric ? 28 : 24,
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: isMainMetric ? 16 : 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: isHighlighted ? color : theme.colorScheme.onSurface,
+              fontSize: isMainMetric ? 24 : (isHighlighted ? 20 : 18),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  SummaryMetrics _calculateSummaryMetrics(List<CFDI> cfdis) {
+    if (cfdis.isEmpty) {
+      return SummaryMetrics.empty();
+    }
+
+    double subtotal = 0;
+    double descuento = 0;
+    double total = 0;
+
+    for (final cfdi in cfdis) {
+      subtotal += double.tryParse(cfdi.subTotal ?? '0') ?? 0;
+      descuento += double.tryParse(cfdi.descuento ?? '0') ?? 0;
+      total += double.tryParse(cfdi.total ?? '0') ?? 0;
+    }
+
+    final subtotalMenosDescuento = subtotal - descuento;
+    final totalConIva = subtotalMenosDescuento * 1.16; // IVA del 16%
+
+    return SummaryMetrics(
+      subtotal: subtotal,
+      descuento: descuento,
+      subtotalMenosDescuento: subtotalMenosDescuento,
+      total: total,
+      totalConIva: totalConIva,
     );
   }
 
@@ -496,31 +833,31 @@ class CFDIDashboard extends StatelessWidget {
     if (cfdis.isEmpty) {
       return CFDIStats.empty();
     }
-    
+
     double totalAmount = 0;
     double ingresoAmount = 0;
     double egresoAmount = 0;
     double pagoAmount = 0;
     double trasladoAmount = 0;
     double otherAmount = 0;
-    
+
     int ingresoCount = 0;
     int egresoCount = 0;
     int pagoCount = 0;
     int trasladoCount = 0;
     int otherCount = 0;
-    
-    Map<String, int> emisorMap = {};
-    Map<String, int> receptorMap = {};
-    
+
+    final Map<String, int> emisorMap = {};
+    final Map<String, int> receptorMap = {};
+
     DateTime? fechaMinima;
     DateTime? fechaMaxima;
-    
+
     for (final cfdi in cfdis) {
       // Calcular totales por tipo
       final total = double.tryParse(cfdi.total ?? '0') ?? 0;
       totalAmount += total;
-      
+
       final tipo = cfdi.tipoDeComprobante?.toUpperCase();
       switch (tipo) {
         case 'I':
@@ -543,14 +880,14 @@ class CFDIDashboard extends StatelessWidget {
           otherAmount += total;
           otherCount++;
       }
-      
+
       // Contar emisores y receptores
       final emisorNombre = cfdi.emisor?.nombre ?? 'Sin nombre';
       emisorMap[emisorNombre] = (emisorMap[emisorNombre] ?? 0) + 1;
-      
+
       final receptorNombre = cfdi.receptor?.nombre ?? 'Sin nombre';
       receptorMap[receptorNombre] = (receptorMap[receptorNombre] ?? 0) + 1;
-      
+
       // Determinar rango de fechas
       if (cfdi.fecha != null) {
         try {
@@ -564,30 +901,30 @@ class CFDIDashboard extends StatelessWidget {
         } catch (_) {}
       }
     }
-    
+
     // Ordenar emisores y receptores por count
     final topEmisores = emisorMap.entries
         .map((e) => EntityCount(nombre: e.key, count: e.value))
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
-      
+
     final topReceptores = receptorMap.entries
         .map((e) => EntityCount(nombre: e.key, count: e.value))
         .toList()
       ..sort((a, b) => b.count.compareTo(a.count));
-    
-    final fechaInicioStr = fechaMinima != null 
-      ? DateFormat('dd/MM/yyyy').format(fechaMinima)
-      : 'N/A';
-      
-    final fechaFinStr = fechaMaxima != null 
-      ? DateFormat('dd/MM/yyyy').format(fechaMaxima)
-      : 'N/A';
-      
+
+    final fechaInicioStr = fechaMinima != null
+        ? DateFormat('dd/MM/yyyy').format(fechaMinima)
+        : 'N/A';
+
+    final fechaFinStr = fechaMaxima != null
+        ? DateFormat('dd/MM/yyyy').format(fechaMaxima)
+        : 'N/A';
+
     final diasRango = fechaMinima != null && fechaMaxima != null
-      ? fechaMaxima.difference(fechaMinima).inDays + 1
-      : 0;
-    
+        ? fechaMaxima.difference(fechaMinima).inDays + 1
+        : 0;
+
     return CFDIStats(
       totalAmount: totalAmount,
       ingresoAmount: ingresoAmount,
@@ -625,16 +962,16 @@ class CFDIStats {
   final double pagoAmount;
   final double trasladoAmount;
   final double otherAmount;
-  
+
   final int ingresoCount;
   final int egresoCount;
   final int pagoCount;
   final int trasladoCount;
   final int otherCount;
-  
+
   final List<EntityCount> topEmisores;
   final List<EntityCount> topReceptores;
-  
+
   final String fechaInicio;
   final String fechaFin;
   final int diasRango;
@@ -657,7 +994,7 @@ class CFDIStats {
     required this.fechaFin,
     required this.diasRango,
   });
-  
+
   factory CFDIStats.empty() {
     return CFDIStats(
       totalAmount: 0,
@@ -685,4 +1022,30 @@ class EntityCount {
   final int count;
 
   EntityCount({required this.nombre, required this.count});
+}
+
+class SummaryMetrics {
+  final double subtotal;
+  final double descuento;
+  final double subtotalMenosDescuento;
+  final double total;
+  final double totalConIva;
+
+  SummaryMetrics({
+    required this.subtotal,
+    required this.descuento,
+    required this.subtotalMenosDescuento,
+    required this.total,
+    required this.totalConIva,
+  });
+
+  factory SummaryMetrics.empty() {
+    return SummaryMetrics(
+      subtotal: 0,
+      descuento: 0,
+      subtotalMenosDescuento: 0,
+      total: 0,
+      totalConIva: 0,
+    );
+  }
 }

@@ -9,7 +9,7 @@ import 'package:comparador_cfdis/widgets/modern/modern_buttons.dart';
 class CFDIExportWidget extends StatelessWidget {
   final List<CFDI> cfdis;
   final VoidCallback? onExportComplete;
-  
+
   const CFDIExportWidget({
     super.key,
     required this.cfdis,
@@ -19,7 +19,7 @@ class CFDIExportWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -44,16 +44,16 @@ class CFDIExportWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             Text(
               'Exportar ${cfdis.length} CFDIs filtrados',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Opciones de exportación
             Wrap(
               spacing: 12,
@@ -114,10 +114,11 @@ class CFDIExportWidget extends StatelessWidget {
       // Por simplicidad, usaremos CSV como base para Excel
       final csv = _generateCSV(cfdis);
       await _saveFile(context, csv, 'cfdis_export.xlsx', 'Excel');
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Nota: El archivo se exportó como CSV compatible con Excel'),
+          content:
+              Text('Nota: El archivo se exportó como CSV compatible con Excel'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -130,7 +131,7 @@ class CFDIExportWidget extends StatelessWidget {
     try {
       // Simulamos la exportación PDF
       await Future.delayed(const Duration(seconds: 2));
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Funcionalidad PDF en desarrollo - próxima versión'),
@@ -144,12 +145,12 @@ class CFDIExportWidget extends StatelessWidget {
 
   String _generateCSV(List<CFDI> cfdis) {
     final buffer = StringBuffer();
-    
+
     // Headers
     buffer.writeln(
-      'UUID,RFC_Emisor,Nombre_Emisor,RFC_Receptor,Nombre_Receptor,Fecha,Serie,Folio,Tipo_Comprobante,Forma_Pago,Metodo_Pago,Moneda,Subtotal,Descuento,Total,Lugar_Expedicion'
+      'UUID,RFC_Emisor,Nombre_Emisor,RFC_Receptor,Nombre_Receptor,Fecha,Serie,Folio,Tipo_Comprobante,Forma_Pago,Metodo_Pago,Moneda,Subtotal,Descuento,Total,Lugar_Expedicion',
     );
-    
+
     // Data
     for (final cfdi in cfdis) {
       final row = [
@@ -170,52 +171,56 @@ class CFDIExportWidget extends StatelessWidget {
         _escapeCsv(cfdi.total ?? ''),
         _escapeCsv(cfdi.lugarExpedicion ?? ''),
       ];
-      
+
       buffer.writeln(row.join(','));
     }
-    
+
     return buffer.toString();
   }
 
   String _generateJSON(List<CFDI> cfdis) {
-    final data = cfdis.map((cfdi) => {
-      'uuid': cfdi.timbreFiscalDigital?.uuid,
-      'emisor': {
-        'rfc': cfdi.emisor?.rfc,
-        'nombre': cfdi.emisor?.nombre,
-        'regimenFiscal': cfdi.emisor?.regimenFiscal,
-      },
-      'receptor': {
-        'rfc': cfdi.receptor?.rfc,
-        'nombre': cfdi.receptor?.nombre,
-        'domicilioFiscal': cfdi.receptor?.domicilioFiscalReceptor,
-        'regimenFiscal': cfdi.receptor?.regimenFiscalReceptor,
-        'usoCFDI': cfdi.receptor?.usoCFDI,
-      },
-      'comprobante': {
-        'fecha': cfdi.fecha,
-        'serie': cfdi.serie,
-        'folio': cfdi.folio,
-        'tipoComprobante': cfdi.tipoDeComprobante,
-        'formaPago': cfdi.formaPago,
-        'metodoPago': cfdi.metodoPago,
-        'moneda': cfdi.moneda,
-        'tipoCambio': cfdi.tipoCambio,
-        'lugarExpedicion': cfdi.lugarExpedicion,
-      },
-      'totales': {
-        'subtotal': cfdi.subTotal,
-        'descuento': cfdi.descuento,
-        'total': cfdi.total,
-      },
-      'timbrado': {
-        'uuid': cfdi.timbreFiscalDigital?.uuid,
-        'fechaTimbrado': cfdi.timbreFiscalDigital?.fechaTimbrado,
-        'rfcProvCertif': cfdi.timbreFiscalDigital?.rfcProvCertif,
-        'noCertificadoSAT': cfdi.timbreFiscalDigital?.noCertificadoSAT,
-      },
-    }).toList();
-    
+    final data = cfdis
+        .map(
+          (cfdi) => {
+            'uuid': cfdi.timbreFiscalDigital?.uuid,
+            'emisor': {
+              'rfc': cfdi.emisor?.rfc,
+              'nombre': cfdi.emisor?.nombre,
+              'regimenFiscal': cfdi.emisor?.regimenFiscal,
+            },
+            'receptor': {
+              'rfc': cfdi.receptor?.rfc,
+              'nombre': cfdi.receptor?.nombre,
+              'domicilioFiscal': cfdi.receptor?.domicilioFiscalReceptor,
+              'regimenFiscal': cfdi.receptor?.regimenFiscalReceptor,
+              'usoCFDI': cfdi.receptor?.usoCFDI,
+            },
+            'comprobante': {
+              'fecha': cfdi.fecha,
+              'serie': cfdi.serie,
+              'folio': cfdi.folio,
+              'tipoComprobante': cfdi.tipoDeComprobante,
+              'formaPago': cfdi.formaPago,
+              'metodoPago': cfdi.metodoPago,
+              'moneda': cfdi.moneda,
+              'tipoCambio': cfdi.tipoCambio,
+              'lugarExpedicion': cfdi.lugarExpedicion,
+            },
+            'totales': {
+              'subtotal': cfdi.subTotal,
+              'descuento': cfdi.descuento,
+              'total': cfdi.total,
+            },
+            'timbrado': {
+              'uuid': cfdi.timbreFiscalDigital?.uuid,
+              'fechaTimbrado': cfdi.timbreFiscalDigital?.fechaTimbrado,
+              'rfcProvCertif': cfdi.timbreFiscalDigital?.rfcProvCertif,
+              'noCertificadoSAT': cfdi.timbreFiscalDigital?.noCertificadoSAT,
+            },
+          },
+        )
+        .toList();
+
     return const JsonEncoder.withIndent('  ').convert({
       'metadata': {
         'exportDate': DateTime.now().toIso8601String(),
@@ -236,9 +241,9 @@ class CFDIExportWidget extends StatelessWidget {
       final directory = await getApplicationDocumentsDirectory();
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       final file = File('${directory.path}/${timestamp}_$fileName');
-      
+
       await file.writeAsString(content, encoding: utf8);
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -250,7 +255,7 @@ class CFDIExportWidget extends StatelessWidget {
             ),
           ),
         );
-        
+
         onExportComplete?.call();
       }
     } catch (e) {

@@ -22,13 +22,15 @@ class CFDIDetailScreen extends StatefulWidget {
   State<CFDIDetailScreen> createState() => _CFDIDetailScreenState();
 }
 
-class _CFDIDetailScreenState extends State<CFDIDetailScreen> with AccessibilityMixin {
+class _CFDIDetailScreenState extends State<CFDIDetailScreen>
+    with AccessibilityMixin {
   CFDI get cfdi => widget.cfdi;
 
   @override
   Widget build(BuildContext context) {
     return AccessibilityWrapper(
-      screenName: 'Detalle del CFDI ${cfdi.timbreFiscalDigital?.uuid ?? 'sin UUID'}',
+      screenName:
+          'Detalle del CFDI ${cfdi.timbreFiscalDigital?.uuid ?? 'sin UUID'}',
       child: Scaffold(
         appBar: AppBar(
           title: Semantics(
@@ -146,9 +148,9 @@ class _CFDIDetailScreenState extends State<CFDIDetailScreen> with AccessibilityM
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AccessibleText(
+              const AccessibleText(
                 text: 'UUID del CFDI:',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 isHeader: true,
                 semanticLabel: 'Encabezado: UUID del CFDI',
               ),
@@ -156,8 +158,10 @@ class _CFDIDetailScreenState extends State<CFDIDetailScreen> with AccessibilityM
               AccessibleText(
                 text: cfdi.timbreFiscalDigital?.uuid ?? 'No disponible',
                 style: const TextStyle(fontSize: 15),
-                semanticLabel: 'UUID: ${cfdi.timbreFiscalDigital?.uuid ?? 'No disponible'}',
-                semanticHint: 'Identificador único universal del documento fiscal',
+                semanticLabel:
+                    'UUID: ${cfdi.timbreFiscalDigital?.uuid ?? 'No disponible'}',
+                semanticHint:
+                    'Identificador único universal del documento fiscal',
               ),
               const SizedBox(height: 16),
               Row(
@@ -181,7 +185,8 @@ class _CFDIDetailScreenState extends State<CFDIDetailScreen> with AccessibilityM
                         : null,
                     tooltip: 'Copiar UUID al portapapeles',
                     semanticLabel: 'Copiar UUID',
-                    semanticHint: 'Copia el identificador único del CFDI al portapapeles',
+                    semanticHint:
+                        'Copia el identificador único del CFDI al portapapeles',
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -206,7 +211,8 @@ class _CFDIDetailScreenState extends State<CFDIDetailScreen> with AccessibilityM
                                   backgroundColor: Colors.red,
                                 ),
                               );
-                              announceMessage('Error: No se pudo abrir el archivo XML');
+                              announceMessage(
+                                  'Error: No se pudo abrir el archivo XML');
                               provideFeedback(AccessibilityFeedback.error);
                             } else {
                               announceMessage('Abriendo archivo XML');

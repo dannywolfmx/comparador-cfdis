@@ -255,13 +255,14 @@ class AccessibleTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveDecoration = decoration ?? InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      helperText: helperText,
-      errorText: errorText,
-      border: const OutlineInputBorder(),
-    );
+    final effectiveDecoration = decoration ??
+        InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          helperText: helperText,
+          errorText: errorText,
+          border: const OutlineInputBorder(),
+        );
 
     return AccessibleWidget(
       semanticLabel: semanticLabel ?? labelText ?? hintText,
@@ -309,9 +310,7 @@ class AccessibleCard extends StatelessWidget {
     Widget cardContent = Card(
       color: color,
       margin: margin,
-      child: padding != null 
-        ? Padding(padding: padding!, child: child)
-        : child,
+      child: padding != null ? Padding(padding: padding!, child: child) : child,
     );
 
     if (onTap != null) {

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:comparador_cfdis/models/cfdi.dart';
 import 'package:comparador_cfdis/widgets/cfdi_list.dart';
 import 'package:comparador_cfdis/widgets/table_cfdi.dart';
+import 'package:comparador_cfdis/widgets/cfdi_summary_card.dart';
 import 'package:comparador_cfdis/theme/app_dimensions.dart';
 
 class AdaptiveCFDIView extends StatefulWidget {
   final List<CFDI> cfdis;
-  
+
   const AdaptiveCFDIView({
     super.key,
     required this.cfdis,
@@ -18,28 +19,41 @@ class AdaptiveCFDIView extends StatefulWidget {
 
 class _AdaptiveCFDIViewState extends State<AdaptiveCFDIView> {
   bool _forceListView = false;
-  
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMobile = AppLayout.isMobile(context);
         final isTablet = AppLayout.isTablet(context);
-        final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-        
+        final isLandscape =
+            MediaQuery.of(context).orientation == Orientation.landscape;
+
         // Determinar vista basado en tamaño y orientación
         final shouldUseListView = isMobile && !isLandscape || _forceListView;
-        
+
         return Column(
           children: [
             // Barra de controles superior
             if (!isMobile) _buildControlBar(context, constraints),
-            
+
             // Vista principal
             Expanded(
               child: shouldUseListView
-                ? CFDIListView(cfdis: widget.cfdis)
-                : _buildTableView(context, constraints, isTablet),
+                  ? CFDIListView(
+                      cfdis:
+                          widget.cfdis) // Ya tiene su propia barra de resumen
+                  : Column(
+                      children: [
+                        // Vista de tabla
+                        Expanded(
+                          child:
+                              _buildTableView(context, constraints, isTablet),
+                        ),
+                        // Barra de resumen para la vista de tabla
+                        const CFDISummaryCard(),
+                      ],
+                    ),
             ),
           ],
         );
@@ -49,7 +63,7 @@ class _AdaptiveCFDIViewState extends State<AdaptiveCFDIView> {
 
   Widget _buildControlBar(BuildContext context, BoxConstraints constraints) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -89,9 +103,9 @@ class _AdaptiveCFDIViewState extends State<AdaptiveCFDIView> {
               ],
             ),
           ),
-          
+
           const Spacer(),
-          
+
           // Controles de vista
           SegmentedButton<bool>(
             segments: const [
@@ -121,7 +135,8 @@ class _AdaptiveCFDIViewState extends State<AdaptiveCFDIView> {
     );
   }
 
-  Widget _buildTableView(BuildContext context, BoxConstraints constraints, bool isTablet) {
+  Widget _buildTableView(
+      BuildContext context, BoxConstraints constraints, bool isTablet) {
     // Ajustar la tabla según el espacio disponible
     return Container(
       decoration: BoxDecoration(

@@ -15,7 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CollapsibleFilterPanel extends StatefulWidget {
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
-  
+
   const CollapsibleFilterPanel({
     super.key,
     required this.isCollapsed,
@@ -33,9 +33,9 @@ class _CollapsibleFilterPanelState extends State<CollapsibleFilterPanel>
   bool _expandedUsoCFDI = false;
   bool _expandedTipoComprobante = false;
   bool _expandedDateRange = false;
-  
+
   late AnimationController _collapseController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -43,7 +43,7 @@ class _CollapsibleFilterPanelState extends State<CollapsibleFilterPanel>
       duration: AppAnimations.medium,
       vsync: this,
     );
-    
+
     if (!widget.isCollapsed) {
       _collapseController.value = 1.0;
     }
@@ -71,7 +71,7 @@ class _CollapsibleFilterPanelState extends State<CollapsibleFilterPanel>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = AppLayout.isMobile(context);
-    
+
     return Container(
       width: widget.isCollapsed ? 56 : (isMobile ? double.infinity : 320),
       decoration: BoxDecoration(
@@ -147,7 +147,8 @@ class _CollapsibleFilterPanelState extends State<CollapsibleFilterPanel>
               widget.isCollapsed ? Icons.chevron_right : Icons.chevron_left,
               size: 24,
             ),
-            tooltip: widget.isCollapsed ? 'Expandir filtros' : 'Colapsar filtros',
+            tooltip:
+                widget.isCollapsed ? 'Expandir filtros' : 'Colapsar filtros',
             onPressed: widget.onToggleCollapse,
             constraints: const BoxConstraints(
               minWidth: 40,
@@ -170,7 +171,7 @@ class _CollapsibleFilterPanelState extends State<CollapsibleFilterPanel>
               // Búsqueda global
               const SizedBox(height: 8),
               const GlobalSearchWidget(),
-              
+
               const SizedBox(height: 12),
 
               // Panel de plantillas de filtros
@@ -248,7 +249,7 @@ class _CollapsibleFilterPanelState extends State<CollapsibleFilterPanel>
     required Widget child,
   }) {
     final theme = Theme.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 2),
       elevation: 0,
@@ -268,7 +269,8 @@ class _CollapsibleFilterPanelState extends State<CollapsibleFilterPanel>
               onTap: onTap,
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Row(
                   children: [
                     Icon(
@@ -321,7 +323,7 @@ class _CollapsibleFilterPanelState extends State<CollapsibleFilterPanel>
         if (state is! CFDILoaded) {
           return const SizedBox.shrink();
         }
-        
+
         final theme = Theme.of(context);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

@@ -5,8 +5,9 @@ import 'package:flutter/semantics.dart';
 /// Servicio para manejar configuración y utilidades de accesibilidad
 class AccessibilityService {
   static AccessibilityService? _instance;
-  static AccessibilityService get instance => _instance ??= AccessibilityService._();
-  
+  static AccessibilityService get instance =>
+      _instance ??= AccessibilityService._();
+
   AccessibilityService._();
 
   /// Configuración de accesibilidad
@@ -32,7 +33,7 @@ class AccessibilityService {
   Future<void> _detectAccessibilitySettings() async {
     // Nota: Flutter no proporciona APIs directas para detectar todas estas configuraciones
     // Esta es una implementación base que se puede extender
-    
+
     // Por ahora, usar MediaQuery para detectar algunas configuraciones
     // Esto debería ser llamado desde el contexto de la aplicación
   }
@@ -43,7 +44,7 @@ class AccessibilityService {
     _textScaleFactor = mediaQuery.textScaleFactor;
     _isLargeTextEnabled = mediaQuery.textScaleFactor > 1.2;
     _isReduceMotionEnabled = mediaQuery.disableAnimations;
-    
+
     // TalkBack/VoiceOver detection (aproximado)
     _isScreenReaderEnabled = mediaQuery.accessibleNavigation;
   }
@@ -83,22 +84,23 @@ class AccessibilityService {
   }
 
   /// Obtener colores con contraste apropiado
-  Color getAccessibleColor(Color baseColor, Color backgroundColor, BuildContext context) {
+  Color getAccessibleColor(
+      Color baseColor, Color backgroundColor, BuildContext context) {
     if (!_isHighContrastEnabled) {
       return baseColor;
     }
-    
+
     // Calcular contraste y ajustar si es necesario
     final luminance1 = baseColor.computeLuminance();
     final luminance2 = backgroundColor.computeLuminance();
     final contrast = _calculateContrast(luminance1, luminance2);
-    
+
     // WCAG AA requiere al menos 4.5:1 para texto normal
     if (contrast < 4.5) {
       // Ajustar color para mayor contraste
       return _adjustColorForContrast(baseColor, backgroundColor);
     }
-    
+
     return baseColor;
   }
 
@@ -112,7 +114,7 @@ class AccessibilityService {
   /// Ajustar color para mejor contraste
   Color _adjustColorForContrast(Color baseColor, Color backgroundColor) {
     final bgLuminance = backgroundColor.computeLuminance();
-    
+
     // Si el fondo es claro, hacer el texto más oscuro
     if (bgLuminance > 0.5) {
       return Colors.black87;
@@ -163,8 +165,9 @@ class AccessibilityWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     // Actualizar configuraciones de accesibilidad
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      AccessibilityService.instance.updateFromMediaQuery(MediaQuery.of(context));
-      
+      AccessibilityService.instance
+          .updateFromMediaQuery(MediaQuery.of(context));
+
       // Anunciar cambio de pantalla si es necesario
       if (screenName != null) {
         Future.delayed(const Duration(milliseconds: 500), () {
