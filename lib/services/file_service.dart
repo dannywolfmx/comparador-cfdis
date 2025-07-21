@@ -18,14 +18,15 @@ class FileService {
       if (Platform.isWindows) {
         // Usar Process.run directo en Windows para evitar problemas de symlinks
         final process = await Process.run(
-            'cmd',
-            [
-              '/c',
-              'start',
-              '',
-              filePath,
-            ],
-            runInShell: true);
+          'cmd',
+          [
+            '/c',
+            'start',
+            '',
+            filePath,
+          ],
+          runInShell: true,
+        );
 
         Log.logInfo('Resultado de abrir archivo: ${process.exitCode}');
         return process.exitCode == 0;

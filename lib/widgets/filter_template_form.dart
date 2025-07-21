@@ -96,7 +96,8 @@ class _FilterTemplateFormState extends State<FilterTemplateForm> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-          widget.template != null ? 'Editar Plantilla' : 'Crear Plantilla'),
+        widget.template != null ? 'Editar Plantilla' : 'Crear Plantilla',
+      ),
       content: SizedBox(
         width: double.maxFinite,
         child: Form(
@@ -142,8 +143,10 @@ class _FilterTemplateFormState extends State<FilterTemplateForm> {
                 const SizedBox(height: 16),
 
                 // Color
-                const Text('Color:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Color:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -175,8 +178,10 @@ class _FilterTemplateFormState extends State<FilterTemplateForm> {
                 const SizedBox(height: 16),
 
                 // Filtros
-                const Text('Filtros:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Filtros:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
                 Container(
                   constraints: const BoxConstraints(maxHeight: 300),
@@ -190,16 +195,20 @@ class _FilterTemplateFormState extends State<FilterTemplateForm> {
 
                 // Resumen de filtros seleccionados
                 if (_selectedFilters.isNotEmpty) ...[
-                  const Text('Filtros seleccionados:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Filtros seleccionados:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
                     children: _selectedFilters.map((filter) {
                       return Chip(
-                        label: Text(filter.nombre,
-                            style: const TextStyle(fontSize: 12)),
+                        label: Text(
+                          filter.nombre,
+                          style: const TextStyle(fontSize: 12),
+                        ),
                         backgroundColor: _selectedColor.withValues(alpha: 0.2),
                         deleteIcon: const Icon(Icons.close, size: 16),
                         onDeleted: () {
@@ -240,8 +249,10 @@ class _FilterTemplateFormState extends State<FilterTemplateForm> {
 
     return sections.entries.map((entry) {
       return ExpansionTile(
-        title: Text(entry.key,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          entry.key,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         initiallyExpanded: entry.value.any((f) => _selectedFilters.contains(f)),
         children: entry.value.map((filter) {
           return CheckboxListTile(

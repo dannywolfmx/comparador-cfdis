@@ -16,7 +16,9 @@ class ImpuestoConcepto {
   });
 
   factory ImpuestoConcepto.fromJson(
-      Map<String, dynamic> json, bool esTraslado) {
+    Map<String, dynamic> json,
+    bool esTraslado,
+  ) {
     return ImpuestoConcepto(
       impuesto: json['Impuesto'] ?? '',
       tipoFactor: json['TipoFactor'] ?? '',

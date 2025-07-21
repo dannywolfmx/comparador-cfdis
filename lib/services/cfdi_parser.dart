@@ -10,15 +10,6 @@ class CFDIParser {
   //Logger
   static final _logger = Logger();
 
-  // Namespace prefijos comunes en CFDI
-  static const Map<String, String> _namespaces = {
-    'cfdi': 'http://www.sat.gob.mx/cfd/4',
-    'tfd': 'http://www.sat.gob.mx/TimbreFiscalDigital',
-    'pago10': 'http://www.sat.gob.mx/Pagos',
-    'pago20': 'http://www.sat.gob.mx/Pagos20',
-    'nomina12': 'http://www.sat.gob.mx/nomina12',
-  };
-
   /// Parsea un archivo XML a un objeto CFDI
   static Future<CFDI?> parseXmlFile(File file) async {
     try {
@@ -52,7 +43,7 @@ class CFDIParser {
             document.rootElement;
 
     // Convertir el comprobante a JSON
-    Map<String, dynamic> json = _processElement(comprobante);
+    final Map<String, dynamic> json = _processElement(comprobante);
 
     // Asegurarse de que la versión esté presente en el nivel superior
     if (comprobante.getAttribute('version') != null &&
@@ -84,7 +75,9 @@ class CFDIParser {
     } else {
       // Si no hay complemento, intentamos buscar directamente en todo el documento
       final tfd = findElementWithNamespace(
-          document.rootElement, 'tfd:TimbreFiscalDigital');
+        document.rootElement,
+        'tfd:TimbreFiscalDigital',
+      );
       if (tfd != null) {
         json['TimbreFiscalDigital'] = _processElement(tfd);
       } else {
@@ -102,7 +95,9 @@ class CFDIParser {
 
   /// Encuentra un elemento con un namespace específico
   static XmlElement? findElementWithNamespace(
-      XmlElement element, String qualifiedName) {
+    XmlElement element,
+    String qualifiedName,
+  ) {
     if (element.qualifiedName == qualifiedName) {
       return element;
     }
@@ -144,7 +139,9 @@ class CFDIParser {
 
   /// Busca recursivamente un elemento con el nombre dado en cualquier nivel del documento
   static XmlElement? findElementRecursive(
-      XmlElement element, String localName) {
+    XmlElement element,
+    String localName,
+  ) {
     // Comprobar si este elemento tiene el nombre buscado
     if (element.name.local == localName) {
       return element;
@@ -163,8 +160,8 @@ class CFDIParser {
 
   /// Procesa un elemento XML y sus atributos
   static Map<String, dynamic> _processElement(XmlElement element) {
-    Map<String, dynamic> result = {};
-    Map<String, List<Map<String, dynamic>>> nodeLists = {};
+    final Map<String, dynamic> result = {};
+    final Map<String, List<Map<String, dynamic>>> nodeLists = {};
 
     // Procesa atributos
     for (var attribute in element.attributes) {
@@ -212,13 +209,13 @@ class CFDIParser {
 
   /// Permite al usuario seleccionar archivos XML y los convierte a CFDIs
   static Future<List<CFDI>> pickAndParseXmls() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    final FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xml'],
       allowMultiple: true,
     );
 
-    List<CFDI> cfdis = [];
+    final List<CFDI> cfdis = [];
 
     if (result != null) {
       for (var fileInfo in result.files) {
@@ -237,7 +234,8 @@ class CFDIParser {
 
   /// Permite al usuario seleccionar un directorio y parsea todos los XML dentro
   static Future<List<CFDI>> parseDirectoryCFDIs() async {
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    final String? selectedDirectory =
+        await FilePicker.platform.getDirectoryPath();
 
     if (selectedDirectory == null) {
       return [];
@@ -247,9 +245,11 @@ class CFDIParser {
     final List<CFDI> cfdis = [];
 
     try {
-      final files = directory.listSync().where((entity) =>
-          entity is File &&
-          path.extension(entity.path).toLowerCase() == '.xml');
+      final files = directory.listSync().where(
+            (entity) =>
+                entity is File &&
+                path.extension(entity.path).toLowerCase() == '.xml',
+          );
 
       for (var file in files) {
         final cfdi = await parseXmlFile(file as File);

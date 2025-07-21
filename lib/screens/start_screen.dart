@@ -4,6 +4,9 @@ import 'package:comparador_cfdis/bloc/cfdi_state.dart';
 import 'package:comparador_cfdis/providers/column_visibility_provider.dart';
 import 'package:comparador_cfdis/screens/cfdi_list_screen.dart';
 import 'package:comparador_cfdis/widgets/cfdi_list.dart';
+import 'package:comparador_cfdis/widgets/modern/modern_card.dart';
+import 'package:comparador_cfdis/widgets/modern/modern_buttons.dart';
+import 'package:comparador_cfdis/widgets/modern/modern_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -22,54 +25,60 @@ class StartScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
-    return BlocBuilder<CFDIBloc, CFDIState>(builder: (context, state) {
-      switch (state.runtimeType) {
-        case CFDIInitial:
-          return _buildInitialState(context);
-        case CFDILoading:
-          return _buildLoadingState();
-        case CFDILoaded:
-          return _buildLoadedState(state as CFDILoaded);
-        case CFDIError:
-          return _buildErrorState(state as CFDIError, context);
-        default:
-          return Container();
-      }
-    });
+    return BlocBuilder<CFDIBloc, CFDIState>(
+      builder: (context, state) {
+        switch (state.runtimeType) {
+          case CFDIInitial:
+            return _buildInitialState(context);
+          case CFDILoading:
+            return _buildLoadingState();
+          case CFDILoaded:
+            return _buildLoadedState(state as CFDILoaded);
+          case CFDIError:
+            return _buildErrorState(state as CFDIError, context);
+          default:
+            return Container();
+        }
+      },
+    );
   }
 
   Widget _buildInitialState(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
-      child: Container(
-        padding: const EdgeInsets.all(24.0),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10.0,
-              spreadRadius: 1.0,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.description_outlined,
-              size: 80.0,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 16.0),
-            Text(
-              'No hay CFDIs cargados',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 24.0),
-            loadButtons(context),
-          ],
+      child: MaxWidthContainer(
+        maxWidth: 600,
+        child: ModernCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.description_outlined,
+                size: 80.0,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(height: 24.0),
+              Text(
+                'No hay CFDIs cargados',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                'Selecciona una opción para comenzar',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32.0),
+              loadButtons(context),
+            ],
+          ),
         ),
       ),
     );
@@ -79,40 +88,45 @@ class StartScreen extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ElevatedButton.icon(
+        ModernButton(
+          text: 'Cargar desde directorio',
+          icon: Icons.folder_open,
           onPressed: () {
             context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
           },
-          icon: const Icon(Icons.folder_open),
-          label: const Text('Cargar desde directorio'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            minimumSize: const Size(240, 48),
-          ),
+          fullWidth: true,
         ),
         const SizedBox(height: 16.0),
-        ElevatedButton.icon(
+        ModernButton(
+          text: 'Cargar archivo XML',
+          icon: Icons.file_upload,
+          style: ModernButtonStyle.outlined,
           onPressed: () {
             context.read<CFDIBloc>().add(LoadCFDIsFromFile());
           },
-          icon: const Icon(Icons.file_upload),
-          label: const Text('Cargar archivo XML'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            minimumSize: const Size(240, 48),
-          ),
+          fullWidth: true,
         ),
       ],
     );
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(),
+    return Builder(
+      builder: (context) => Center(
+        child: ModernCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                'Cargando CFDIs...',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -131,24 +145,42 @@ class StartScreen extends StatelessWidget {
   }
 
   Widget _buildErrorState(CFDIError state, BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            color: Colors.red,
-            size: 60,
+      child: MaxWidthContainer(
+        maxWidth: 600,
+        child: ModernCard(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: theme.colorScheme.error,
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Error al cargar CFDIs',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                state.message,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              loadButtons(context),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Error: ${state.message}',
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          loadButtons(context)
-        ],
+        ),
       ),
     );
   }

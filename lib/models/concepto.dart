@@ -30,8 +30,8 @@ class Concepto {
   });
 
   factory Concepto.fromJson(Map<String, dynamic> json) {
-    List<ImpuestoConcepto> impuestos = [];
-    List<TrasladoConcepto> traslados = [];
+    final List<ImpuestoConcepto> impuestos = [];
+    final List<TrasladoConcepto> traslados = [];
 
     // Estructura exacta: concepto > impuestos > traslados > traslado
     if (json['impuestos'] != null) {
@@ -98,8 +98,8 @@ class Concepto {
     }
 
     // Parse values with better error handling for the various field types
-    String claveProdServ = json['ClaveProdServ']?.toString() ?? '';
-    String noIdentificacion = json['NoIdentificacion']?.toString() ?? '';
+    final String claveProdServ = json['ClaveProdServ']?.toString() ?? '';
+    final String noIdentificacion = json['NoIdentificacion']?.toString() ?? '';
 
     int cantidad;
     try {
@@ -109,14 +109,15 @@ class Concepto {
       cantidad = 0;
     }
 
-    String claveUnidad = json['ClaveUnidad']?.toString() ?? '';
-    String unidad = json['Unidad']?.toString() ?? '';
-    String descripcion = json['Descripcion']?.toString() ?? '';
+    final String claveUnidad = json['ClaveUnidad']?.toString() ?? '';
+    final String unidad = json['Unidad']?.toString() ?? '';
+    final String descripcion = json['Descripcion']?.toString() ?? '';
 
     double valorUnitario;
     try {
       valorUnitario = double.parse(
-          json['ValorUnitario']?.toString().replaceAll(',', '') ?? '0.0');
+        json['ValorUnitario']?.toString().replaceAll(',', '') ?? '0.0',
+      );
     } catch (e) {
       developer.log('Error parsing valorUnitario: ${e.toString()}');
       valorUnitario = 0.0;
@@ -125,13 +126,14 @@ class Concepto {
     double importe;
     try {
       importe = double.parse(
-          json['Importe']?.toString().replaceAll(',', '') ?? '0.0');
+        json['Importe']?.toString().replaceAll(',', '') ?? '0.0',
+      );
     } catch (e) {
       developer.log('Error parsing importe: ${e.toString()}');
       importe = 0.0;
     }
 
-    String objetoImp = json['ObjetoImp']?.toString() ?? '01';
+    final String objetoImp = json['ObjetoImp']?.toString() ?? '01';
 
     return Concepto(
       claveProdServ: claveProdServ,
@@ -150,16 +152,16 @@ class Concepto {
 
   // Static method to parse a list of concepts from different CFDI formats
   static List<Concepto> parseConceptos(Map<String, dynamic> cfdi) {
-    List<Concepto> conceptos = [];
+    final List<Concepto> conceptos = [];
 
     try {
       // Estructura exacta: Conceptos > concepto
       if (cfdi['Conceptos'] != null) {
-        var conceptosData = cfdi['Conceptos'];
+        final conceptosData = cfdi['Conceptos'];
 
         // Para 'concepto' en minúsculas (común en XML parseados)
         if (conceptosData['concepto'] != null) {
-          var conceptoData = conceptosData['concepto'];
+          final conceptoData = conceptosData['concepto'];
           if (conceptoData is List) {
             for (var concepto in conceptoData) {
               conceptos.add(Concepto.fromJson(concepto));
@@ -172,7 +174,7 @@ class Concepto {
         }
         // Para 'Concepto' en mayúsculas
         else if (conceptosData['Concepto'] != null) {
-          var conceptoData = conceptosData['Concepto'];
+          final conceptoData = conceptosData['Concepto'];
           if (conceptoData is List) {
             for (var concepto in conceptoData) {
               conceptos.add(Concepto.fromJson(concepto));
@@ -187,9 +189,9 @@ class Concepto {
 
       // Estructura alternativa con conceptos en minúsculas
       else if (cfdi['conceptos'] != null) {
-        var conceptosData = cfdi['conceptos'];
+        final conceptosData = cfdi['conceptos'];
         if (conceptosData['concepto'] != null) {
-          var conceptoData = conceptosData['concepto'];
+          final conceptoData = conceptosData['concepto'];
           if (conceptoData is List) {
             for (var concepto in conceptoData) {
               conceptos.add(Concepto.fromJson(concepto));
@@ -204,9 +206,9 @@ class Concepto {
 
       // Soporte para cfdi: prefijo (común en XML)
       else if (cfdi['cfdi:Conceptos'] != null) {
-        var conceptosData = cfdi['cfdi:Conceptos'];
+        final conceptosData = cfdi['cfdi:Conceptos'];
         if (conceptosData['cfdi:Concepto'] != null) {
-          var conceptoData = conceptosData['cfdi:Concepto'];
+          final conceptoData = conceptosData['cfdi:Concepto'];
           if (conceptoData is List) {
             for (var concepto in conceptoData) {
               conceptos.add(Concepto.fromJson(concepto));
@@ -220,9 +222,9 @@ class Concepto {
       // Estructura anidada desde Comprobante
       else if (cfdi['Comprobante'] != null) {
         if (cfdi['Comprobante']['Conceptos'] != null) {
-          var conceptosData = cfdi['Comprobante']['Conceptos'];
+          final conceptosData = cfdi['Comprobante']['Conceptos'];
           if (conceptosData['Concepto'] != null) {
-            var conceptoData = conceptosData['Concepto'];
+            final conceptoData = conceptosData['Concepto'];
             if (conceptoData is List) {
               for (var concepto in conceptoData) {
                 conceptos.add(Concepto.fromJson(concepto));
@@ -238,9 +240,9 @@ class Concepto {
       else if (cfdi['_declaration'] != null &&
           cfdi['cfdi:Comprobante'] != null) {
         if (cfdi['cfdi:Comprobante']['cfdi:Conceptos'] != null) {
-          var conceptosData = cfdi['cfdi:Comprobante']['cfdi:Conceptos'];
+          final conceptosData = cfdi['cfdi:Comprobante']['cfdi:Conceptos'];
           if (conceptosData['cfdi:Concepto'] != null) {
-            var conceptoData = conceptosData['cfdi:Concepto'];
+            final conceptoData = conceptosData['cfdi:Concepto'];
             if (conceptoData is List) {
               for (var concepto in conceptoData) {
                 conceptos.add(Concepto.fromJson(concepto));
@@ -255,7 +257,8 @@ class Concepto {
       developer.log('Error parsing conceptos: ${e.toString()}', error: e);
       // Imprimir el objeto CFDI para entender mejor su estructura
       developer.log(
-          'CFDI structure: ${cfdi.toString().substring(0, min(1000, cfdi.toString().length))}');
+        'CFDI structure: ${cfdi.toString().substring(0, min(1000, cfdi.toString().length))}',
+      );
     }
 
     developer.log('Found ${conceptos.length} conceptos');
@@ -280,7 +283,7 @@ class Concepto {
 
       if (traslados.isNotEmpty) {
         data['Impuestos']['Traslados'] = {
-          'Traslado': traslados.map((t) => t.toJson()).toList()
+          'Traslado': traslados.map((t) => t.toJson()).toList(),
         };
       }
 
@@ -288,7 +291,7 @@ class Concepto {
         final retenciones = impuestos.where((imp) => !imp.esTraslado).toList();
         if (retenciones.isNotEmpty) {
           data['Impuestos']['Retenciones'] = {
-            'Retencion': retenciones.map((r) => r.toJson()).toList()
+            'Retencion': retenciones.map((r) => r.toJson()).toList(),
           };
         }
       }

@@ -6,6 +6,7 @@ import 'package:comparador_cfdis/repositories/cfdi_repository.dart';
 import 'package:comparador_cfdis/screens/start_screen.dart';
 import 'package:comparador_cfdis/services/configuration_service.dart';
 import 'package:comparador_cfdis/services/filter_template_service.dart';
+import 'package:comparador_cfdis/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
@@ -36,8 +37,11 @@ void main() async {
       ),
     );
   } catch (e, stackTrace) {
-    logger.e('Error durante la inicialización',
-        error: e, stackTrace: stackTrace);
+    logger.e(
+      'Error durante la inicialización',
+      error: e,
+      stackTrace: stackTrace,
+    );
 
     // Ejecutar app con configuración mínima en caso de error
     runApp(const ErrorApp());
@@ -61,15 +65,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Comparador CFDIs',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        useMaterial3: true,
-        drawerTheme: const DrawerThemeData(
-          backgroundColor: Colors.white,
-          elevation: 2.0,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       home: Builder(
         builder: (context) {
           final filterTemplateBloc = FilterTemplateBloc(filterTemplateService)

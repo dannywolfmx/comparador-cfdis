@@ -32,7 +32,7 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
                 onTap: () => setState(() => _isExpanded = !_isExpanded),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                leading: Icon(
+                leading: const Icon(
                   Icons.filter_list_alt,
                   color: Colors.white,
                   size: 20,
@@ -71,8 +71,11 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
                     if (state is FilterTemplateLoaded &&
                         state.activeTemplates.isNotEmpty)
                       IconButton(
-                        icon: const Icon(Icons.clear_all,
-                            color: Colors.white, size: 18),
+                        icon: const Icon(
+                          Icons.clear_all,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                         onPressed: () {
                           final filterTemplateBloc =
                               context.read<FilterTemplateBloc>();
@@ -107,7 +110,9 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
   }
 
   Widget _buildTemplateContent(
-      BuildContext context, FilterTemplateState state) {
+    BuildContext context,
+    FilterTemplateState state,
+  ) {
     if (state is FilterTemplateLoading) {
       return const Padding(
         padding: EdgeInsets.all(16),
@@ -168,7 +173,8 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
                 ),
               ),
               ...state.activeTemplates.map(
-                  (template) => _buildTemplateCard(context, template, true)),
+                (template) => _buildTemplateCard(context, template, true),
+              ),
               const SizedBox(height: 8),
             ],
 
@@ -189,7 +195,8 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
                 ),
               ),
               ...state.templates.where((t) => !t.isActive).map(
-                  (template) => _buildTemplateCard(context, template, false)),
+                    (template) => _buildTemplateCard(context, template, false),
+                  ),
             ],
           ],
         ),
@@ -200,7 +207,10 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
   }
 
   Widget _buildTemplateCard(
-      BuildContext context, FilterTemplate template, bool isActive) {
+    BuildContext context,
+    FilterTemplate template,
+    bool isActive,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 2),
       color: isActive
@@ -293,7 +303,10 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
   }
 
   void _handleTemplateAction(
-      BuildContext context, FilterTemplate template, String action) {
+    BuildContext context,
+    FilterTemplate template,
+    String action,
+  ) {
     final filterTemplateBloc = context.read<FilterTemplateBloc>();
 
     switch (action) {
@@ -321,8 +334,11 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
     );
   }
 
-  void _showEditTemplateDialog(BuildContext context, FilterTemplate template,
-      FilterTemplateBloc filterTemplateBloc) {
+  void _showEditTemplateDialog(
+    BuildContext context,
+    FilterTemplate template,
+    FilterTemplateBloc filterTemplateBloc,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => BlocProvider.value(
@@ -333,7 +349,9 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
   }
 
   void _duplicateTemplate(
-      FilterTemplate template, FilterTemplateBloc filterTemplateBloc) {
+    FilterTemplate template,
+    FilterTemplateBloc filterTemplateBloc,
+  ) {
     final duplicatedTemplate = template.copyWith(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: '${template.name} (Copia)',
@@ -345,14 +363,18 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, FilterTemplate template,
-      FilterTemplateBloc filterTemplateBloc) {
+  void _showDeleteConfirmation(
+    BuildContext context,
+    FilterTemplate template,
+    FilterTemplateBloc filterTemplateBloc,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Confirmar eliminación'),
         content: Text(
-            '¿Estás seguro de que quieres eliminar la plantilla "${template.name}"?'),
+          '¿Estás seguro de que quieres eliminar la plantilla "${template.name}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
@@ -373,13 +395,16 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
   }
 
   void _clearAllTemplates(
-      BuildContext context, FilterTemplateBloc filterTemplateBloc) {
+    BuildContext context,
+    FilterTemplateBloc filterTemplateBloc,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Limpiar todas las plantillas'),
         content: const Text(
-            '¿Estás seguro de que quieres desactivar todas las plantillas activas?'),
+          '¿Estás seguro de que quieres desactivar todas las plantillas activas?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),

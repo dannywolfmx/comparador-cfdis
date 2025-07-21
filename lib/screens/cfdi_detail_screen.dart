@@ -155,7 +155,8 @@ class CFDIDetailScreen extends StatelessWidget {
                       ? () async {
                           final success =
                               await FileService.openFileWithDefaultApp(
-                                  cfdi.filePath!);
+                            cfdi.filePath!,
+                          );
                           if (!success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -200,10 +201,12 @@ class CFDIDetailScreen extends StatelessWidget {
               onPressed: cfdi.timbreFiscalDigital?.uuid != null
                   ? () {
                       Clipboard.setData(
-                          ClipboardData(text: cfdi.timbreFiscalDigital!.uuid!));
+                        ClipboardData(text: cfdi.timbreFiscalDigital!.uuid!),
+                      );
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text('UUID copiado al portapapeles')),
+                          content: Text('UUID copiado al portapapeles'),
+                        ),
                       );
                     }
                   : null,
@@ -277,7 +280,9 @@ class CFDIDetailScreen extends StatelessWidget {
         _buildDetailItem('Nombre', emisor.nombre),
         _buildDetailItem('RFC', emisor.rfc),
         _buildDetailItem(
-            'Régimen Fiscal', _getRegimenFiscalNombre(emisor.regimenFiscal)),
+          'Régimen Fiscal',
+          _getRegimenFiscalNombre(emisor.regimenFiscal),
+        ),
       ],
     );
   }
@@ -294,8 +299,10 @@ class CFDIDetailScreen extends StatelessWidget {
         _buildDetailItem('Nombre', receptor.nombre),
         _buildDetailItem('RFC', receptor.rfc),
         _buildDetailItem('Domicilio Fiscal', receptor.domicilioFiscalReceptor),
-        _buildDetailItem('Régimen Fiscal',
-            _getRegimenFiscalNombre(receptor.regimenFiscalReceptor)),
+        _buildDetailItem(
+          'Régimen Fiscal',
+          _getRegimenFiscalNombre(receptor.regimenFiscalReceptor),
+        ),
         _buildDetailItem('Uso de CFDI', _getUsoCFDINombre(receptor.usoCFDI)),
       ],
     );
@@ -308,7 +315,9 @@ class CFDIDetailScreen extends StatelessWidget {
         _buildDetailItem('Versión', cfdi.version),
         _buildDetailItem('Forma de Pago', _getFormaPagoNombre(cfdi.formaPago)),
         _buildDetailItem(
-            'Método de Pago', _getMetodoPagoNombre(cfdi.metodoPago)),
+          'Método de Pago',
+          _getMetodoPagoNombre(cfdi.metodoPago),
+        ),
         _buildDetailItem('Moneda', cfdi.moneda),
         if (cfdi.tipoCambio != null && cfdi.tipoCambio != '1')
           _buildDetailItem('Tipo de Cambio', cfdi.tipoCambio),
@@ -369,7 +378,9 @@ class CFDIDetailScreen extends StatelessWidget {
         subtitle: Text(
           'Importe: \$${concepto.importe}',
           style: TextStyle(
-              color: Colors.green.shade700, fontWeight: FontWeight.bold),
+            color: Colors.green.shade700,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         children: [
           Padding(
@@ -381,12 +392,16 @@ class CFDIDetailScreen extends StatelessWidget {
                 _buildConceptoInfoRow('Cantidad', concepto.cantidad.toString()),
                 _buildConceptoInfoRow('Unidad', concepto.unidad),
                 _buildConceptoInfoRow(
-                    'Valor unitario', '\$${concepto.valorUnitario}'),
+                  'Valor unitario',
+                  '\$${concepto.valorUnitario}',
+                ),
                 const Divider(),
 
                 // Información detallada
                 _buildConceptoInfoRow(
-                    'Clave Prod/Serv', concepto.claveProdServ),
+                  'Clave Prod/Serv',
+                  concepto.claveProdServ,
+                ),
                 if (concepto.claveUnidad != concepto.unidad)
                   _buildConceptoInfoRow('Clave Unidad', concepto.claveUnidad),
 
@@ -427,12 +442,16 @@ class CFDIDetailScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Valor unitario: \$${concepto.valorUnitario}'),
-                Text('Importe: \$${concepto.importe}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Importe: \$${concepto.importe}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ],
             ),
-            Text('Clave Prod/Serv: ${concepto.claveProdServ}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(
+              'Clave Prod/Serv: ${concepto.claveProdServ}',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -471,9 +490,14 @@ class CFDIDetailScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDetailItem(
-            'Subtotal', cfdi.subTotal != null ? '\$${cfdi.subTotal}' : null),
-        _buildDetailItem('Total', cfdi.total != null ? '\$${cfdi.total}' : null,
-            isHighlighted: true),
+          'Subtotal',
+          cfdi.subTotal != null ? '\$${cfdi.subTotal}' : null,
+        ),
+        _buildDetailItem(
+          'Total',
+          cfdi.total != null ? '\$${cfdi.total}' : null,
+          isHighlighted: true,
+        ),
       ],
     );
   }
@@ -489,7 +513,9 @@ class CFDIDetailScreen extends StatelessWidget {
       children: [
         _buildDetailItem('UUID', tfd.uuid),
         _buildDetailItem(
-            'Fecha de Timbrado', _formatearFecha(tfd.fechaTimbrado)),
+          'Fecha de Timbrado',
+          _formatearFecha(tfd.fechaTimbrado),
+        ),
         _buildDetailItem('RFC PAC', tfd.rfcProvCertif),
         _buildDetailItem('No. Certificado SAT', tfd.noCertificadoSAT),
       ],
@@ -564,24 +590,34 @@ class CFDIDetailScreen extends StatelessWidget {
 
         // Mostrar cada pago
         ...complemento.pagos!.asMap().entries.map((entry) {
-          int index = entry.key;
-          Pago pago = entry.value;
+          final int index = entry.key;
+          final Pago pago = entry.value;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (complemento.pagos!.length > 1)
-                Text('Pago ${index + 1}',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  'Pago ${index + 1}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               const SizedBox(height: 8),
 
               _buildDetailItem(
-                  'Fecha de Pago', _formatearFecha(pago.fechaPago)),
+                'Fecha de Pago',
+                _formatearFecha(pago.fechaPago),
+              ),
               _buildDetailItem(
-                  'Forma de Pago', _getFormaPagoNombre(pago.formaDePagoP)),
+                'Forma de Pago',
+                _getFormaPagoNombre(pago.formaDePagoP),
+              ),
               _buildDetailItem(
-                  'Monto', pago.monto != null ? '\$${pago.monto}' : null),
+                'Monto',
+                pago.monto != null ? '\$${pago.monto}' : null,
+              ),
               _buildDetailItem('Moneda', pago.monedaP),
               if (pago.tipoCambioP != null && pago.tipoCambioP != '1')
                 _buildDetailItem('Tipo de Cambio', pago.tipoCambioP),
@@ -590,80 +626,93 @@ class CFDIDetailScreen extends StatelessWidget {
               if (pago.documentosRelacionados != null &&
                   pago.documentosRelacionados!.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                const Text('Documentos Relacionados:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Documentos Relacionados:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 4),
 
                 // Listar cada documento relacionado
                 ...pago.documentosRelacionados!
-                    .map((doc) => Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Modificar la línea del UUID para incluir el botón de búsqueda
-                                Row(
-                                  children: [
-                                    const SizedBox(
-                                      width: 140,
-                                      child: Text(
-                                        'UUID:',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black54,
+                    .map(
+                      (doc) => Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Modificar la línea del UUID para incluir el botón de búsqueda
+                              Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 140,
+                                    child: Text(
+                                      'UUID:',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      doc.idDocumento ?? 'N/A',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  if (doc.idDocumento != null)
+                                    Builder(
+                                      builder: (context) => IconButton(
+                                        icon: const Icon(
+                                          Icons.description_outlined,
+                                          size: 20,
+                                        ),
+                                        tooltip: 'Abrir CFDI relacionado',
+                                        onPressed: () => _searchRelatedCFDI(
+                                          context,
+                                          doc.idDocumento!,
                                         ),
                                       ),
                                     ),
-                                    Expanded(
-                                      child: Text(
-                                        doc.idDocumento ?? 'N/A',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.normal,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
-                                    if (doc.idDocumento != null)
-                                      Builder(
-                                        builder: (context) => IconButton(
-                                          icon: const Icon(
-                                              Icons.description_outlined,
-                                              size: 20),
-                                          tooltip: 'Abrir CFDI relacionado',
-                                          onPressed: () => _searchRelatedCFDI(
-                                              context, doc.idDocumento!),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                _buildDetailItem(
-                                    'Serie/Folio',
-                                    doc.serie != null || doc.folio != null
-                                        ? '${doc.serie ?? ''} ${doc.folio ?? ''}'
-                                        : null),
-                                _buildDetailItem(
-                                    'Parcialidad', doc.numParcialidad),
-                                _buildDetailItem(
-                                    'Saldo Anterior',
-                                    doc.impSaldoAnt != null
-                                        ? '\$${doc.impSaldoAnt}'
-                                        : null),
-                                _buildDetailItem(
-                                    'Importe Pagado',
-                                    doc.impPagado != null
-                                        ? '\$${doc.impPagado}'
-                                        : null),
-                                _buildDetailItem(
-                                    'Saldo Insoluto',
-                                    doc.impSaldoInsoluto != null
-                                        ? '\$${doc.impSaldoInsoluto}'
-                                        : null),
-                              ],
-                            ),
+                                ],
+                              ),
+                              _buildDetailItem(
+                                'Serie/Folio',
+                                doc.serie != null || doc.folio != null
+                                    ? '${doc.serie ?? ''} ${doc.folio ?? ''}'
+                                    : null,
+                              ),
+                              _buildDetailItem(
+                                'Parcialidad',
+                                doc.numParcialidad,
+                              ),
+                              _buildDetailItem(
+                                'Saldo Anterior',
+                                doc.impSaldoAnt != null
+                                    ? '\$${doc.impSaldoAnt}'
+                                    : null,
+                              ),
+                              _buildDetailItem(
+                                'Importe Pagado',
+                                doc.impPagado != null
+                                    ? '\$${doc.impPagado}'
+                                    : null,
+                              ),
+                              _buildDetailItem(
+                                'Saldo Insoluto',
+                                doc.impSaldoInsoluto != null
+                                    ? '\$${doc.impSaldoInsoluto}'
+                                    : null,
+                              ),
+                            ],
                           ),
-                        ))
+                        ),
+                      ),
+                    )
                     .toList(),
               ],
 
@@ -676,8 +725,11 @@ class CFDIDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailItem(String label, String? value,
-      {bool isHighlighted = false}) {
+  Widget _buildDetailItem(
+    String label,
+    String? value, {
+    bool isHighlighted = false,
+  }) {
     if (value == null || value.isEmpty) {
       return Container();
     }
@@ -895,7 +947,8 @@ class CFDIDetailScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              'No se encontró el CFDI con UUID: $uuid entre los CFDIs cargados'),
+            'No se encontró el CFDI con UUID: $uuid entre los CFDIs cargados',
+          ),
           backgroundColor: Colors.orange,
           duration: const Duration(seconds: 3),
         ),

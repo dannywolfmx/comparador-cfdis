@@ -49,32 +49,44 @@ class _CFDITableViewState extends State<CFDITableView> {
   void _sortData() {
     // Ordena la lista base
     _sortedCfdis.sort((a, b) {
-      var formatoTipoComprobanteA = FormatTipoComprobante(a.tipoDeComprobante);
-      var formatoTipoComprobanteB = FormatTipoComprobante(b.tipoDeComprobante);
+      final formatoTipoComprobanteA =
+          FormatTipoComprobante(a.tipoDeComprobante);
+      final formatoTipoComprobanteB =
+          FormatTipoComprobante(b.tipoDeComprobante);
 
       // Asegurarse que los índices coincidan con _buildGridColumns
-      int effectiveSortIndex =
+      final int effectiveSortIndex =
           _sortColumnIndex; // Ajustar si hay columna de checkbox implícita
 
       switch (effectiveSortIndex) {
         case 0: // Emisor
           return _compareNullableStrings(
-              a.emisor?.nombre, b.emisor?.nombre, _sortAscending);
+            a.emisor?.nombre,
+            b.emisor?.nombre,
+            _sortAscending,
+          );
         case 1: // Receptor
           return _compareNullableStrings(
-              a.receptor?.nombre, b.receptor?.nombre, _sortAscending);
+            a.receptor?.nombre,
+            b.receptor?.nombre,
+            _sortAscending,
+          );
         case 2: // Fecha
           return _compareNullableStrings(a.fecha, b.fecha, _sortAscending);
         case 3: // Total
           return _compareNullableNumeric(a.total, b.total, _sortAscending);
         case 4: // Tipo
           return _compareNullableStrings(
-              formatoTipoComprobanteA.tipoComprobante,
-              formatoTipoComprobanteB.tipoComprobante,
-              _sortAscending);
+            formatoTipoComprobanteA.tipoComprobante,
+            formatoTipoComprobanteB.tipoComprobante,
+            _sortAscending,
+          );
         case 5: // UUID
-          return _compareNullableStrings(a.timbreFiscalDigital?.uuid,
-              b.timbreFiscalDigital?.uuid, _sortAscending);
+          return _compareNullableStrings(
+            a.timbreFiscalDigital?.uuid,
+            b.timbreFiscalDigital?.uuid,
+            _sortAscending,
+          );
         default:
           return 0;
       }
@@ -85,7 +97,7 @@ class _CFDITableViewState extends State<CFDITableView> {
     if (a == null && b == null) return 0;
     if (a == null) return ascending ? -1 : 1;
     if (b == null) return ascending ? 1 : -1;
-    int result = a.compareTo(b);
+    final int result = a.compareTo(b);
     return ascending ? result : -result;
   }
 
@@ -94,15 +106,15 @@ class _CFDITableViewState extends State<CFDITableView> {
     if (a == null) return ascending ? -1 : 1;
     if (b == null) return ascending ? 1 : -1;
 
-    double? valA = double.tryParse(a);
-    double? valB = double.tryParse(b);
+    final double? valA = double.tryParse(a);
+    final double? valB = double.tryParse(b);
 
     // Ambos no son numéricos, comparar como string
     if (valA == null && valB == null) return 0;
     if (valA == null) return ascending ? -1 : 1; // A no es numérico
     if (valB == null) return ascending ? 1 : -1; // B no es numérico
 
-    int result = valA.compareTo(valB);
+    final int result = valA.compareTo(valB);
     return ascending ? result : -result;
   }
 
@@ -186,7 +198,9 @@ class _CFDITableViewState extends State<CFDITableView> {
                             ElevatedButton.icon(
                               onPressed: _selectedCfdis.length == 1
                                   ? () => _mostrarDetalles(
-                                      _selectedCfdis.first, context)
+                                        _selectedCfdis.first,
+                                        context,
+                                      )
                                   : null,
                               icon: const Icon(Icons.fullscreen),
                               label: const Text('Expandir'),

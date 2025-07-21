@@ -58,7 +58,7 @@ class CFDI {
 
     // Look for Complemento/Pagos in different possible structures
     if (json['Complemento'] != null) {
-      var complemento = json['Complemento'];
+      final complemento = json['Complemento'];
       if (complemento is Map) {
         if (complemento['Pagos'] != null) {
           complementoPagoObj = ComplementoPago.fromJson(complemento['Pagos']);
@@ -158,7 +158,7 @@ class Conceptos {
   Conceptos({this.concepto});
 
   factory Conceptos.fromJson(Map<String, dynamic> json) {
-    List<Concepto> conceptos = [];
+    final List<Concepto> conceptos = [];
     if (json['Concepto'] is List) {
       for (var item in json['Concepto']) {
         conceptos.add(Concepto.fromJson(item));

@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:comparador_cfdis/services/cfdi_parser.dart';
-import 'package:comparador_cfdis/models/cfdi.dart';
 
 void main() {
   group('CFDIParser Tests', () {
@@ -27,10 +26,10 @@ void main() {
                          Importe="100.00" />
         </cfdi:Conceptos>
       </cfdi:Comprobante>''';
-      
+
       // When
       final result = CFDIParser.parseXmlString(xmlString);
-      
+
       // Then
       expect(result, isNotNull);
       expect(result!.version, equals('4.0'));
@@ -42,10 +41,10 @@ void main() {
     test('should handle invalid XML gracefully', () {
       // Given
       const invalidXml = '<invalid>xml</invalid>';
-      
+
       // When
       final result = CFDIParser.parseXmlString(invalidXml);
-      
+
       // Then
       expect(result, isNull);
     });
@@ -53,10 +52,10 @@ void main() {
     test('should handle empty XML string', () {
       // Given
       const emptyXml = '';
-      
+
       // When
       final result = CFDIParser.parseXmlString(emptyXml);
-      
+
       // Then
       expect(result, isNull);
     });

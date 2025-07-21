@@ -66,14 +66,14 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
                 ),
               ),
             ),
-            _buildTiposDeComprobante(),
+            if (state is CFDILoaded) _buildTiposDeComprobante(state),
           ],
         );
       },
     );
   }
 
-  Widget _buildTiposDeComprobante() {
+  Widget _buildTiposDeComprobante(CFDILoaded state) {
     final filteredTipos = tiposDeComprobante
         .where((tipo) => tipo.nombre.toLowerCase().contains(_searchQuery))
         .toList();
@@ -92,8 +92,12 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
 
     return Column(
       children: filteredTipos.map((tipoComprobante) {
+        final bool isSelected = state.activeFilters.any(
+          (filter) =>
+              filter is TipoComprobante && filter.id == tipoComprobante.id,
+        );
         // Obtener color según el tipo de comprobante
-        Color tipoColor = _getColorForTipoComprobante(tipoComprobante.id);
+        final Color tipoColor = _getColorForTipoComprobante(tipoComprobante.id);
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 2),
@@ -115,9 +119,10 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
                   child: Text(
                     _getShortTipoComprobante(tipoComprobante.id),
                     style: TextStyle(
-                        color: tipoColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold),
+                      color: tipoColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -129,13 +134,12 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
                 ),
               ],
             ),
-            value: tipoComprobante.seleccionado,
+            value: isSelected,
             activeColor: Colors.white,
             checkColor: Theme.of(context).primaryColor,
             onChanged: (value) {
               if (value == null) return;
               context.read<CFDIBloc>().add(FilterCFDIs(tipoComprobante));
-              // No se actualiza el estado aquí, se deja que el BLoC lo maneje
             },
             dense: true,
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),

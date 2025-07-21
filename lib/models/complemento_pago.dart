@@ -14,7 +14,7 @@ class ComplementoPago {
 
   factory ComplementoPago.fromMap(Map<String, dynamic> map) {
     // Extraer los pagos
-    List<Pago> pagosLista = [];
+    final List<Pago> pagosLista = [];
     if (map['Pagos'] != null) {
       if (map['Pagos']['Pago'] is List) {
         for (var pagoDato in map['Pagos']['Pago']) {

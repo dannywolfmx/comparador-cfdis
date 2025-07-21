@@ -22,7 +22,8 @@ class TimbreFiscal {
       version: json['Version'] ?? '',
       uuid: json['UUID'] ?? '',
       fechaTimbrado: DateTime.parse(
-          json['FechaTimbrado'] ?? DateTime.now().toIso8601String()),
+        json['FechaTimbrado'] ?? DateTime.now().toIso8601String(),
+      ),
       rfcProvCertif: json['RfcProvCertif'] ?? '',
       selloCFD: json['SelloCFD'] ?? '',
       selloSAT: json['SelloSAT'] ?? '',

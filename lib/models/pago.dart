@@ -31,7 +31,7 @@ class Pago {
 
   factory Pago.fromMap(Map<String, dynamic> map) {
     // Manejar los documentos relacionados
-    List<DocumentoRelacionado> docsRelacionados = [];
+    final List<DocumentoRelacionado> docsRelacionados = [];
     if (map['DoctoRelacionado'] != null) {
       if (map['DoctoRelacionado'] is List) {
         for (var docData in map['DoctoRelacionado']) {

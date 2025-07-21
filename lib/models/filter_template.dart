@@ -54,7 +54,7 @@ class FilterTemplate {
       'isActive': isActive,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
-      'color': color.value,
+      'color': color.toARGB32(),
     };
   }
 
@@ -67,7 +67,7 @@ class FilterTemplate {
       isActive: json['isActive'] ?? false,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
-      color: Color(json['color'] ?? Colors.blue.value),
+      color: Color(json['color'] ?? Colors.blue.toARGB32()),
     );
   }
 

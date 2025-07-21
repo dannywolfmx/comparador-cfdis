@@ -19,24 +19,26 @@ class TrasladoConcepto {
     // Manejar casos de claves en minúsculas y mayúsculas
     double base;
     try {
-      base = double.parse((json['Base'] ?? json['base'] ?? '0.0')
-          .toString()
-          .replaceAll(',', ''));
+      base = double.parse(
+        (json['Base'] ?? json['base'] ?? '0.0').toString().replaceAll(',', ''),
+      );
     } catch (e) {
       developer.log('Error parsing base: ${e.toString()}');
       base = 0.0;
     }
 
-    String impuesto = (json['Impuesto'] ?? json['impuesto'] ?? '').toString();
-    String tipoFactor =
+    final String impuesto =
+        (json['Impuesto'] ?? json['impuesto'] ?? '').toString();
+    final String tipoFactor =
         (json['TipoFactor'] ?? json['tipoFactor'] ?? '').toString();
 
     double tasaOCuota;
     try {
       tasaOCuota = double.parse(
-          (json['TasaOCuota'] ?? json['tasaOCuota'] ?? '0.0')
-              .toString()
-              .replaceAll(',', ''));
+        (json['TasaOCuota'] ?? json['tasaOCuota'] ?? '0.0')
+            .toString()
+            .replaceAll(',', ''),
+      );
     } catch (e) {
       developer.log('Error parsing tasaOCuota: ${e.toString()}');
       tasaOCuota = 0.0;
@@ -44,9 +46,11 @@ class TrasladoConcepto {
 
     double importe;
     try {
-      importe = double.parse((json['Importe'] ?? json['importe'] ?? '0.0')
-          .toString()
-          .replaceAll(',', ''));
+      importe = double.parse(
+        (json['Importe'] ?? json['importe'] ?? '0.0')
+            .toString()
+            .replaceAll(',', ''),
+      );
     } catch (e) {
       developer.log('Error parsing importe: ${e.toString()}');
       importe = 0.0;

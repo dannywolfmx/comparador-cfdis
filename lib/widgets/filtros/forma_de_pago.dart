@@ -68,7 +68,7 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
               ),
             ),
             //Lista de checkbox para seleccionar la forma de pago
-            _buildFormasDePago(),
+            if (state is CFDILoaded) _buildFormasDePago(state),
           ],
         );
       },
@@ -76,11 +76,13 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
   }
 
   //Lista de checkbox para seleccionar la forma de pago
-  Widget _buildFormasDePago() {
+  Widget _buildFormasDePago(CFDILoaded state) {
     final filteredFormas = formasDePago
-        .where((forma) =>
-            forma.nombre.toLowerCase().contains(_searchQuery) ||
-            forma.id.toLowerCase().contains(_searchQuery))
+        .where(
+          (forma) =>
+              forma.nombre.toLowerCase().contains(_searchQuery) ||
+              forma.id.toLowerCase().contains(_searchQuery),
+        )
         .toList();
 
     if (filteredFormas.isEmpty) {
@@ -97,6 +99,9 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
 
     return Column(
       children: filteredFormas.map((formaPago) {
+        final bool isSelected = state.activeFilters.any(
+          (filter) => filter is FormaPago && filter.id == formaPago.id,
+        );
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 2),
           color: Colors.white.withValues(alpha: 0.05),
@@ -116,9 +121,10 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
                   child: Text(
                     formaPago.id,
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -130,15 +136,12 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
                 ),
               ],
             ),
-            value: formaPago.seleccionado,
+            value: isSelected,
             activeColor: Colors.white,
             checkColor: Theme.of(context).primaryColor,
             onChanged: (value) {
               if (value == null) return;
-
-              //Apply filter to the list of CFDIs
               context.read<CFDIBloc>().add(FilterCFDIs(formaPago));
-              // No se actualiza el estado aquí, se deja que el BLoC lo maneje
             },
             dense: true,
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),

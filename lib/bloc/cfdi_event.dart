@@ -1,5 +1,6 @@
 import 'package:comparador_cfdis/models/filter.dart';
 import 'package:comparador_cfdis/models/filter_template.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 abstract class CFDIEvent {}
 
@@ -21,4 +22,17 @@ class ApplyTemplateFilters extends CFDIEvent {
   final List<FilterTemplate> activeTemplates;
 
   ApplyTemplateFilters(this.activeTemplates);
+}
+
+class ApplyDateRangeFilter extends CFDIEvent {
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  ApplyDateRangeFilter(this.startDate, this.endDate);
+}
+
+class UpdateStateManager extends CFDIEvent {
+  final PlutoGridStateManager stateManager;
+
+  UpdateStateManager(this.stateManager);
 }

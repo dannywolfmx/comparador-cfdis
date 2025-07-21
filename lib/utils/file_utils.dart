@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 class FileUtils {
   /// Permite al usuario seleccionar un archivo XML
   static Future<File?> pickXmlFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    final FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xml'],
       dialogTitle: 'Seleccionar archivo CFDI (XML)',
@@ -20,7 +20,7 @@ class FileUtils {
 
   /// Permite al usuario seleccionar múltiples archivos XML
   static Future<List<File>> pickMultipleXmlFiles() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    final FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowMultiple: true,
       allowedExtensions: ['xml'],
@@ -39,7 +39,7 @@ class FileUtils {
 
   /// Obtiene el nombre de un archivo sin extensión
   static String getFileNameWithoutExtension(File file) {
-    String fileName = path.basename(file.path);
+    final String fileName = path.basename(file.path);
     return path.basenameWithoutExtension(fileName);
   }
 }

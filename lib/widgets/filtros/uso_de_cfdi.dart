@@ -68,7 +68,7 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
               ),
             ),
             //Lista de checkbox para seleccionar el uso de CFDI
-            _buildUsosDeCFDI(),
+            if (state is CFDILoaded) _buildUsosDeCFDI(state),
           ],
         );
       },
@@ -76,11 +76,13 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
   }
 
   //Lista de checkbox para seleccionar el uso de CFDI
-  Widget _buildUsosDeCFDI() {
+  Widget _buildUsosDeCFDI(CFDILoaded state) {
     final filteredUsos = usosDeCFDI
-        .where((uso) =>
-            uso.nombre.toLowerCase().contains(_searchQuery) ||
-            uso.id.toLowerCase().contains(_searchQuery))
+        .where(
+          (uso) =>
+              uso.nombre.toLowerCase().contains(_searchQuery) ||
+              uso.id.toLowerCase().contains(_searchQuery),
+        )
         .toList();
 
     if (filteredUsos.isEmpty) {
@@ -97,6 +99,9 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
 
     return Column(
       children: filteredUsos.map((usoCFDI) {
+        final bool isSelected = state.activeFilters.any(
+          (filter) => filter is UsoDeCFDI && filter.id == usoCFDI.id,
+        );
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 2),
           color: Colors.white.withValues(alpha: 0.05),
@@ -116,9 +121,10 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
                   child: Text(
                     usoCFDI.id,
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -130,14 +136,12 @@ class _FiltroUsoDeCFDIState extends State<FiltroUsoDeCFDI> {
                 ),
               ],
             ),
-            value: usoCFDI.seleccionado,
+            value: isSelected,
             activeColor: Colors.white,
             checkColor: Theme.of(context).primaryColor,
             onChanged: (value) {
               if (value == null) return;
-              //Apply filter to the list of CFDIs
               context.read<CFDIBloc>().add(FilterCFDIs(usoCFDI));
-              // No se actualiza el estado aquí, se deja que el BLoC lo maneje
             },
             dense: true,
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),

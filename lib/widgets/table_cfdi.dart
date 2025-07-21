@@ -1,4 +1,5 @@
 import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
+import 'package:comparador_cfdis/bloc/cfdi_event.dart';
 import 'package:comparador_cfdis/bloc/cfdi_state.dart';
 import 'package:comparador_cfdis/models/cfdi.dart';
 import 'package:comparador_cfdis/screens/cfdi_detail_screen.dart';
@@ -25,16 +26,17 @@ class _TableCFDIState extends State<TableCFDI> {
       columns: _columns(),
       rows: widget.cfdis.map((cfdi) => _row(cfdi)).toList(),
       configuration: const PlutoGridConfiguration(
-          localeText: PlutoGridLocaleText.spanish(),
-          columnSize: PlutoGridColumnSizeConfig(
-            autoSizeMode: PlutoAutoSizeMode.scale,
-          )),
+        localeText: PlutoGridLocaleText.spanish(),
+        columnSize: PlutoGridColumnSizeConfig(
+          autoSizeMode: PlutoAutoSizeMode.scale,
+        ),
+      ),
       onLoaded: (event) {
         stateManager = event.stateManager;
         stateManager.setShowColumnFilter(showColumn);
-        final state = context.read<CFDIBloc>().state;
-        if (state is CFDILoaded) {
-          state.stateManager = stateManager;
+        final bloc = context.read<CFDIBloc>();
+        if (bloc.state is CFDILoaded) {
+          bloc.add(UpdateStateManager(stateManager));
         }
       },
       onChanged: (event) {},
@@ -110,15 +112,17 @@ class _TableCFDIState extends State<TableCFDI> {
   }
 
   PlutoRow _row(CFDI cfdi) {
-    return PlutoRow(cells: {
-      'uuid': PlutoCell(value: cfdi.timbreFiscalDigital?.uuid),
-      'rfcEmisor': PlutoCell(value: cfdi.emisor?.nombre),
-      'rfcReceptor': PlutoCell(value: cfdi.receptor?.nombre),
-      'fecha': PlutoCell(value: cfdi.fecha),
-      'total': PlutoCell(value: cfdi.total),
-      'acciones':
-          PlutoCell(value: ''), // Esta celda se renderizará con el botón
-    });
+    return PlutoRow(
+      cells: {
+        'uuid': PlutoCell(value: cfdi.timbreFiscalDigital?.uuid),
+        'rfcEmisor': PlutoCell(value: cfdi.emisor?.nombre),
+        'rfcReceptor': PlutoCell(value: cfdi.receptor?.nombre),
+        'fecha': PlutoCell(value: cfdi.fecha),
+        'total': PlutoCell(value: cfdi.total),
+        'acciones':
+            PlutoCell(value: ''), // Esta celda se renderizará con el botón
+      },
+    );
   }
 
   void _mostrarDetalles(CFDI cfdi, BuildContext context) {

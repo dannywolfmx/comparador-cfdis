@@ -68,7 +68,7 @@ class _FiltroMetodoDePagoState extends State<FiltroMetodoDePago> {
               ),
             ),
             //Lista de checkbox para seleccionar el método de pago
-            _buildMetodosDePago(),
+            if (state is CFDILoaded) _buildMetodosDePago(state),
           ],
         );
       },
@@ -76,11 +76,13 @@ class _FiltroMetodoDePagoState extends State<FiltroMetodoDePago> {
   }
 
   //Lista de checkbox para seleccionar el método de pago
-  Widget _buildMetodosDePago() {
+  Widget _buildMetodosDePago(CFDILoaded state) {
     final filteredMetodos = metodosDePago
-        .where((metodo) =>
-            metodo.nombre.toLowerCase().contains(_searchQuery) ||
-            metodo.id.toLowerCase().contains(_searchQuery))
+        .where(
+          (metodo) =>
+              metodo.nombre.toLowerCase().contains(_searchQuery) ||
+              metodo.id.toLowerCase().contains(_searchQuery),
+        )
         .toList();
 
     if (filteredMetodos.isEmpty) {
@@ -97,6 +99,9 @@ class _FiltroMetodoDePagoState extends State<FiltroMetodoDePago> {
 
     return Column(
       children: filteredMetodos.map((metodoPago) {
+        final bool isSelected = state.activeFilters.any(
+          (filter) => filter is MetodoPago && filter.id == metodoPago.id,
+        );
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 2),
           color: Colors.white.withValues(alpha: 0.05),
@@ -116,9 +121,10 @@ class _FiltroMetodoDePagoState extends State<FiltroMetodoDePago> {
                   child: Text(
                     metodoPago.id,
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -130,14 +136,12 @@ class _FiltroMetodoDePagoState extends State<FiltroMetodoDePago> {
                 ),
               ],
             ),
-            value: metodoPago.seleccionado,
+            value: isSelected,
             activeColor: Colors.white,
             checkColor: Theme.of(context).primaryColor,
             onChanged: (value) {
               if (value == null) return;
-              //Apply filter to the list of CFDIs
               context.read<CFDIBloc>().add(FilterCFDIs(metodoPago));
-              // No se actualiza el estado aquí, se deja que el BLoC lo maneje
             },
             dense: true,
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),

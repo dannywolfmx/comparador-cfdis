@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:comparador_cfdis/bloc/filter_template_event.dart';
 import 'package:comparador_cfdis/bloc/filter_template_state.dart';
-import 'package:comparador_cfdis/models/filter_template.dart';
 import 'package:comparador_cfdis/services/filter_template_service.dart';
 
 class FilterTemplateBloc
@@ -26,10 +25,12 @@ class FilterTemplateBloc
     try {
       final templates = await _templateService.loadTemplates();
       final activeTemplates = templates.where((t) => t.isActive).toList();
-      emit(FilterTemplateLoaded(
-        templates: templates,
-        activeTemplates: activeTemplates,
-      ));
+      emit(
+        FilterTemplateLoaded(
+          templates: templates,
+          activeTemplates: activeTemplates,
+        ),
+      );
     } catch (e) {
       emit(FilterTemplateError('Error cargando plantillas: ${e.toString()}'));
     }
@@ -58,8 +59,11 @@ class FilterTemplateBloc
         await _templateService.saveTemplate(event.template);
         add(LoadFilterTemplates());
       } catch (e) {
-        emit(FilterTemplateError(
-            'Error actualizando plantilla: ${e.toString()}'));
+        emit(
+          FilterTemplateError(
+            'Error actualizando plantilla: ${e.toString()}',
+          ),
+        );
       }
     }
   }
@@ -74,7 +78,8 @@ class FilterTemplateBloc
         add(LoadFilterTemplates());
       } catch (e) {
         emit(
-            FilterTemplateError('Error eliminando plantilla: ${e.toString()}'));
+          FilterTemplateError('Error eliminando plantilla: ${e.toString()}'),
+        );
       }
     }
   }
@@ -88,8 +93,11 @@ class FilterTemplateBloc
         await _templateService.toggleTemplate(event.templateId, event.isActive);
         add(LoadFilterTemplates());
       } catch (e) {
-        emit(FilterTemplateError(
-            'Error cambiando estado de plantilla: ${e.toString()}'));
+        emit(
+          FilterTemplateError(
+            'Error cambiando estado de plantilla: ${e.toString()}',
+          ),
+        );
       }
     }
   }
@@ -100,13 +108,11 @@ class FilterTemplateBloc
   ) async {
     if (state is FilterTemplateLoaded) {
       final currentState = state as FilterTemplateLoaded;
-      final template = currentState.templates.firstWhere(
-        (t) => t.id == event.templateId,
-        orElse: () => throw Exception('Plantilla no encontrada'),
-      );
+      // TODO: Implementar la aplicación de filtros de plantilla
+      // Se necesita integración con CFDIBloc
 
-      // Aquí se aplicarían los filtros de la plantilla
-      // Esto se integrará con el CFDIBloc
+      // Por ahora, mantener el estado actual
+      emit(currentState);
     }
   }
 
@@ -124,7 +130,8 @@ class FilterTemplateBloc
         add(LoadFilterTemplates());
       } catch (e) {
         emit(
-            FilterTemplateError('Error limpiando plantillas: ${e.toString()}'));
+          FilterTemplateError('Error limpiando plantillas: ${e.toString()}'),
+        );
       }
     }
   }

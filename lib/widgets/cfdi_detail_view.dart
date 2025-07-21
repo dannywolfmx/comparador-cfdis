@@ -69,7 +69,8 @@ class CFDIDetailView extends StatelessWidget {
                     ? () async {
                         final success =
                             await FileService.openFileWithDefaultApp(
-                                cfdi.filePath!);
+                          cfdi.filePath!,
+                        );
                         if (!success && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

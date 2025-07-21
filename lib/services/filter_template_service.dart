@@ -155,16 +155,18 @@ class FilterTemplateService {
       'name': template.name,
       'description': template.description,
       'filters': template.filters
-          .map((f) => {
-                'id': f.id,
-                'nombre': f.nombre,
-                'type': f.runtimeType.toString(),
-              })
+          .map(
+            (f) => {
+              'id': f.id,
+              'nombre': f.nombre,
+              'type': f.runtimeType.toString(),
+            },
+          )
           .toList(),
       'isActive': template.isActive,
       'createdAt': template.createdAt.toIso8601String(),
       'updatedAt': template.updatedAt.toIso8601String(),
-      'color': template.color.value,
+      'color': template.color.toARGB32(),
     };
   }
 
@@ -190,7 +192,7 @@ class FilterTemplateService {
       isActive: json['isActive'] ?? false,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
-      color: Color(json['color'] ?? Colors.blue.value),
+      color: Color(json['color'] ?? Colors.blue.toARGB32()),
     );
   }
 

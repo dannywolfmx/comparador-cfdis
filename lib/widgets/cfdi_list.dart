@@ -38,11 +38,18 @@ class CFDIListView extends StatelessWidget {
                 }
               }
 
-              var formatTipoComprobante =
+              final formatTipoComprobante =
                   FormatTipoComprobante(cfdi.tipoDeComprobante);
 
-              return _content(emisor, receptor, fechaFormateada, cfdi,
-                  timbreFiscal, formatTipoComprobante, context);
+              return _content(
+                emisor,
+                receptor,
+                fechaFormateada,
+                cfdi,
+                timbreFiscal,
+                formatTipoComprobante,
+                context,
+              );
             },
           ),
         ),
@@ -54,13 +61,14 @@ class CFDIListView extends StatelessWidget {
   }
 
   Widget _content(
-      Emisor? emisor,
-      Receptor? receptor,
-      String? fechaFormateada,
-      CFDI cfdi,
-      TimbreFiscalDigital? timbreFiscal,
-      FormatTipoComprobante formatTipoComprobante,
-      BuildContext context) {
+    Emisor? emisor,
+    Receptor? receptor,
+    String? fechaFormateada,
+    CFDI cfdi,
+    TimbreFiscalDigital? timbreFiscal,
+    FormatTipoComprobante formatTipoComprobante,
+    BuildContext context,
+  ) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       shape: RoundedRectangleBorder(
@@ -138,7 +146,7 @@ class CFDIListView extends StatelessWidget {
                         Icon(
                           Icons.chevron_right,
                           color: Colors.grey[400],
-                        )
+                        ),
                       ],
                     ),
                     if (timbreFiscal?.uuid != null)

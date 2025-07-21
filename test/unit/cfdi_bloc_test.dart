@@ -1,3 +1,5 @@
+import 'package:comparador_cfdis/bloc/filter_template_bloc.dart';
+import 'package:comparador_cfdis/services/filter_template_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -9,13 +11,19 @@ import 'package:comparador_cfdis/models/cfdi.dart';
 
 class MockCFDIRepository extends Mock implements CFDIRepository {}
 
+class MockFilterTemplateService extends Mock implements FilterTemplateService {}
+
 void main() {
   late CFDIBloc cfdiBloc;
   late MockCFDIRepository mockRepository;
+  late FilterTemplateBloc filterTemplateBloc;
+  late MockFilterTemplateService mockFilterTemplateService;
 
   setUp(() {
     mockRepository = MockCFDIRepository();
-    cfdiBloc = CFDIBloc(mockRepository, {});
+    mockFilterTemplateService = MockFilterTemplateService();
+    filterTemplateBloc = FilterTemplateBloc(mockFilterTemplateService);
+    cfdiBloc = CFDIBloc(mockRepository, {}, filterTemplateBloc);
   });
 
   tearDown(() {

@@ -240,7 +240,7 @@ class CFDISummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                '${state.count} CFDIs',
+                '${state.cfdis.length} CFDIs',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -298,7 +298,7 @@ class CFDISummaryCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${state.count} CFDIs',
+                    '${state.cfdis.length} CFDIs',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,
