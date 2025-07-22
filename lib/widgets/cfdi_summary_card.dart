@@ -200,6 +200,16 @@ class CFDISummaryCard extends StatelessWidget {
               _buildVerticalDivider(),
               _buildCompactMetric(
                 context,
+                label: 'IVA (16%)',
+                value: formatCurrency(
+                  (state.cfdiInformation.subtotal - state.cfdiInformation.descuento) * 0.16,
+                ),
+                icon: Icons.receipt,
+                color: Colors.indigo,
+              ),
+              _buildVerticalDivider(),
+              _buildCompactMetric(
+                context,
                 label: 'Total',
                 value: formatCurrency(state.cfdiInformation.total),
                 icon: Icons.price_check,
@@ -329,6 +339,23 @@ class CFDISummaryCard extends StatelessWidget {
               value: formatCurrency(state.cfdiInformation.descuento),
               color: Colors.orange,
             ),
+            _buildMiniMetric(
+              context,
+              label: 'IVA (16%)',
+              value: formatCurrency(
+                (state.cfdiInformation.subtotal - state.cfdiInformation.descuento) * 0.16,
+              ),
+              color: Colors.indigo,
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 6),
+        
+        // Tercera fila: Totales destacados
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
             _buildMiniMetric(
               context,
               label: 'Total',

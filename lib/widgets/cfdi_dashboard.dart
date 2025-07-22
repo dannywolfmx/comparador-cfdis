@@ -631,7 +631,7 @@ class CFDIDashboard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        // Segunda fila - totales
+        // Segunda fila - Sub. - Desc. e IVA
         Row(
           children: [
             Expanded(
@@ -647,6 +647,21 @@ class CFDIDashboard extends StatelessWidget {
             Expanded(
               child: _buildSummaryMetric(
                 context,
+                title: 'IVA (16%)',
+                value: _formatCurrency(metrics.iva),
+                icon: Icons.receipt,
+                color: Colors.indigo,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Tercera fila - totales destacados
+        Row(
+          children: [
+            Expanded(
+              child: _buildSummaryMetric(
+                context,
                 title: 'Total',
                 value: _formatCurrency(metrics.total),
                 icon: Icons.price_check,
@@ -654,18 +669,18 @@ class CFDIDashboard extends StatelessWidget {
                 isHighlighted: true,
               ),
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildSummaryMetric(
+                context,
+                title: 'Total + IVA',
+                value: _formatCurrency(metrics.totalConIva),
+                icon: Icons.calculate_outlined,
+                color: Colors.purple,
+                isHighlighted: true,
+              ),
+            ),
           ],
-        ),
-        const SizedBox(height: 12),
-        // Tercera fila - total con IVA (destacado)
-        _buildSummaryMetric(
-          context,
-          title: 'Total + IVA (16%)',
-          value: _formatCurrency(metrics.totalConIva),
-          icon: Icons.calculate_outlined,
-          color: Colors.purple,
-          isHighlighted: true,
-          isMainMetric: true,
         ),
       ],
     );
@@ -702,6 +717,16 @@ class CFDIDashboard extends StatelessWidget {
             value: _formatCurrency(metrics.subtotalMenosDescuento),
             icon: Icons.calculate,
             color: Colors.green,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildSummaryMetric(
+            context,
+            title: 'IVA (16%)',
+            value: _formatCurrency(metrics.iva),
+            icon: Icons.receipt,
+            color: Colors.indigo,
           ),
         ),
         const SizedBox(width: 16),
@@ -818,12 +843,14 @@ class CFDIDashboard extends StatelessWidget {
     }
 
     final subtotalMenosDescuento = subtotal - descuento;
-    final totalConIva = subtotalMenosDescuento * 1.16; // IVA del 16%
+    final iva = subtotalMenosDescuento * 0.16; // IVA del 16%
+    final totalConIva = subtotalMenosDescuento * 1.16; // Total con IVA
 
     return SummaryMetrics(
       subtotal: subtotal,
       descuento: descuento,
       subtotalMenosDescuento: subtotalMenosDescuento,
+      iva: iva,
       total: total,
       totalConIva: totalConIva,
     );
@@ -1028,6 +1055,7 @@ class SummaryMetrics {
   final double subtotal;
   final double descuento;
   final double subtotalMenosDescuento;
+  final double iva;
   final double total;
   final double totalConIva;
 
@@ -1035,6 +1063,7 @@ class SummaryMetrics {
     required this.subtotal,
     required this.descuento,
     required this.subtotalMenosDescuento,
+    required this.iva,
     required this.total,
     required this.totalConIva,
   });
@@ -1044,6 +1073,7 @@ class SummaryMetrics {
       subtotal: 0,
       descuento: 0,
       subtotalMenosDescuento: 0,
+      iva: 0,
       total: 0,
       totalConIva: 0,
     );
