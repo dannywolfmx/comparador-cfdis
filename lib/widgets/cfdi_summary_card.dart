@@ -137,7 +137,8 @@ class CFDISummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFullLayout(BuildContext context, CFDILoaded state, String Function(double) formatCurrency) {
+  Widget _buildFullLayout(BuildContext context, CFDILoaded state,
+      String Function(double) formatCurrency) {
     return Row(
       children: [
         // Botones de acción
@@ -164,9 +165,9 @@ class CFDISummaryCard extends StatelessWidget {
             ),
           ],
         ),
-        
+
         const SizedBox(width: 24),
-        
+
         // Métricas en fila horizontal
         Expanded(
           child: Row(
@@ -192,7 +193,8 @@ class CFDISummaryCard extends StatelessWidget {
                 context,
                 label: 'Sub. - Desc.',
                 value: formatCurrency(
-                  state.cfdiInformation.subtotal - state.cfdiInformation.descuento,
+                  state.cfdiInformation.subtotal -
+                      state.cfdiInformation.descuento,
                 ),
                 icon: Icons.calculate,
                 color: Colors.green,
@@ -202,7 +204,9 @@ class CFDISummaryCard extends StatelessWidget {
                 context,
                 label: 'IVA (16%)',
                 value: formatCurrency(
-                  (state.cfdiInformation.subtotal - state.cfdiInformation.descuento) * 0.16,
+                  (state.cfdiInformation.subtotal -
+                          state.cfdiInformation.descuento) *
+                      0.16,
                 ),
                 icon: Icons.receipt,
                 color: Colors.indigo,
@@ -221,7 +225,9 @@ class CFDISummaryCard extends StatelessWidget {
                 context,
                 label: 'Total + IVA',
                 value: formatCurrency(
-                  (state.cfdiInformation.subtotal - state.cfdiInformation.descuento) * 1.16,
+                  (state.cfdiInformation.subtotal -
+                          state.cfdiInformation.descuento) *
+                      1.16,
                 ),
                 icon: Icons.calculate_outlined,
                 color: Colors.purple,
@@ -230,9 +236,9 @@ class CFDISummaryCard extends StatelessWidget {
             ],
           ),
         ),
-        
+
         const SizedBox(width: 24),
-        
+
         // Contador de CFDIs
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -264,7 +270,8 @@ class CFDISummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactLayout(BuildContext context, CFDILoaded state, String Function(double) formatCurrency) {
+  Widget _buildCompactLayout(BuildContext context, CFDILoaded state,
+      String Function(double) formatCurrency) {
     return Column(
       children: [
         // Primera fila: Botones de acción y contador
@@ -320,9 +327,9 @@ class CFDISummaryCard extends StatelessWidget {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         // Segunda fila: Métricas principales
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -343,15 +350,17 @@ class CFDISummaryCard extends StatelessWidget {
               context,
               label: 'IVA (16%)',
               value: formatCurrency(
-                (state.cfdiInformation.subtotal - state.cfdiInformation.descuento) * 0.16,
+                (state.cfdiInformation.subtotal -
+                        state.cfdiInformation.descuento) *
+                    0.16,
               ),
               color: Colors.indigo,
             ),
           ],
         ),
-        
+
         const SizedBox(height: 6),
-        
+
         // Tercera fila: Totales destacados
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -367,7 +376,9 @@ class CFDISummaryCard extends StatelessWidget {
               context,
               label: 'Total + IVA',
               value: formatCurrency(
-                (state.cfdiInformation.subtotal - state.cfdiInformation.descuento) * 1.16,
+                (state.cfdiInformation.subtotal -
+                        state.cfdiInformation.descuento) *
+                    1.16,
               ),
               color: Colors.purple,
               isHighlighted: true,
@@ -395,7 +406,9 @@ class CFDISummaryCard extends StatelessWidget {
         color: Colors.white,
         padding: const EdgeInsets.all(6),
         constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-        tooltip: icon == Icons.add_to_photos ? 'Añadir archivo' : 'Cargar directorio',
+        tooltip: icon == Icons.add_to_photos
+            ? 'Añadir archivo'
+            : 'Cargar directorio',
       ),
     );
   }

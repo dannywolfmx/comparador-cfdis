@@ -567,7 +567,10 @@ class CFDIDashboard extends StatelessWidget {
   }
 
   Widget _buildFinancialSummaryPanel(
-      BuildContext context, SummaryMetrics metrics, bool isMobile) {
+    BuildContext context,
+    SummaryMetrics metrics,
+    bool isMobile,
+  ) {
     final theme = Theme.of(context);
 
     return ModernCard(
@@ -687,7 +690,9 @@ class CFDIDashboard extends StatelessWidget {
   }
 
   Widget _buildDesktopSummaryGrid(
-      BuildContext context, SummaryMetrics metrics) {
+    BuildContext context,
+    SummaryMetrics metrics,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -776,7 +781,8 @@ class CFDIDashboard extends StatelessWidget {
         border: isHighlighted
             ? Border.all(color: color.withValues(alpha: 0.3), width: 2)
             : Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+                color: theme.colorScheme.outline.withValues(alpha: 0.2),
+              ),
         boxShadow: isHighlighted
             ? [
                 BoxShadow(
