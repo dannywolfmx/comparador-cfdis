@@ -3,6 +3,7 @@ import 'package:comparador_cfdis/models/cfdi.dart';
 import 'package:comparador_cfdis/widgets/modern/modern_card.dart';
 import 'package:comparador_cfdis/widgets/cfdi_export_widget.dart';
 import 'package:comparador_cfdis/theme/app_dimensions.dart';
+import 'package:comparador_cfdis/theme/adaptive_colors.dart';
 import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
 import 'package:comparador_cfdis/bloc/cfdi_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -511,6 +512,8 @@ class CFDIDashboard extends StatelessWidget {
   }
 
   Widget _buildDashboardActions(BuildContext context) {
+    final actionColors = AdaptiveColors.getActionColors(context);
+
     return Row(
       children: [
         _buildActionButton(
@@ -520,7 +523,8 @@ class CFDIDashboard extends StatelessWidget {
           onPressed: () {
             context.read<CFDIBloc>().add(LoadCFDIsFromFile());
           },
-          color: Colors.blue,
+          color: actionColors.addFile,
+          foregroundColor: actionColors.onAddFile,
         ),
         const SizedBox(width: 8),
         _buildActionButton(
@@ -530,7 +534,8 @@ class CFDIDashboard extends StatelessWidget {
           onPressed: () {
             context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
           },
-          color: Colors.green,
+          color: actionColors.loadDirectory,
+          foregroundColor: actionColors.onLoadDirectory,
         ),
       ],
     );
@@ -542,6 +547,7 @@ class CFDIDashboard extends StatelessWidget {
     required String label,
     required VoidCallback onPressed,
     required Color color,
+    Color? foregroundColor,
   }) {
     final isMobile = AppLayout.isMobile(context);
 
@@ -554,7 +560,8 @@ class CFDIDashboard extends StatelessWidget {
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor:
+            foregroundColor ?? AdaptiveColors.getContrastingTextColor(color),
         padding: EdgeInsets.symmetric(
           horizontal: isMobile ? 12 : 16,
           vertical: isMobile ? 8 : 12,
@@ -572,10 +579,11 @@ class CFDIDashboard extends StatelessWidget {
     bool isMobile,
   ) {
     final theme = Theme.of(context);
+    final adaptiveColors = AdaptiveColors.getFinancialMetricColors(context);
 
     return ModernCard(
       padding: const EdgeInsets.all(20),
-      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+      color: AdaptiveColors.getElevatedSurface(context, elevation: 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -598,15 +606,19 @@ class CFDIDashboard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (isMobile)
-            _buildMobileSummaryGrid(context, metrics)
+            _buildMobileSummaryGrid(context, metrics, adaptiveColors)
           else
-            _buildDesktopSummaryGrid(context, metrics),
+            _buildDesktopSummaryGrid(context, metrics, adaptiveColors),
         ],
       ),
     );
   }
 
-  Widget _buildMobileSummaryGrid(BuildContext context, SummaryMetrics metrics) {
+  Widget _buildMobileSummaryGrid(
+    BuildContext context,
+    SummaryMetrics metrics,
+    AdaptiveColorSet adaptiveColors,
+  ) {
     return Column(
       children: [
         // Primera fila - métricas principales
@@ -692,6 +704,7 @@ class CFDIDashboard extends StatelessWidget {
   Widget _buildDesktopSummaryGrid(
     BuildContext context,
     SummaryMetrics metrics,
+    AdaptiveColorSet adaptiveColors,
   ) {
     return Row(
       children: [

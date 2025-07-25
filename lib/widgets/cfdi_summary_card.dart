@@ -1,6 +1,7 @@
 import 'package:comparador_cfdis/bloc/cfdi_bloc.dart';
 import 'package:comparador_cfdis/bloc/cfdi_event.dart';
 import 'package:comparador_cfdis/bloc/cfdi_state.dart';
+import 'package:comparador_cfdis/theme/adaptive_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,6 +16,11 @@ class CFDISummaryCard extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
+        // Obtener colores adaptativos
+        final adaptiveColors = AdaptiveColors.getFinancialMetricColors(context);
+        final actionColors = AdaptiveColors.getActionColors(context);
+        final theme = Theme.of(context);
+
         // Formato para valores monetarios
         String formatCurrency(double value) {
           return '\$${value.toStringAsFixed(2).replaceAll(RegExp(r'(?<=\d)(?=(\d{3})+(?!\d))'), ',')}';
@@ -24,22 +30,19 @@ class CFDISummaryCard extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Theme.of(context).primaryColor.withValues(alpha: 0.12),
-                Theme.of(context).primaryColor.withValues(alpha: 0.06),
-              ],
+            gradient: AdaptiveColors.getAdaptiveGradient(
+              context,
+              theme.colorScheme.primary,
             ),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.25),
+              color:
+                  AdaptiveColors.getAdaptiveBorderColor(context, opacity: 0.3),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
+                color: adaptiveColors.shadow.withValues(alpha: 0.08),
                 blurRadius: 6,
                 offset: const Offset(0, -2),
               ),
@@ -49,10 +52,22 @@ class CFDISummaryCard extends StatelessWidget {
             builder: (context, constraints) {
               // Si el espacio es muy reducido, mostrar versión compacta
               if (constraints.maxWidth < 800) {
-                return _buildCompactLayout(context, state, formatCurrency);
+                return _buildCompactLayout(
+                  context,
+                  state,
+                  formatCurrency,
+                  adaptiveColors,
+                  actionColors,
+                );
               }
               // Versión completa para pantallas grandes
-              return _buildFullLayout(context, state, formatCurrency);
+              return _buildFullLayout(
+                context,
+                state,
+                formatCurrency,
+                adaptiveColors,
+                actionColors,
+              );
             },
           ),
         );
@@ -66,6 +81,7 @@ class CFDISummaryCard extends StatelessWidget {
     required String label,
     required VoidCallback onPressed,
     required Color color,
+    Color? foregroundColor,
   }) {
     return ElevatedButton.icon(
       onPressed: onPressed,
@@ -76,7 +92,8 @@ class CFDISummaryCard extends StatelessWidget {
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor:
+            foregroundColor ?? AdaptiveColors.getContrastingTextColor(color),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -129,16 +146,22 @@ class CFDISummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildVerticalDivider() {
+  Widget _buildVerticalDivider([AdaptiveColorSet? adaptiveColors]) {
     return Container(
       height: 32,
       width: 1,
-      color: Colors.grey.withValues(alpha: 0.3),
+      color: adaptiveColors?.outline.withValues(alpha: 0.3) ??
+          Colors.grey.withValues(alpha: 0.3),
     );
   }
 
-  Widget _buildFullLayout(BuildContext context, CFDILoaded state,
-      String Function(double) formatCurrency) {
+  Widget _buildFullLayout(
+    BuildContext context,
+    CFDILoaded state,
+    String Function(double) formatCurrency,
+    AdaptiveColorSet adaptiveColors,
+    AdaptiveActionColors actionColors,
+  ) {
     return Row(
       children: [
         // Botones de acción
@@ -151,7 +174,8 @@ class CFDISummaryCard extends StatelessWidget {
               onPressed: () {
                 context.read<CFDIBloc>().add(LoadCFDIsFromFile());
               },
-              color: Colors.blue,
+              color: actionColors.addFile,
+              foregroundColor: actionColors.onAddFile,
             ),
             const SizedBox(width: 8),
             _buildActionButton(
@@ -161,7 +185,8 @@ class CFDISummaryCard extends StatelessWidget {
               onPressed: () {
                 context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
               },
-              color: Colors.green,
+              color: actionColors.loadDirectory,
+              foregroundColor: actionColors.onLoadDirectory,
             ),
           ],
         ),
@@ -178,17 +203,17 @@ class CFDISummaryCard extends StatelessWidget {
                 label: 'SubTotal',
                 value: formatCurrency(state.cfdiInformation.subtotal),
                 icon: Icons.account_balance,
-                color: Colors.blue,
+                color: adaptiveColors.subtotal,
               ),
-              _buildVerticalDivider(),
+              _buildVerticalDivider(adaptiveColors),
               _buildCompactMetric(
                 context,
                 label: 'Descuento',
                 value: formatCurrency(state.cfdiInformation.descuento),
                 icon: Icons.discount,
-                color: Colors.orange,
+                color: adaptiveColors.descuento,
               ),
-              _buildVerticalDivider(),
+              _buildVerticalDivider(adaptiveColors),
               _buildCompactMetric(
                 context,
                 label: 'Sub. - Desc.',
@@ -197,9 +222,9 @@ class CFDISummaryCard extends StatelessWidget {
                       state.cfdiInformation.descuento,
                 ),
                 icon: Icons.calculate,
-                color: Colors.green,
+                color: adaptiveColors.baseGravable,
               ),
-              _buildVerticalDivider(),
+              _buildVerticalDivider(adaptiveColors),
               _buildCompactMetric(
                 context,
                 label: 'IVA (16%)',
@@ -209,18 +234,18 @@ class CFDISummaryCard extends StatelessWidget {
                       0.16,
                 ),
                 icon: Icons.receipt,
-                color: Colors.indigo,
+                color: adaptiveColors.iva,
               ),
-              _buildVerticalDivider(),
+              _buildVerticalDivider(adaptiveColors),
               _buildCompactMetric(
                 context,
                 label: 'Total',
                 value: formatCurrency(state.cfdiInformation.total),
                 icon: Icons.price_check,
-                color: Colors.teal,
+                color: adaptiveColors.total,
                 isHighlighted: true,
               ),
-              _buildVerticalDivider(),
+              _buildVerticalDivider(adaptiveColors),
               _buildCompactMetric(
                 context,
                 label: 'Total + IVA',
@@ -230,7 +255,7 @@ class CFDISummaryCard extends StatelessWidget {
                       1.16,
                 ),
                 icon: Icons.calculate_outlined,
-                color: Colors.purple,
+                color: adaptiveColors.totalConIva,
                 isHighlighted: true,
               ),
             ],
@@ -270,8 +295,13 @@ class CFDISummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactLayout(BuildContext context, CFDILoaded state,
-      String Function(double) formatCurrency) {
+  Widget _buildCompactLayout(
+    BuildContext context,
+    CFDILoaded state,
+    String Function(double) formatCurrency,
+    AdaptiveColorSet adaptiveColors,
+    AdaptiveActionColors actionColors,
+  ) {
     return Column(
       children: [
         // Primera fila: Botones de acción y contador
@@ -286,7 +316,8 @@ class CFDISummaryCard extends StatelessWidget {
                   onPressed: () {
                     context.read<CFDIBloc>().add(LoadCFDIsFromFile());
                   },
-                  color: Colors.blue,
+                  color: actionColors.addFile,
+                  foregroundColor: actionColors.onAddFile,
                 ),
                 const SizedBox(width: 6),
                 _buildCompactActionButton(
@@ -295,7 +326,8 @@ class CFDISummaryCard extends StatelessWidget {
                   onPressed: () {
                     context.read<CFDIBloc>().add(LoadCFDIsFromDirectory());
                   },
-                  color: Colors.green,
+                  color: actionColors.loadDirectory,
+                  foregroundColor: actionColors.onLoadDirectory,
                 ),
               ],
             ),
@@ -338,13 +370,13 @@ class CFDISummaryCard extends StatelessWidget {
               context,
               label: 'SubTotal',
               value: formatCurrency(state.cfdiInformation.subtotal),
-              color: Colors.blue,
+              color: adaptiveColors.subtotal,
             ),
             _buildMiniMetric(
               context,
               label: 'Descuento',
               value: formatCurrency(state.cfdiInformation.descuento),
-              color: Colors.orange,
+              color: adaptiveColors.descuento,
             ),
             _buildMiniMetric(
               context,
@@ -354,7 +386,7 @@ class CFDISummaryCard extends StatelessWidget {
                         state.cfdiInformation.descuento) *
                     0.16,
               ),
-              color: Colors.indigo,
+              color: adaptiveColors.iva,
             ),
           ],
         ),
@@ -369,7 +401,7 @@ class CFDISummaryCard extends StatelessWidget {
               context,
               label: 'Total',
               value: formatCurrency(state.cfdiInformation.total),
-              color: Colors.teal,
+              color: adaptiveColors.total,
               isHighlighted: true,
             ),
             _buildMiniMetric(
@@ -380,7 +412,7 @@ class CFDISummaryCard extends StatelessWidget {
                         state.cfdiInformation.descuento) *
                     1.16,
               ),
-              color: Colors.purple,
+              color: adaptiveColors.totalConIva,
               isHighlighted: true,
             ),
           ],
@@ -394,7 +426,11 @@ class CFDISummaryCard extends StatelessWidget {
     required IconData icon,
     required VoidCallback onPressed,
     required Color color,
+    Color? foregroundColor,
   }) {
+    final iconColor =
+        foregroundColor ?? AdaptiveColors.getContrastingTextColor(color);
+
     return Container(
       decoration: BoxDecoration(
         color: color,
@@ -403,7 +439,7 @@ class CFDISummaryCard extends StatelessWidget {
       child: IconButton(
         onPressed: onPressed,
         icon: Icon(icon, size: 16),
-        color: Colors.white,
+        color: iconColor,
         padding: const EdgeInsets.all(6),
         constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
         tooltip: icon == Icons.add_to_photos

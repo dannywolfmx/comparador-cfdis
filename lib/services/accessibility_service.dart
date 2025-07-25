@@ -85,7 +85,10 @@ class AccessibilityService {
 
   /// Obtener colores con contraste apropiado
   Color getAccessibleColor(
-      Color baseColor, Color backgroundColor, BuildContext context) {
+    Color baseColor,
+    Color backgroundColor,
+    BuildContext context,
+  ) {
     if (!_isHighContrastEnabled) {
       return baseColor;
     }

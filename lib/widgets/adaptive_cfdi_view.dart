@@ -41,8 +41,8 @@ class _AdaptiveCFDIViewState extends State<AdaptiveCFDIView> {
             Expanded(
               child: shouldUseListView
                   ? CFDIListView(
-                      cfdis:
-                          widget.cfdis) // Ya tiene su propia barra de resumen
+                      cfdis: widget.cfdis,
+                    ) // Ya tiene su propia barra de resumen
                   : Column(
                       children: [
                         // Vista de tabla
@@ -136,7 +136,10 @@ class _AdaptiveCFDIViewState extends State<AdaptiveCFDIView> {
   }
 
   Widget _buildTableView(
-      BuildContext context, BoxConstraints constraints, bool isTablet) {
+    BuildContext context,
+    BoxConstraints constraints,
+    bool isTablet,
+  ) {
     // Ajustar la tabla según el espacio disponible
     return Container(
       decoration: BoxDecoration(

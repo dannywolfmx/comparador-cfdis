@@ -238,9 +238,11 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
                 setState(() {
                   _isFilterPanelCollapsed = !_isFilterPanelCollapsed;
                 });
-                announceMessage(_isFilterPanelCollapsed
-                    ? 'Panel de filtros colapsado'
-                    : 'Panel de filtros expandido');
+                announceMessage(
+                  _isFilterPanelCollapsed
+                      ? 'Panel de filtros colapsado'
+                      : 'Panel de filtros expandido',
+                );
                 provideFeedback(AccessibilityFeedback.selection);
               },
             ),
@@ -379,7 +381,9 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
                     hint: 'Número total de documentos fiscales',
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(16),

@@ -25,6 +25,8 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocBuilder<CFDIBloc, CFDIState>(
       builder: (context, state) {
         return Column(
@@ -40,15 +42,22 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
                     _searchQuery = value.toLowerCase();
                   });
                 },
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: theme.colorScheme.onSurface),
                 decoration: InputDecoration(
                   hintText: 'Buscar forma de pago',
-                  hintStyle:
-                      TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                  prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.white70),
+                          icon: Icon(
+                            Icons.clear,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           onPressed: () {
                             _searchController.clear();
                             setState(() {
@@ -58,7 +67,7 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
                         )
                       : null,
                   filled: true,
-                  fillColor: Colors.white12,
+                  fillColor: theme.colorScheme.surfaceContainer,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
@@ -77,6 +86,7 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
 
   //Lista de checkbox para seleccionar la forma de pago
   Widget _buildFormasDePago(CFDILoaded state) {
+    final theme = Theme.of(context);
     final filteredFormas = formasDePago
         .where(
           (forma) =>
@@ -91,7 +101,7 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
           padding: const EdgeInsets.all(16.0),
           child: Text(
             'No se encontraron resultados',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
           ),
         ),
       );
@@ -104,7 +114,7 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
         );
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 2),
-          color: Colors.white.withValues(alpha: 0.05),
+          color: theme.colorScheme.surfaceContainerLow,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),
@@ -115,13 +125,13 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: theme.colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     formaPago.id,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimaryContainer,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -131,14 +141,14 @@ class _FiltroFormaPagoState extends State<FiltroFormaPago> {
                 Expanded(
                   child: Text(
                     formaPago.nombre,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                   ),
                 ),
               ],
             ),
             value: isSelected,
-            activeColor: Colors.white,
-            checkColor: Theme.of(context).primaryColor,
+            activeColor: theme.colorScheme.primary,
+            checkColor: theme.colorScheme.onPrimary,
             onChanged: (value) {
               if (value == null) return;
               context.read<CFDIBloc>().add(FilterCFDIs(formaPago));

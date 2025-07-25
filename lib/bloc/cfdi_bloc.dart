@@ -246,8 +246,9 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
       // Buscar en serie y folio
       final serie = cfdi.serie?.toLowerCase() ?? '';
       final folio = cfdi.folio?.toLowerCase() ?? '';
-      if (serie.contains(searchQuery) || folio.contains(searchQuery))
+      if (serie.contains(searchQuery) || folio.contains(searchQuery)) {
         return true;
+      }
 
       return false;
     }).toList();

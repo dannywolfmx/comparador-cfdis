@@ -24,6 +24,8 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocBuilder<CFDIBloc, CFDIState>(
       builder: (context, state) {
         return Column(
@@ -39,15 +41,22 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
                     _searchQuery = value.toLowerCase();
                   });
                 },
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: theme.colorScheme.onSurface),
                 decoration: InputDecoration(
                   hintText: 'Buscar tipo de comprobante',
-                  hintStyle:
-                      TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                  prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.white70),
+                          icon: Icon(
+                            Icons.clear,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           onPressed: () {
                             _searchController.clear();
                             setState(() {
@@ -57,7 +66,7 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
                         )
                       : null,
                   filled: true,
-                  fillColor: Colors.white12,
+                  fillColor: theme.colorScheme.surfaceContainer,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
@@ -74,6 +83,7 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
   }
 
   Widget _buildTiposDeComprobante(CFDILoaded state) {
+    final theme = Theme.of(context);
     final filteredTipos = tiposDeComprobante
         .where((tipo) => tipo.nombre.toLowerCase().contains(_searchQuery))
         .toList();
@@ -84,7 +94,7 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
           padding: const EdgeInsets.all(16.0),
           child: Text(
             'No se encontraron resultados',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
           ),
         ),
       );
@@ -97,11 +107,12 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
               filter is TipoComprobante && filter.id == tipoComprobante.id,
         );
         // Obtener color según el tipo de comprobante
-        final Color tipoColor = _getColorForTipoComprobante(tipoComprobante.id);
+        final Color tipoColor =
+            _getColorForTipoComprobante(context, tipoComprobante.id);
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 2),
-          color: Colors.white.withValues(alpha: 0.05),
+          color: theme.colorScheme.surfaceContainerLow,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),
@@ -129,14 +140,14 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
                 Expanded(
                   child: Text(
                     tipoComprobante.nombre,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                   ),
                 ),
               ],
             ),
             value: isSelected,
-            activeColor: Colors.white,
-            checkColor: Theme.of(context).primaryColor,
+            activeColor: theme.colorScheme.primary,
+            checkColor: theme.colorScheme.onPrimary,
             onChanged: (value) {
               if (value == null) return;
               context.read<CFDIBloc>().add(FilterCFDIs(tipoComprobante));
@@ -150,20 +161,22 @@ class _FiltroTipoComprobanteState extends State<FiltroTipoComprobante> {
   }
 
   // Helper methods para colores y etiquetas de tipos de comprobante
-  Color _getColorForTipoComprobante(String tipo) {
+  Color _getColorForTipoComprobante(BuildContext context, String tipo) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     switch (tipo.toUpperCase()) {
       case 'I':
-        return Colors.green;
+        return isDark ? Colors.green.shade300 : Colors.green.shade700;
       case 'E':
-        return Colors.red;
+        return isDark ? Colors.red.shade300 : Colors.red.shade700;
       case 'T':
-        return Colors.blue;
+        return isDark ? Colors.blue.shade300 : Colors.blue.shade700;
       case 'N':
-        return Colors.purple;
+        return isDark ? Colors.purple.shade300 : Colors.purple.shade700;
       case 'P':
-        return Colors.orange;
+        return isDark ? Colors.orange.shade300 : Colors.orange.shade700;
       default:
-        return Colors.grey;
+        return isDark ? Colors.grey.shade300 : Colors.grey.shade700;
     }
   }
 

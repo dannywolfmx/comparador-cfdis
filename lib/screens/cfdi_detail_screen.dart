@@ -212,7 +212,8 @@ class _CFDIDetailScreenState extends State<CFDIDetailScreen>
                                 ),
                               );
                               announceMessage(
-                                  'Error: No se pudo abrir el archivo XML');
+                                'Error: No se pudo abrir el archivo XML',
+                              );
                               provideFeedback(AccessibilityFeedback.error);
                             } else {
                               announceMessage('Abriendo archivo XML');

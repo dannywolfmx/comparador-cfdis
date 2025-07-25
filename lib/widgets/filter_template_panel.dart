@@ -18,90 +18,120 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocBuilder<FilterTemplateBloc, FilterTemplateState>(
       builder: (context, state) {
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
+          margin: const EdgeInsets.symmetric(vertical: 2),
           elevation: 0,
-          color: Colors.white.withValues(alpha: 0.1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          color: theme.colorScheme.surfaceContainerHigh,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
           child: Column(
             children: [
-              // Encabezado del panel
-              ListTile(
-                onTap: () => setState(() => _isExpanded = !_isExpanded),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                leading: const Icon(
-                  Icons.filter_list_alt,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                title: const Text(
-                  'Plantillas de Filtros',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                subtitle: state is FilterTemplateLoaded
-                    ? Text(
-                        '${state.activeTemplates.length} activas de ${state.templates.length}',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
-                      )
-                    : null,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Botón para crear nueva plantilla
-                    IconButton(
-                      icon:
-                          const Icon(Icons.add, color: Colors.white, size: 18),
-                      onPressed: () => _showCreateTemplateDialog(context),
-                      tooltip: 'Crear nueva plantilla',
-                      padding: EdgeInsets.zero,
-                      constraints:
-                          const BoxConstraints(minWidth: 32, minHeight: 32),
-                    ),
-                    // Botón para limpiar todas las plantillas
-                    if (state is FilterTemplateLoaded &&
-                        state.activeTemplates.isNotEmpty)
-                      IconButton(
-                        icon: const Icon(
-                          Icons.clear_all,
-                          color: Colors.white,
+              // Encabezado del panel - similar a los filtros expandibles
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => setState(() => _isExpanded = !_isExpanded),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.filter_list_alt,
+                          color: theme.colorScheme.primary,
                           size: 18,
                         ),
-                        onPressed: () {
-                          final filterTemplateBloc =
-                              context.read<FilterTemplateBloc>();
-                          _clearAllTemplates(context, filterTemplateBloc);
-                        },
-                        tooltip: 'Limpiar todas las plantillas',
-                        padding: EdgeInsets.zero,
-                        constraints:
-                            const BoxConstraints(minWidth: 32, minHeight: 32),
-                      ),
-                    // Icono de expansión
-                    Icon(
-                      _isExpanded ? Icons.expand_less : Icons.expand_more,
-                      color: Colors.white,
-                      size: 18,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Plantillas de Filtros',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        // Botones de acción
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Botón para crear nueva plantilla
+                            IconButton(
+                              icon: Icon(
+                                Icons.add,
+                                color: theme.colorScheme.primary,
+                                size: 16,
+                              ),
+                              onPressed: () =>
+                                  _showCreateTemplateDialog(context),
+                              tooltip: 'Crear nueva plantilla',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                            ),
+                            // Botón para limpiar todas las plantillas
+                            if (state is FilterTemplateLoaded &&
+                                state.activeTemplates.isNotEmpty)
+                              IconButton(
+                                icon: Icon(
+                                  Icons.clear_all,
+                                  color: theme.colorScheme.error,
+                                  size: 16,
+                                ),
+                                onPressed: () {
+                                  final filterTemplateBloc =
+                                      context.read<FilterTemplateBloc>();
+                                  _clearAllTemplates(
+                                      context, filterTemplateBloc);
+                                },
+                                tooltip: 'Limpiar todas las plantillas',
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
+                              ),
+                            // Icono de expansión
+                            AnimatedRotation(
+                              turns: _isExpanded ? 0.5 : 0,
+                              duration: const Duration(milliseconds: 200),
+                              child: Icon(
+                                Icons.expand_more,
+                                color: theme.colorScheme.onSurfaceVariant,
+                                size: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
 
               // Contenido expandible
-              if (_isExpanded)
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  child: _buildTemplateContent(context, state),
-                ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                child: _isExpanded
+                    ? Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                        child: _buildTemplateContent(context, state),
+                      )
+                    : const SizedBox.shrink(),
+              ),
             ],
           ),
         );
@@ -113,16 +143,19 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
     BuildContext context,
     FilterTemplateState state,
   ) {
+    final theme = Theme.of(context);
+
     if (state is FilterTemplateLoading) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
+      return Padding(
+        padding: const EdgeInsets.all(16),
         child: Center(
           child: SizedBox(
             width: 20,
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
             ),
           ),
         ),
@@ -134,7 +167,10 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
         padding: const EdgeInsets.all(16),
         child: Text(
           state.message,
-          style: const TextStyle(color: Colors.redAccent),
+          style: TextStyle(
+            color: theme.colorScheme.error,
+            fontSize: 12,
+          ),
           textAlign: TextAlign.center,
         ),
       );
@@ -142,64 +178,59 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
 
     if (state is FilterTemplateLoaded) {
       if (state.templates.isEmpty) {
-        return const Padding(
-          padding: EdgeInsets.all(16),
+        return Padding(
+          padding: const EdgeInsets.all(16),
           child: Text(
             'No hay plantillas disponibles',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
             textAlign: TextAlign.center,
           ),
         );
       }
 
-      return Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            // Plantillas activas
-            if (state.activeTemplates.isNotEmpty) ...[
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Text(
-                    'Activas',
-                    style: TextStyle(
-                      color: Colors.greenAccent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Plantillas activas
+          if (state.activeTemplates.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Text(
+                'Activas',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              ...state.activeTemplates.map(
-                (template) => _buildTemplateCard(context, template, true),
-              ),
-              const SizedBox(height: 8),
-            ],
-
-            // Plantillas inactivas
-            if (state.templates.where((t) => !t.isActive).isNotEmpty) ...[
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Text(
-                    'Disponibles',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              ...state.templates.where((t) => !t.isActive).map(
-                    (template) => _buildTemplateCard(context, template, false),
-                  ),
-            ],
+            ),
+            ...state.activeTemplates.map(
+              (template) => _buildTemplateCard(context, template, true),
+            ),
+            const SizedBox(height: 8),
           ],
-        ),
+
+          // Plantillas inactivas
+          if (state.templates.where((t) => !t.isActive).isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Text(
+                'Disponibles',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ...state.templates.where((t) => !t.isActive).map(
+                  (template) => _buildTemplateCard(context, template, false),
+                ),
+          ],
+        ],
       );
     }
 
@@ -211,86 +242,138 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
     FilterTemplate template,
     bool isActive,
   ) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 2),
-      color: isActive
-          ? template.color.withValues(alpha: 0.2)
-          : Colors.white.withValues(alpha: 0.05),
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
+      decoration: BoxDecoration(
+        color: isActive
+            ? template.color.withValues(alpha: 0.1)
+            : theme.colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(6),
+        border: isActive
+            ? Border.all(
+                color: template.color.withValues(alpha: 0.3),
+                width: 1,
+              )
+            : Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                width: 1,
+              ),
+      ),
       child: ListTile(
         dense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         leading: Container(
-          width: 12,
-          height: 12,
+          width: 8,
+          height: 8,
           decoration: BoxDecoration(
             color: template.color,
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(4),
           ),
         ),
         title: Text(
           template.name,
-          style: TextStyle(
-            color: isActive ? Colors.white : Colors.white70,
-            fontSize: 14,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: isActive
+                ? theme.colorScheme.onSurface
+                : theme.colorScheme.onSurfaceVariant,
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+            fontSize: 12,
           ),
         ),
         subtitle: Text(
           '${template.filters.length} filtros',
-          style: TextStyle(
-            color: isActive ? Colors.white70 : Colors.white54,
-            fontSize: 11,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontSize: 10,
           ),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Switch para activar/desactivar
-            Switch(
-              value: isActive,
-              onChanged: (value) {
-                context.read<FilterTemplateBloc>().add(
-                      ToggleFilterTemplate(template.id, value),
-                    );
-              },
-              activeColor: template.color,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            Transform.scale(
+              scale: 0.8,
+              child: Switch(
+                value: isActive,
+                onChanged: (value) {
+                  context.read<FilterTemplateBloc>().add(
+                        ToggleFilterTemplate(template.id, value),
+                      );
+                },
+                activeColor: template.color,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
             // Menú de opciones
             PopupMenuButton<String>(
-              icon:
-                  const Icon(Icons.more_vert, color: Colors.white54, size: 16),
+              icon: Icon(
+                Icons.more_vert,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 14,
+              ),
               onSelected: (value) =>
                   _handleTemplateAction(context, template, value),
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'edit',
                   child: Row(
                     children: [
-                      Icon(Icons.edit, size: 16),
-                      SizedBox(width: 8),
-                      Text('Editar'),
+                      Icon(
+                        Icons.edit,
+                        size: 14,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Editar',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'duplicate',
                   child: Row(
                     children: [
-                      Icon(Icons.copy, size: 16),
-                      SizedBox(width: 8),
-                      Text('Duplicar'),
+                      Icon(
+                        Icons.copy,
+                        size: 14,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Duplicar',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 if (!template.id.startsWith('predefined_'))
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete, size: 16, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Eliminar', style: TextStyle(color: Colors.red)),
+                        Icon(
+                          Icons.delete,
+                          size: 14,
+                          color: theme.colorScheme.error,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Eliminar',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
                       ],
                     ),
                   ),
