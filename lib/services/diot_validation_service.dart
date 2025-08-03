@@ -60,7 +60,8 @@ class DIOTValidationService {
 
   /// Valida tipo de tercero y RFC
   static List<DIOTValidationError> _validateTipoTerceroAndRFC(
-      DIOTRecord record) {
+    DIOTRecord record,
+  ) {
     final List<DIOTValidationError> errors = [];
 
     switch (record.tipoTercero) {
@@ -123,7 +124,8 @@ class DIOTValidationService {
 
   /// Valida campos específicos de proveedor extranjero
   static List<DIOTValidationError> _validateProveedorExtranjero(
-      DIOTRecord record) {
+    DIOTRecord record,
+  ) {
     final List<DIOTValidationError> errors = [];
 
     // Número de identificación fiscal requerido
@@ -356,7 +358,8 @@ class DIOTValidationService {
 
   /// Valida configuración del lote
   static List<DIOTValidationError> _validateConfiguration(
-      DIOTConfiguration config) {
+    DIOTConfiguration config,
+  ) {
     final List<DIOTValidationError> errors = [];
 
     // Validar año
@@ -400,7 +403,8 @@ class DIOTValidationService {
 
   /// Valida RFCs duplicados en el lote
   static List<DIOTValidationError> _validateDuplicateRFCs(
-      List<DIOTRecord> records) {
+    List<DIOTRecord> records,
+  ) {
     final List<DIOTValidationError> errors = [];
     final Set<String> seenRFCs = {};
 

@@ -269,8 +269,13 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
         final isReadyForExport = validatedBatch.isReadyForExport;
 
         // Emitir estado de validación automática
-        emit(DIOTValidated(
-            validatedBatch, newValidationSummary, isReadyForExport));
+        emit(
+          DIOTValidated(
+            validatedBatch,
+            newValidationSummary,
+            isReadyForExport,
+          ),
+        );
       }
     } catch (e) {
       emit(DIOTError('Error al actualizar el registro: ${e.toString()}'));
@@ -543,7 +548,8 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
     }
 
     // Si no tiene clasificación de IVA cuando es necesaria
-    if (record.safeValorActos16Porciento > 0 && record.clasificacionIVA == null) {
+    if (record.safeValorActos16Porciento > 0 &&
+        record.clasificacionIVA == null) {
       return true;
     }
 

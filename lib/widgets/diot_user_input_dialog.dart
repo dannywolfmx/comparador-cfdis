@@ -566,8 +566,9 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
       }
 
       // Verificar clasificaciones si el record tiene valores de IVA
-      final bool hasIVAValues = (widget.record.valorActos16Porciento ?? 0) > 0 ||
-          (widget.record.ivaNoAcreditableSinRequisitos16 ?? 0) > 0;
+      final bool hasIVAValues =
+          (widget.record.valorActos16Porciento ?? 0) > 0 ||
+              (widget.record.ivaNoAcreditableSinRequisitos16 ?? 0) > 0;
 
       if (hasIVAValues) {
         if (_selectedClasificacionRegional == null) {

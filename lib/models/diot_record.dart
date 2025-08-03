@@ -355,13 +355,17 @@ class DIOTRecord extends Equatable {
       _formatNullableNumericValue(ivaAcreditableExclusivo16),
       _formatNullableNumericValue(ivaAcreditableProporcion16),
       _formatNullableNumericValue(
-          ivaAcreditableExclusivoImportacionTangibles16),
+        ivaAcreditableExclusivoImportacionTangibles16,
+      ),
       _formatNullableNumericValue(
-          ivaAcreditableProporcionImportacionTangibles16),
+        ivaAcreditableProporcionImportacionTangibles16,
+      ),
       _formatNullableNumericValue(
-          ivaAcreditableExclusivoImportacionIntangibles16),
+        ivaAcreditableExclusivoImportacionIntangibles16,
+      ),
       _formatNullableNumericValue(
-          ivaAcreditableProporcionImportacionIntangibles16),
+        ivaAcreditableProporcionImportacionIntangibles16,
+      ),
       _formatNullableNumericValue(ivaNoAcreditableProporcionFronteraNorte),
       _formatNullableNumericValue(ivaNoAcreditableSinRequisitosFronteraNorte),
       _formatNullableNumericValue(ivaNoAcreditableExentasFronteraNorte),
@@ -375,22 +379,29 @@ class DIOTRecord extends Equatable {
       _formatNullableNumericValue(ivaNoAcreditableExentas16),
       _formatNullableNumericValue(ivaNoAcreditableNoObjeto16),
       _formatNullableNumericValue(
-          ivaNoAcreditableProporcionImportacionTangibles16),
+        ivaNoAcreditableProporcionImportacionTangibles16,
+      ),
       _formatNullableNumericValue(
-          ivaNoAcreditableSinRequisitosImportacionTangibles16),
+        ivaNoAcreditableSinRequisitosImportacionTangibles16,
+      ),
       _formatNullableNumericValue(
-          ivaNoAcreditableExentasImportacionTangibles16),
+        ivaNoAcreditableExentasImportacionTangibles16,
+      ),
       _formatNullableNumericValue(
-          ivaNoAcreditableNoObjetoImportacionTangibles16),
+        ivaNoAcreditableNoObjetoImportacionTangibles16,
+      ),
       _formatNullableNumericValue(
-          ivaNoAcreditableProporcionImportacionIntangibles16),
+        ivaNoAcreditableProporcionImportacionIntangibles16,
+      ),
       _formatNullableNumericValue(
         ivaNoAcreditableSinRequisitosImportacionIntangibles16,
       ),
       _formatNullableNumericValue(
-          ivaNoAcreditableExentasImportacionIntangibles16),
+        ivaNoAcreditableExentasImportacionIntangibles16,
+      ),
       _formatNullableNumericValue(
-          ivaNoAcreditableNoObjetoImportacionIntangibles16),
+        ivaNoAcreditableNoObjetoImportacionIntangibles16,
+      ),
       _formatNullableNumericValue(ivaRetenido),
       _formatNullableNumericValue(importacionExentos),
       _formatNullableNumericValue(actosExentos),
@@ -409,7 +420,8 @@ class DIOTRecord extends Equatable {
     if (value == null) {
       return ''; // Campo vacío cuando no aplica
     }
-    return value.toInt().toString(); // Incluye 0 como valor legítimo
+    return value
+        .toStringAsFixed(2); // Formato con 2 decimales para valores legítimos
   }
 
   /// Helper para obtener valor numérico tratando null como 0
@@ -417,13 +429,14 @@ class DIOTRecord extends Equatable {
   double get safeValorActosFronteraNorte => valorActosFronteraNorte ?? 0;
   double get safeValorActosFronteraSur => valorActosFronteraSur ?? 0;
   double get safeIvaAcreditableExclusivo16 => ivaAcreditableExclusivo16 ?? 0;
-  double get safeIvaNoAcreditableSinRequisitos16 => ivaNoAcreditableSinRequisitos16 ?? 0;
+  double get safeIvaNoAcreditableSinRequisitos16 =>
+      ivaNoAcreditableSinRequisitos16 ?? 0;
 
   /// Indica si el registro tiene valores de IVA significativos
-  bool get hasIVAValues => 
-    safeValorActos16Porciento > 0 ||
-    safeValorActosFronteraNorte > 0 ||
-    safeValorActosFronteraSur > 0;
+  bool get hasIVAValues =>
+      safeValorActos16Porciento > 0 ||
+      safeValorActosFronteraNorte > 0 ||
+      safeValorActosFronteraSur > 0;
 
   @override
   List<Object?> get props => [

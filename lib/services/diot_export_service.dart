@@ -194,7 +194,8 @@ class DIOTExportService {
         if (record.numeroIdentificacionFiscal == null ||
             record.numeroIdentificacionFiscal!.isEmpty) {
           errors.add(
-              'Línea $lineNumber: Número de identificación fiscal requerido');
+            'Línea $lineNumber: Número de identificación fiscal requerido',
+          );
         }
         if (record.nombreExtranjero == null ||
             record.nombreExtranjero!.isEmpty) {
@@ -208,7 +209,8 @@ class DIOTExportService {
       case TipoTercero.global:
         if (record.rfc != DIOTConstants.rfcProveedorGlobal) {
           errors.add(
-              'Línea $lineNumber: RFC global debe ser ${DIOTConstants.rfcProveedorGlobal}');
+            'Línea $lineNumber: RFC global debe ser ${DIOTConstants.rfcProveedorGlobal}',
+          );
         }
         break;
     }
@@ -232,7 +234,8 @@ class DIOTExportService {
     for (final value in numericFields) {
       if ((value ?? 0) < 0) {
         errors.add(
-            'Línea $lineNumber: Valores numéricos no pueden ser negativos');
+          'Línea $lineNumber: Valores numéricos no pueden ser negativos',
+        );
         break;
       }
       if ((value ?? 0) > DIOTConstants.maxNumericValue) {
@@ -281,7 +284,8 @@ class DIOTExportService {
     buffer.writeln('Fecha de exportación: ${DateTime.now()}');
     buffer.writeln('Archivo generado: ${path.basename(exportPath)}');
     buffer.writeln(
-        'Período: ${batch.configuration.month}/${batch.configuration.year}');
+      'Período: ${batch.configuration.month}/${batch.configuration.year}',
+    );
     buffer.writeln('');
 
     buffer.writeln('=== ESTADÍSTICAS ===');
