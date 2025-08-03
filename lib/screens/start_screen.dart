@@ -10,6 +10,7 @@ import 'package:comparador_cfdis/widgets/modern/modern_scaffold.dart';
 import 'package:comparador_cfdis/widgets/accessibility/accessible_widget.dart';
 import 'package:comparador_cfdis/services/accessibility_service.dart';
 import 'package:comparador_cfdis/theme/app_dimensions.dart';
+import 'package:comparador_cfdis/screens/diot_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -372,6 +373,22 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
               ),
             ),
             const Spacer(),
+            // Botón DIOT
+            Semantics(
+              label: 'Generar DIOT 2025',
+              hint:
+                  'Abrir módulo para generar Declaración Informativa de Operaciones con Terceros',
+              child: ElevatedButton.icon(
+                onPressed: () => _navigateToDIOT(context),
+                icon: const Icon(Icons.assignment),
+                label: const Text('DIOT 2025'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
             // Información adicional
             BlocBuilder<CFDIBloc, CFDIState>(
               builder: (context, state) {
@@ -417,6 +434,29 @@ class _StartScreenState extends State<StartScreen> with AccessibilityMixin {
         ),
       ),
     );
+  }
+
+  /// Navegar al módulo DIOT
+  void _navigateToDIOT(BuildContext context) {
+    // Obtener el estado actual de CFDIs
+    final cfdiState = context.read<CFDIBloc>().state;
+    if (cfdiState is CFDILoaded) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => DIOTScreen(cfdis: cfdiState.cfdis),
+        ),
+      );
+      announceMessage('Navegando al módulo DIOT 2025');
+      provideFeedback(AccessibilityFeedback.selection);
+    } else {
+      // Mostrar mensaje de error si no hay CFDIs cargados
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Primero debes cargar CFDIs para usar el módulo DIOT'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 
   /// Anunciar cambio de vista para accesibilidad
