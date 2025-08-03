@@ -16,58 +16,58 @@ class DIOTRecord extends Equatable {
   final EfectosFiscales efectosFiscales;
 
   // Valores calculados desde CFDIs
-  final double valorActosFronteraNorte;
-  final double devolucionesFronteraNorte;
-  final double valorActosFronteraSur;
-  final double devolucionesFronteraSur;
-  final double valorActos16Porciento;
-  final double devoluciones16Porciento;
-  final double valorImportacionTangibles16;
-  final double devolucionesImportacionTangibles16;
-  final double valorImportacionIntangibles16;
-  final double devolucionesImportacionIntangibles16;
+  final double? valorActosFronteraNorte;
+  final double? devolucionesFronteraNorte;
+  final double? valorActosFronteraSur;
+  final double? devolucionesFronteraSur;
+  final double? valorActos16Porciento;
+  final double? devoluciones16Porciento;
+  final double? valorImportacionTangibles16;
+  final double? devolucionesImportacionTangibles16;
+  final double? valorImportacionIntangibles16;
+  final double? devolucionesImportacionIntangibles16;
 
   // IVA acreditable (requiere clasificación del usuario)
-  final double ivaAcreditableExclusivoFronteraNorte;
-  final double ivaAcreditableProporcionFronteraNorte;
-  final double ivaAcreditableExclusivoFronteraSur;
-  final double ivaAcreditableProporcionFronteraSur;
-  final double ivaAcreditableExclusivo16;
-  final double ivaAcreditableProporcion16;
-  final double ivaAcreditableExclusivoImportacionTangibles16;
-  final double ivaAcreditableProporcionImportacionTangibles16;
-  final double ivaAcreditableExclusivoImportacionIntangibles16;
-  final double ivaAcreditableProporcionImportacionIntangibles16;
+  final double? ivaAcreditableExclusivoFronteraNorte;
+  final double? ivaAcreditableProporcionFronteraNorte;
+  final double? ivaAcreditableExclusivoFronteraSur;
+  final double? ivaAcreditableProporcionFronteraSur;
+  final double? ivaAcreditableExclusivo16;
+  final double? ivaAcreditableProporcion16;
+  final double? ivaAcreditableExclusivoImportacionTangibles16;
+  final double? ivaAcreditableProporcionImportacionTangibles16;
+  final double? ivaAcreditableExclusivoImportacionIntangibles16;
+  final double? ivaAcreditableProporcionImportacionIntangibles16;
 
   // IVA no acreditable
-  final double ivaNoAcreditableProporcionFronteraNorte;
-  final double ivaNoAcreditableSinRequisitosFronteraNorte;
-  final double ivaNoAcreditableExentasFronteraNorte;
-  final double ivaNoAcreditableNoObjetoFronteraNorte;
-  final double ivaNoAcreditableProporcionFronteraSur;
-  final double ivaNoAcreditableSinRequisitosFronteraSur;
-  final double ivaNoAcreditableExentasFronteraSur;
-  final double ivaNoAcreditableNoObjetoFronteraSur;
-  final double ivaNoAcreditableProporcion16;
-  final double ivaNoAcreditableSinRequisitos16;
-  final double ivaNoAcreditableExentas16;
-  final double ivaNoAcreditableNoObjeto16;
-  final double ivaNoAcreditableProporcionImportacionTangibles16;
-  final double ivaNoAcreditableSinRequisitosImportacionTangibles16;
-  final double ivaNoAcreditableExentasImportacionTangibles16;
-  final double ivaNoAcreditableNoObjetoImportacionTangibles16;
-  final double ivaNoAcreditableProporcionImportacionIntangibles16;
-  final double ivaNoAcreditableSinRequisitosImportacionIntangibles16;
-  final double ivaNoAcreditableExentasImportacionIntangibles16;
-  final double ivaNoAcreditableNoObjetoImportacionIntangibles16;
+  final double? ivaNoAcreditableProporcionFronteraNorte;
+  final double? ivaNoAcreditableSinRequisitosFronteraNorte;
+  final double? ivaNoAcreditableExentasFronteraNorte;
+  final double? ivaNoAcreditableNoObjetoFronteraNorte;
+  final double? ivaNoAcreditableProporcionFronteraSur;
+  final double? ivaNoAcreditableSinRequisitosFronteraSur;
+  final double? ivaNoAcreditableExentasFronteraSur;
+  final double? ivaNoAcreditableNoObjetoFronteraSur;
+  final double? ivaNoAcreditableProporcion16;
+  final double? ivaNoAcreditableSinRequisitos16;
+  final double? ivaNoAcreditableExentas16;
+  final double? ivaNoAcreditableNoObjeto16;
+  final double? ivaNoAcreditableProporcionImportacionTangibles16;
+  final double? ivaNoAcreditableSinRequisitosImportacionTangibles16;
+  final double? ivaNoAcreditableExentasImportacionTangibles16;
+  final double? ivaNoAcreditableNoObjetoImportacionTangibles16;
+  final double? ivaNoAcreditableProporcionImportacionIntangibles16;
+  final double? ivaNoAcreditableSinRequisitosImportacionIntangibles16;
+  final double? ivaNoAcreditableExentasImportacionIntangibles16;
+  final double? ivaNoAcreditableNoObjetoImportacionIntangibles16;
 
   // Otros campos
-  final double ivaRetenido;
-  final double importacionExentos;
-  final double actosExentos;
-  final double actosTasaCero;
-  final double actosNoObjetoNacional;
-  final double actosNoObjetoSinEstablecimiento;
+  final double? ivaRetenido;
+  final double? importacionExentos;
+  final double? actosExentos;
+  final double? actosTasaCero;
+  final double? actosNoObjetoNacional;
+  final double? actosNoObjetoSinEstablecimiento;
 
   // Estado de validación
   final List<DIOTValidationError> validationErrors;
@@ -84,52 +84,52 @@ class DIOTRecord extends Equatable {
     this.clasificacionRegional,
     this.clasificacionIVA,
     required this.efectosFiscales,
-    this.valorActosFronteraNorte = 0,
-    this.devolucionesFronteraNorte = 0,
-    this.valorActosFronteraSur = 0,
-    this.devolucionesFronteraSur = 0,
-    this.valorActos16Porciento = 0,
-    this.devoluciones16Porciento = 0,
-    this.valorImportacionTangibles16 = 0,
-    this.devolucionesImportacionTangibles16 = 0,
-    this.valorImportacionIntangibles16 = 0,
-    this.devolucionesImportacionIntangibles16 = 0,
-    this.ivaAcreditableExclusivoFronteraNorte = 0,
-    this.ivaAcreditableProporcionFronteraNorte = 0,
-    this.ivaAcreditableExclusivoFronteraSur = 0,
-    this.ivaAcreditableProporcionFronteraSur = 0,
-    this.ivaAcreditableExclusivo16 = 0,
-    this.ivaAcreditableProporcion16 = 0,
-    this.ivaAcreditableExclusivoImportacionTangibles16 = 0,
-    this.ivaAcreditableProporcionImportacionTangibles16 = 0,
-    this.ivaAcreditableExclusivoImportacionIntangibles16 = 0,
-    this.ivaAcreditableProporcionImportacionIntangibles16 = 0,
-    this.ivaNoAcreditableProporcionFronteraNorte = 0,
-    this.ivaNoAcreditableSinRequisitosFronteraNorte = 0,
-    this.ivaNoAcreditableExentasFronteraNorte = 0,
-    this.ivaNoAcreditableNoObjetoFronteraNorte = 0,
-    this.ivaNoAcreditableProporcionFronteraSur = 0,
-    this.ivaNoAcreditableSinRequisitosFronteraSur = 0,
-    this.ivaNoAcreditableExentasFronteraSur = 0,
-    this.ivaNoAcreditableNoObjetoFronteraSur = 0,
-    this.ivaNoAcreditableProporcion16 = 0,
-    this.ivaNoAcreditableSinRequisitos16 = 0,
-    this.ivaNoAcreditableExentas16 = 0,
-    this.ivaNoAcreditableNoObjeto16 = 0,
-    this.ivaNoAcreditableProporcionImportacionTangibles16 = 0,
-    this.ivaNoAcreditableSinRequisitosImportacionTangibles16 = 0,
-    this.ivaNoAcreditableExentasImportacionTangibles16 = 0,
-    this.ivaNoAcreditableNoObjetoImportacionTangibles16 = 0,
-    this.ivaNoAcreditableProporcionImportacionIntangibles16 = 0,
-    this.ivaNoAcreditableSinRequisitosImportacionIntangibles16 = 0,
-    this.ivaNoAcreditableExentasImportacionIntangibles16 = 0,
-    this.ivaNoAcreditableNoObjetoImportacionIntangibles16 = 0,
-    this.ivaRetenido = 0,
-    this.importacionExentos = 0,
-    this.actosExentos = 0,
-    this.actosTasaCero = 0,
-    this.actosNoObjetoNacional = 0,
-    this.actosNoObjetoSinEstablecimiento = 0,
+    this.valorActosFronteraNorte,
+    this.devolucionesFronteraNorte,
+    this.valorActosFronteraSur,
+    this.devolucionesFronteraSur,
+    this.valorActos16Porciento,
+    this.devoluciones16Porciento,
+    this.valorImportacionTangibles16,
+    this.devolucionesImportacionTangibles16,
+    this.valorImportacionIntangibles16,
+    this.devolucionesImportacionIntangibles16,
+    this.ivaAcreditableExclusivoFronteraNorte,
+    this.ivaAcreditableProporcionFronteraNorte,
+    this.ivaAcreditableExclusivoFronteraSur,
+    this.ivaAcreditableProporcionFronteraSur,
+    this.ivaAcreditableExclusivo16,
+    this.ivaAcreditableProporcion16,
+    this.ivaAcreditableExclusivoImportacionTangibles16,
+    this.ivaAcreditableProporcionImportacionTangibles16,
+    this.ivaAcreditableExclusivoImportacionIntangibles16,
+    this.ivaAcreditableProporcionImportacionIntangibles16,
+    this.ivaNoAcreditableProporcionFronteraNorte,
+    this.ivaNoAcreditableSinRequisitosFronteraNorte,
+    this.ivaNoAcreditableExentasFronteraNorte,
+    this.ivaNoAcreditableNoObjetoFronteraNorte,
+    this.ivaNoAcreditableProporcionFronteraSur,
+    this.ivaNoAcreditableSinRequisitosFronteraSur,
+    this.ivaNoAcreditableExentasFronteraSur,
+    this.ivaNoAcreditableNoObjetoFronteraSur,
+    this.ivaNoAcreditableProporcion16,
+    this.ivaNoAcreditableSinRequisitos16,
+    this.ivaNoAcreditableExentas16,
+    this.ivaNoAcreditableNoObjeto16,
+    this.ivaNoAcreditableProporcionImportacionTangibles16,
+    this.ivaNoAcreditableSinRequisitosImportacionTangibles16,
+    this.ivaNoAcreditableExentasImportacionTangibles16,
+    this.ivaNoAcreditableNoObjetoImportacionTangibles16,
+    this.ivaNoAcreditableProporcionImportacionIntangibles16,
+    this.ivaNoAcreditableSinRequisitosImportacionIntangibles16,
+    this.ivaNoAcreditableExentasImportacionIntangibles16,
+    this.ivaNoAcreditableNoObjetoImportacionIntangibles16,
+    this.ivaRetenido,
+    this.importacionExentos,
+    this.actosExentos,
+    this.actosTasaCero,
+    this.actosNoObjetoNacional,
+    this.actosNoObjetoSinEstablecimiento,
     this.validationErrors = const [],
     this.requiresUserInput = false,
   });
@@ -338,63 +338,92 @@ class DIOTRecord extends Equatable {
       tipoTercero == TipoTercero.extranjero ? (nombreExtranjero ?? '') : '',
       tipoTercero == TipoTercero.extranjero ? (paisResidenciaFiscal ?? '') : '',
       paisResidenciaFiscal == 'ZZZ' ? (especificarJurisdiccion ?? '') : '',
-      _formatNumericValue(valorActosFronteraNorte),
-      _formatNumericValue(devolucionesFronteraNorte),
-      _formatNumericValue(valorActosFronteraSur),
-      _formatNumericValue(devolucionesFronteraSur),
-      _formatNumericValue(valorActos16Porciento),
-      _formatNumericValue(devoluciones16Porciento),
-      _formatNumericValue(valorImportacionTangibles16),
-      _formatNumericValue(devolucionesImportacionTangibles16),
-      _formatNumericValue(valorImportacionIntangibles16),
-      _formatNumericValue(devolucionesImportacionIntangibles16),
-      _formatNumericValue(ivaAcreditableExclusivoFronteraNorte),
-      _formatNumericValue(ivaAcreditableProporcionFronteraNorte),
-      _formatNumericValue(ivaAcreditableExclusivoFronteraSur),
-      _formatNumericValue(ivaAcreditableProporcionFronteraSur),
-      _formatNumericValue(ivaAcreditableExclusivo16),
-      _formatNumericValue(ivaAcreditableProporcion16),
-      _formatNumericValue(ivaAcreditableExclusivoImportacionTangibles16),
-      _formatNumericValue(ivaAcreditableProporcionImportacionTangibles16),
-      _formatNumericValue(ivaAcreditableExclusivoImportacionIntangibles16),
-      _formatNumericValue(ivaAcreditableProporcionImportacionIntangibles16),
-      _formatNumericValue(ivaNoAcreditableProporcionFronteraNorte),
-      _formatNumericValue(ivaNoAcreditableSinRequisitosFronteraNorte),
-      _formatNumericValue(ivaNoAcreditableExentasFronteraNorte),
-      _formatNumericValue(ivaNoAcreditableNoObjetoFronteraNorte),
-      _formatNumericValue(ivaNoAcreditableProporcionFronteraSur),
-      _formatNumericValue(ivaNoAcreditableSinRequisitosFronteraSur),
-      _formatNumericValue(ivaNoAcreditableExentasFronteraSur),
-      _formatNumericValue(ivaNoAcreditableNoObjetoFronteraSur),
-      _formatNumericValue(ivaNoAcreditableProporcion16),
-      _formatNumericValue(ivaNoAcreditableSinRequisitos16),
-      _formatNumericValue(ivaNoAcreditableExentas16),
-      _formatNumericValue(ivaNoAcreditableNoObjeto16),
-      _formatNumericValue(ivaNoAcreditableProporcionImportacionTangibles16),
-      _formatNumericValue(ivaNoAcreditableSinRequisitosImportacionTangibles16),
-      _formatNumericValue(ivaNoAcreditableExentasImportacionTangibles16),
-      _formatNumericValue(ivaNoAcreditableNoObjetoImportacionTangibles16),
-      _formatNumericValue(ivaNoAcreditableProporcionImportacionIntangibles16),
-      _formatNumericValue(
+      _formatNullableNumericValue(valorActosFronteraNorte),
+      _formatNullableNumericValue(devolucionesFronteraNorte),
+      _formatNullableNumericValue(valorActosFronteraSur),
+      _formatNullableNumericValue(devolucionesFronteraSur),
+      _formatNullableNumericValue(valorActos16Porciento),
+      _formatNullableNumericValue(devoluciones16Porciento),
+      _formatNullableNumericValue(valorImportacionTangibles16),
+      _formatNullableNumericValue(devolucionesImportacionTangibles16),
+      _formatNullableNumericValue(valorImportacionIntangibles16),
+      _formatNullableNumericValue(devolucionesImportacionIntangibles16),
+      _formatNullableNumericValue(ivaAcreditableExclusivoFronteraNorte),
+      _formatNullableNumericValue(ivaAcreditableProporcionFronteraNorte),
+      _formatNullableNumericValue(ivaAcreditableExclusivoFronteraSur),
+      _formatNullableNumericValue(ivaAcreditableProporcionFronteraSur),
+      _formatNullableNumericValue(ivaAcreditableExclusivo16),
+      _formatNullableNumericValue(ivaAcreditableProporcion16),
+      _formatNullableNumericValue(
+          ivaAcreditableExclusivoImportacionTangibles16),
+      _formatNullableNumericValue(
+          ivaAcreditableProporcionImportacionTangibles16),
+      _formatNullableNumericValue(
+          ivaAcreditableExclusivoImportacionIntangibles16),
+      _formatNullableNumericValue(
+          ivaAcreditableProporcionImportacionIntangibles16),
+      _formatNullableNumericValue(ivaNoAcreditableProporcionFronteraNorte),
+      _formatNullableNumericValue(ivaNoAcreditableSinRequisitosFronteraNorte),
+      _formatNullableNumericValue(ivaNoAcreditableExentasFronteraNorte),
+      _formatNullableNumericValue(ivaNoAcreditableNoObjetoFronteraNorte),
+      _formatNullableNumericValue(ivaNoAcreditableProporcionFronteraSur),
+      _formatNullableNumericValue(ivaNoAcreditableSinRequisitosFronteraSur),
+      _formatNullableNumericValue(ivaNoAcreditableExentasFronteraSur),
+      _formatNullableNumericValue(ivaNoAcreditableNoObjetoFronteraSur),
+      _formatNullableNumericValue(ivaNoAcreditableProporcion16),
+      _formatNullableNumericValue(ivaNoAcreditableSinRequisitos16),
+      _formatNullableNumericValue(ivaNoAcreditableExentas16),
+      _formatNullableNumericValue(ivaNoAcreditableNoObjeto16),
+      _formatNullableNumericValue(
+          ivaNoAcreditableProporcionImportacionTangibles16),
+      _formatNullableNumericValue(
+          ivaNoAcreditableSinRequisitosImportacionTangibles16),
+      _formatNullableNumericValue(
+          ivaNoAcreditableExentasImportacionTangibles16),
+      _formatNullableNumericValue(
+          ivaNoAcreditableNoObjetoImportacionTangibles16),
+      _formatNullableNumericValue(
+          ivaNoAcreditableProporcionImportacionIntangibles16),
+      _formatNullableNumericValue(
         ivaNoAcreditableSinRequisitosImportacionIntangibles16,
       ),
-      _formatNumericValue(ivaNoAcreditableExentasImportacionIntangibles16),
-      _formatNumericValue(ivaNoAcreditableNoObjetoImportacionIntangibles16),
-      _formatNumericValue(ivaRetenido),
-      _formatNumericValue(importacionExentos),
-      _formatNumericValue(actosExentos),
-      _formatNumericValue(actosTasaCero),
-      _formatNumericValue(actosNoObjetoNacional),
-      _formatNumericValue(actosNoObjetoSinEstablecimiento),
+      _formatNullableNumericValue(
+          ivaNoAcreditableExentasImportacionIntangibles16),
+      _formatNullableNumericValue(
+          ivaNoAcreditableNoObjetoImportacionIntangibles16),
+      _formatNullableNumericValue(ivaRetenido),
+      _formatNullableNumericValue(importacionExentos),
+      _formatNullableNumericValue(actosExentos),
+      _formatNullableNumericValue(actosTasaCero),
+      _formatNullableNumericValue(actosNoObjetoNacional),
+      _formatNullableNumericValue(actosNoObjetoSinEstablecimiento),
       efectosFiscales.code,
     ].join('|');
   }
 
-  /// Formatea valores numéricos: convierte a entero sin decimales
-  /// Según especificación DIOT, todos los campos numéricos aceptan 0
-  String _formatNumericValue(double value) {
-    return value.toInt().toString();
+  /// Formatea valores numéricos nullable para DIOT:
+  /// - null = campo vacío (no aplica)
+  /// - 0.0 = "0" (valor cero legítimo)
+  /// - >0 = valor como entero
+  String _formatNullableNumericValue(double? value) {
+    if (value == null) {
+      return ''; // Campo vacío cuando no aplica
+    }
+    return value.toInt().toString(); // Incluye 0 como valor legítimo
   }
+
+  /// Helper para obtener valor numérico tratando null como 0
+  double get safeValorActos16Porciento => valorActos16Porciento ?? 0;
+  double get safeValorActosFronteraNorte => valorActosFronteraNorte ?? 0;
+  double get safeValorActosFronteraSur => valorActosFronteraSur ?? 0;
+  double get safeIvaAcreditableExclusivo16 => ivaAcreditableExclusivo16 ?? 0;
+  double get safeIvaNoAcreditableSinRequisitos16 => ivaNoAcreditableSinRequisitos16 ?? 0;
+
+  /// Indica si el registro tiene valores de IVA significativos
+  bool get hasIVAValues => 
+    safeValorActos16Porciento > 0 ||
+    safeValorActosFronteraNorte > 0 ||
+    safeValorActosFronteraSur > 0;
 
   @override
   List<Object?> get props => [

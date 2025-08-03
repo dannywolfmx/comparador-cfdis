@@ -543,8 +543,8 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
 
     final hasAnyIVAValues = selectedRecordObjects.any(
       (record) =>
-          record.valorActos16Porciento > 0 ||
-          record.ivaNoAcreditableSinRequisitos16 > 0,
+          (record.valorActos16Porciento ?? 0) > 0 ||
+          (record.ivaNoAcreditableSinRequisitos16 ?? 0) > 0,
     );
 
     print('🔍 DEBUG: Records con valores de IVA: $hasAnyIVAValues');

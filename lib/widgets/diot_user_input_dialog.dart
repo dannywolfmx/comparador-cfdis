@@ -355,8 +355,8 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
 
   Widget _buildClasificacionSection() {
     // Determinar si las clasificaciones son requeridas
-    final bool hasIVAValues = widget.record.valorActos16Porciento > 0 ||
-        widget.record.ivaNoAcreditableSinRequisitos16 > 0;
+    final bool hasIVAValues = (widget.record.valorActos16Porciento ?? 0) > 0 ||
+        (widget.record.ivaNoAcreditableSinRequisitos16 ?? 0) > 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +392,7 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
         if (hasIVAValues) ...[
           const SizedBox(height: 4),
           Text(
-            'Este registro tiene valores de IVA (${widget.record.valorActos16Porciento.toStringAsFixed(2)}), por lo que requiere clasificaciones.',
+            'Este registro tiene valores de IVA (${(widget.record.valorActos16Porciento ?? 0).toStringAsFixed(2)}), por lo que requiere clasificaciones.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.orange.shade700,
                   fontStyle: FontStyle.italic,
@@ -566,8 +566,8 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
       }
 
       // Verificar clasificaciones si el record tiene valores de IVA
-      final bool hasIVAValues = widget.record.valorActos16Porciento > 0 ||
-          widget.record.ivaNoAcreditableSinRequisitos16 > 0;
+      final bool hasIVAValues = (widget.record.valorActos16Porciento ?? 0) > 0 ||
+          (widget.record.ivaNoAcreditableSinRequisitos16 ?? 0) > 0;
 
       if (hasIVAValues) {
         if (_selectedClasificacionRegional == null) {

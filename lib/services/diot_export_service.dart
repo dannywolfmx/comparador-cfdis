@@ -113,21 +113,21 @@ class DIOTExportService {
       0,
       (sum, record) =>
           sum +
-          record.valorActos16Porciento +
-          record.valorActosFronteraNorte +
-          record.valorActosFronteraSur,
+          (record.valorActos16Porciento ?? 0) +
+          (record.valorActosFronteraNorte ?? 0) +
+          (record.valorActosFronteraSur ?? 0),
     );
 
     final totalIVA = batch.records.fold<double>(
       0,
       (sum, record) =>
           sum +
-          record.ivaAcreditableExclusivo16 +
-          record.ivaAcreditableProporcion16 +
-          record.ivaAcreditableExclusivoFronteraNorte +
-          record.ivaAcreditableProporcionFronteraNorte +
-          record.ivaAcreditableExclusivoFronteraSur +
-          record.ivaAcreditableProporcionFronteraSur,
+          (record.ivaAcreditableExclusivo16 ?? 0) +
+          (record.ivaAcreditableProporcion16 ?? 0) +
+          (record.ivaAcreditableExclusivoFronteraNorte ?? 0) +
+          (record.ivaAcreditableProporcionFronteraNorte ?? 0) +
+          (record.ivaAcreditableExclusivoFronteraSur ?? 0) +
+          (record.ivaAcreditableProporcionFronteraSur ?? 0),
     );
 
     return DIOTExportStatistics(
@@ -230,12 +230,12 @@ class DIOTExportService {
     ];
 
     for (final value in numericFields) {
-      if (value < 0) {
+      if ((value ?? 0) < 0) {
         errors.add(
             'Línea $lineNumber: Valores numéricos no pueden ser negativos');
         break;
       }
-      if (value > DIOTConstants.maxNumericValue) {
+      if ((value ?? 0) > DIOTConstants.maxNumericValue) {
         errors.add('Línea $lineNumber: Valor excede máximo permitido');
         break;
       }

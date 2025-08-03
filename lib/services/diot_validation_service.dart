@@ -288,7 +288,7 @@ class DIOTValidationService {
       final value = field.$2;
 
       // Validar que es positivo
-      if (value < 0) {
+      if ((value ?? 0) < 0) {
         errors.add(
           DIOTValidationError(
             field: fieldName,
@@ -299,7 +299,7 @@ class DIOTValidationService {
       }
 
       // Validar que no excede el máximo
-      if (value > DIOTConstants.maxNumericValue) {
+      if ((value ?? 0) > DIOTConstants.maxNumericValue) {
         errors.add(
           DIOTValidationError(
             field: fieldName,
@@ -319,13 +319,13 @@ class DIOTValidationService {
     final List<DIOTValidationError> errors = [];
 
     // Si hay valor de actos, debe haber IVA correspondiente (y viceversa)
-    if (record.valorActosFronteraNorte > 0) {
-      final totalIVANorte = record.ivaAcreditableExclusivoFronteraNorte +
-          record.ivaAcreditableProporcionFronteraNorte +
-          record.ivaNoAcreditableProporcionFronteraNorte +
-          record.ivaNoAcreditableSinRequisitosFronteraNorte +
-          record.ivaNoAcreditableExentasFronteraNorte +
-          record.ivaNoAcreditableNoObjetoFronteraNorte;
+    if ((record.valorActosFronteraNorte ?? 0) > 0) {
+      final totalIVANorte = (record.ivaAcreditableExclusivoFronteraNorte ?? 0) +
+          (record.ivaAcreditableProporcionFronteraNorte ?? 0) +
+          (record.ivaNoAcreditableProporcionFronteraNorte ?? 0) +
+          (record.ivaNoAcreditableSinRequisitosFronteraNorte ?? 0) +
+          (record.ivaNoAcreditableExentasFronteraNorte ?? 0) +
+          (record.ivaNoAcreditableNoObjetoFronteraNorte ?? 0);
 
       if (totalIVANorte == 0) {
         errors.add(
@@ -430,9 +430,9 @@ class DIOTValidationService {
     // Validar que los totales sean consistentes
     double calculatedTotal = 0;
     for (final record in batch.records) {
-      calculatedTotal += record.valorActos16Porciento +
-          record.valorActosFronteraNorte +
-          record.valorActosFronteraSur;
+      calculatedTotal += (record.valorActos16Porciento ?? 0) +
+          (record.valorActosFronteraNorte ?? 0) +
+          (record.valorActosFronteraSur ?? 0);
     }
 
     if ((calculatedTotal - batch.statistics.totalValue).abs() > 0.01) {

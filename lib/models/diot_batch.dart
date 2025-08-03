@@ -336,18 +336,18 @@ class DIOTBatchStatistics extends Equatable {
           (recordsByTipoOperacion[record.tipoOperacion] ?? 0) + 1;
 
       // Sumar valores
-      totalValue += record.valorActos16Porciento +
-          record.valorActosFronteraNorte +
-          record.valorActosFronteraSur +
-          record.valorImportacionTangibles16 +
-          record.valorImportacionIntangibles16;
+      totalValue += (record.valorActos16Porciento ?? 0) +
+          (record.valorActosFronteraNorte ?? 0) +
+          (record.valorActosFronteraSur ?? 0) +
+          (record.valorImportacionTangibles16 ?? 0) +
+          (record.valorImportacionIntangibles16 ?? 0);
 
-      totalIVA += record.ivaAcreditableExclusivo16 +
-          record.ivaAcreditableProporcion16 +
-          record.ivaAcreditableExclusivoFronteraNorte +
-          record.ivaAcreditableProporcionFronteraNorte +
-          record.ivaAcreditableExclusivoFronteraSur +
-          record.ivaAcreditableProporcionFronteraSur;
+      totalIVA += (record.ivaAcreditableExclusivo16 ?? 0) +
+          (record.ivaAcreditableProporcion16 ?? 0) +
+          (record.ivaAcreditableExclusivoFronteraNorte ?? 0) +
+          (record.ivaAcreditableProporcionFronteraNorte ?? 0) +
+          (record.ivaAcreditableExclusivoFronteraSur ?? 0) +
+          (record.ivaAcreditableProporcionFronteraSur ?? 0);
 
       if (record.validationErrors.isNotEmpty) {
         recordsWithErrors++;

@@ -535,15 +535,15 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
     }
 
     // Si tiene valores de IVA pero no tiene clasificación regional
-    if (record.valorActos16Porciento > 0 ||
-        record.ivaNoAcreditableSinRequisitos16 > 0) {
+    if (record.safeValorActos16Porciento > 0 ||
+        record.safeIvaNoAcreditableSinRequisitos16 > 0) {
       if (record.clasificacionRegional == null) {
         return true;
       }
     }
 
     // Si no tiene clasificación de IVA cuando es necesaria
-    if (record.valorActos16Porciento > 0 && record.clasificacionIVA == null) {
+    if (record.safeValorActos16Porciento > 0 && record.clasificacionIVA == null) {
       return true;
     }
 
