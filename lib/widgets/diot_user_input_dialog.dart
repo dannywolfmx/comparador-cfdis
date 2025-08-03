@@ -354,24 +354,63 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
   }
 
   Widget _buildClasificacionSection() {
+    // Determinar si las clasificaciones son requeridas
+    final bool hasIVAValues = widget.record.valorActos16Porciento > 0 ||
+        widget.record.ivaNoAcreditableSinRequisitos16 > 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Clasificaciones',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+        Row(
+          children: [
+            Text(
+              'Clasificaciones',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            if (hasIVAValues) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'REQUERIDO',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
               ),
+            ],
+          ],
         ),
+        if (hasIVAValues) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Este registro tiene valores de IVA (${widget.record.valorActos16Porciento.toStringAsFixed(2)}), por lo que requiere clasificaciones.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.orange.shade700,
+                  fontStyle: FontStyle.italic,
+                ),
+          ),
+        ],
         const SizedBox(height: 16),
 
         // Clasificación regional
         DropdownButtonFormField<ClasificacionRegional>(
           value: _selectedClasificacionRegional,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Clasificación Regional',
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: hasIVAValues
+                ? 'Clasificación Regional *'
+                : 'Clasificación Regional',
             helperText: 'Determina la tasa de IVA aplicable',
+            errorStyle: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
           items: ClasificacionRegional.values
               .map(
@@ -386,16 +425,27 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
               _selectedClasificacionRegional = value;
             });
           },
+          validator: hasIVAValues
+              ? (value) {
+                  if (value == null) {
+                    return 'Este campo es requerido cuando hay valores de IVA';
+                  }
+                  return null;
+                }
+              : null,
         ),
         const SizedBox(height: 16),
 
         // Clasificación IVA
         DropdownButtonFormField<ClasificacionIVA>(
           value: _selectedClasificacionIVA,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Clasificación de IVA',
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: hasIVAValues
+                ? 'Clasificación de IVA *'
+                : 'Clasificación de IVA',
             helperText: 'Tipo de acreditamiento del IVA',
+            errorStyle: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
           items: ClasificacionIVA.values
               .map(
@@ -410,6 +460,14 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
               _selectedClasificacionIVA = value;
             });
           },
+          validator: hasIVAValues
+              ? (value) {
+                  if (value == null) {
+                    return 'Este campo es requerido cuando hay valores de IVA';
+                  }
+                  return null;
+                }
+              : null,
         ),
       ],
     );
@@ -494,8 +552,64 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
 
   void _saveChanges() {
     if (_formKey.currentState?.validate() ?? false) {
-      // Aquí enviarías los datos actualizados al widget padre
-      // Por ejemplo, a través de un callback o BLoC
+      // Validación adicional: verificar campos requeridos según el contexto
+      final List<String> missingFields = [];
+
+      // Verificar extranjero
+      if (_selectedTipoTercero == TipoTercero.extranjero) {
+        if (_nombreExtranjeroController.text.trim().isEmpty) {
+          missingFields.add('Nombre del extranjero');
+        }
+        if (_selectedPais == null || _selectedPais!.isEmpty) {
+          missingFields.add('País de residencia fiscal');
+        }
+      }
+
+      // Verificar clasificaciones si el record tiene valores de IVA
+      final bool hasIVAValues = widget.record.valorActos16Porciento > 0 ||
+          widget.record.ivaNoAcreditableSinRequisitos16 > 0;
+
+      if (hasIVAValues) {
+        if (_selectedClasificacionRegional == null) {
+          missingFields.add('Clasificación Regional');
+        }
+        if (_selectedClasificacionIVA == null) {
+          missingFields.add('Clasificación de IVA');
+        }
+      }
+
+      // Si faltan campos, mostrar advertencia
+      if (missingFields.isNotEmpty) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Campos Requeridos'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Los siguientes campos son obligatorios:'),
+                const SizedBox(height: 8),
+                ...missingFields.map((field) => Text('• $field')),
+                const SizedBox(height: 16),
+                if (hasIVAValues) ...[
+                  const Text(
+                    'Este registro tiene valores de IVA, por lo que requiere clasificaciones.',
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Entendido'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
 
       final updatedData = <String, dynamic>{
         'tipoTercero': _selectedTipoTercero,

@@ -37,15 +37,20 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
           _filterCFDIs(_cfdis, event.configuration.filterCriteria);
 
       if (filteredCfdis.isEmpty) {
-        emit(const DIOTError(
-            'No se encontraron CFDIs que cumplan con los criterios especificados'));
+        emit(
+          const DIOTError(
+            'No se encontraron CFDIs que cumplan con los criterios especificados',
+          ),
+        );
         return;
       }
 
       // Mapear CFDIs a registros DIOT
       emit(const DIOTLoading(message: 'Procesando CFDIs...'));
       final records = DIOTMappingService.mapCFDIsToRecords(
-          filteredCfdis, event.configuration);
+        filteredCfdis,
+        event.configuration,
+      );
 
       // Crear el lote
       final batch = DIOTBatch(
@@ -68,8 +73,13 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
           validatedBatch.recordsRequiringUserInput.length;
 
       if (recordsRequiringInput > 0) {
-        emit(DIOTBatchCreated(
-            validatedBatch, validationSummary, recordsRequiringInput));
+        emit(
+          DIOTBatchCreated(
+            validatedBatch,
+            validationSummary,
+            recordsRequiringInput,
+          ),
+        );
       } else if (validationSummary.totalErrors > 0) {
         emit(DIOTValidated(validatedBatch, validationSummary, false));
       } else {
@@ -105,7 +115,9 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
       // Mapear CFDIs a registros DIOT
       emit(const DIOTLoading(message: 'Procesando CFDIs...'));
       final records = DIOTMappingService.mapCFDIsToRecords(
-          event.cfdis, completeConfiguration);
+        event.cfdis,
+        completeConfiguration,
+      );
 
       // Crear el lote
       final batch = DIOTBatch(
@@ -163,6 +175,14 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
 
     emit(const DIOTLoading(message: 'Actualizando registro...'));
 
+    print(
+      '🔍 DEBUG BLoC: Recibido UpdateRecordUserInput para RFC: ${event.recordRfc}',
+    );
+    print('🔍 DEBUG BLoC: Datos recibidos:');
+    event.userInput.forEach((key, value) {
+      print('   $key: $value');
+    });
+
     try {
       // Encontrar el registro a actualizar
       final recordIndex = _currentBatch!.records.indexWhere(
@@ -170,9 +190,14 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
       );
 
       if (recordIndex == -1) {
+        print(
+          '🔍 DEBUG BLoC: ERROR - Registro con RFC ${event.recordRfc} no encontrado',
+        );
         emit(DIOTError('Registro con RFC ${event.recordRfc} no encontrado'));
         return;
       }
+
+      print('🔍 DEBUG BLoC: Registro encontrado en índice: $recordIndex');
 
       // Actualizar el registro
       final updatedRecord = DIOTMappingService.updateRecordWithUserInput(
@@ -183,10 +208,27 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
       // Validar el registro actualizado
       final validationErrors =
           DIOTValidationService.validateRecord(updatedRecord);
+
+      // Verificar si el registro aún requiere entrada del usuario
+      // (no simplemente marcarlo como false automáticamente)
+      final stillRequiresInput = _stillRequiresUserInput(updatedRecord);
+
+      print('🔍 DEBUG BLoC: Después de actualización:');
+      print('   Validation errors: ${validationErrors.length}');
+      print('   Still requires input: $stillRequiresInput');
+
       final finalRecord = updatedRecord.copyWith(
         validationErrors: validationErrors,
-        requiresUserInput: false,
+        requiresUserInput: stillRequiresInput,
       );
+
+      print('🔍 DEBUG BLoC: Record final:');
+      print('   RFC: ${finalRecord.rfc}');
+      print('   Nombre extranjero: ${finalRecord.nombreExtranjero}');
+      print('   País: ${finalRecord.paisResidenciaFiscal}');
+      print('   Clasificación Regional: ${finalRecord.clasificacionRegional}');
+      print('   Clasificación IVA: ${finalRecord.clasificacionIVA}');
+      print('   Requires User Input: ${finalRecord.requiresUserInput}');
 
       // Crear nueva lista de registros
       final updatedRecords = List<DIOTRecord>.from(_currentBatch!.records);
@@ -204,6 +246,32 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
           DIOTValidationService.getValidationSummary(updatedBatch);
 
       emit(DIOTRecordUpdated(updatedBatch, validationSummary, event.recordRfc));
+
+      // Verificar si todos los registros están completos y validar automáticamente
+      final recordsRequiringInput = updatedBatch.records
+          .where((record) => record.requiresUserInput)
+          .toList();
+
+      final recordsWithErrors = updatedBatch.records
+          .where((record) => record.validationErrors.isNotEmpty)
+          .toList();
+
+      // Si no hay registros pendientes ni errores, validar automáticamente el lote
+      if (recordsRequiringInput.isEmpty && recordsWithErrors.isEmpty) {
+        // Validar el lote automáticamente
+        final validatedBatch = await _validateAndUpdateBatch(updatedBatch);
+        _currentBatch = validatedBatch;
+
+        final newValidationSummary =
+            DIOTValidationService.getValidationSummary(validatedBatch);
+
+        // Determinar si está listo para exportar
+        final isReadyForExport = validatedBatch.isReadyForExport;
+
+        // Emitir estado de validación automática
+        emit(DIOTValidated(
+            validatedBatch, newValidationSummary, isReadyForExport));
+      }
     } catch (e) {
       emit(DIOTError('Error al actualizar el registro: ${e.toString()}'));
     }
@@ -244,8 +312,11 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
     }
 
     if (!_currentBatch!.isReadyForExport) {
-      emit(const DIOTError(
-          'El lote no está listo para exportar. Hay errores o registros pendientes.'));
+      emit(
+        const DIOTError(
+          'El lote no está listo para exportar. Hay errores o registros pendientes.',
+        ),
+      );
       return;
     }
 
@@ -449,5 +520,33 @@ class DIOTBloc extends Bloc<DIOTEvent, DIOTState> {
       statistics: DIOTBatchStatistics.fromRecords(updatedRecords),
       updatedAt: DateTime.now(),
     );
+  }
+
+  /// Verifica si un registro aún requiere entrada del usuario
+  bool _stillRequiresUserInput(DIOTRecord record) {
+    // Si es extranjero y no tiene información completa
+    if (record.tipoTercero == TipoTercero.extranjero) {
+      if (record.nombreExtranjero == null ||
+          record.nombreExtranjero!.isEmpty ||
+          record.paisResidenciaFiscal == null ||
+          record.paisResidenciaFiscal!.isEmpty) {
+        return true;
+      }
+    }
+
+    // Si tiene valores de IVA pero no tiene clasificación regional
+    if (record.valorActos16Porciento > 0 ||
+        record.ivaNoAcreditableSinRequisitos16 > 0) {
+      if (record.clasificacionRegional == null) {
+        return true;
+      }
+    }
+
+    // Si no tiene clasificación de IVA cuando es necesaria
+    if (record.valorActos16Porciento > 0 && record.clasificacionIVA == null) {
+      return true;
+    }
+
+    return false;
   }
 }

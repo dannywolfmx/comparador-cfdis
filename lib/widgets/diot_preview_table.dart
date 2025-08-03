@@ -4,6 +4,7 @@ import 'package:comparador_cfdis/bloc/diot_bloc.dart';
 import 'package:comparador_cfdis/bloc/diot_state.dart';
 import 'package:comparador_cfdis/bloc/diot_event.dart';
 import 'package:comparador_cfdis/models/diot_record.dart';
+import 'package:comparador_cfdis/models/diot_batch.dart';
 import 'package:comparador_cfdis/widgets/diot_user_input_dialog.dart';
 
 class DIOTPreviewTable extends StatefulWidget {
@@ -19,6 +20,10 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
   String _searchFilter = '';
   final TextEditingController _searchController = TextEditingController();
 
+  // Variables para selección múltiple
+  final Set<String> _selectedRecords = <String>{};
+  bool _isSelectionMode = false;
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -31,7 +36,8 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
       builder: (context, state) {
         if (state is DIOTInitial) {
           return const _NoDataWidget(
-              message: 'No se ha generado ningún lote DIOT');
+            message: 'No se ha generado ningún lote DIOT',
+          );
         }
 
         if (state is DIOTLoading) {
@@ -49,7 +55,8 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
           final batch = _getBatchFromState(state);
           if (batch == null) {
             return const _NoDataWidget(
-                message: 'Error al obtener los datos del lote');
+              message: 'Error al obtener los datos del lote',
+            );
           }
 
           return _buildPreviewTable(batch.records);
@@ -92,33 +99,64 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Vista Previa de Registros DIOT',
-                    style: Theme.of(context).textTheme.titleLarge,
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Vista Previa de Registros DIOT',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _isSelectionMode
+                            ? '${_selectedRecords.length} registros seleccionados'
+                            : 'Mostrando $filteredRecords de $totalRecords registros',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Mostrando $filteredRecords de $totalRecords registros',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                if (_isSelectionMode) ...[
+                  ElevatedButton.icon(
+                    onPressed: _selectedRecords.isNotEmpty
+                        ? _showBulkEditDialog
+                        : null,
+                    icon: const Icon(Icons.edit_note),
+                    label: const Text('Editar Selección'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: _exitSelectionMode,
+                    icon: const Icon(Icons.close),
+                    label: const Text('Cancelar'),
+                  ),
+                ] else ...[
+                  IconButton(
+                    icon: const Icon(Icons.checklist),
+                    onPressed: _enterSelectionMode,
+                    tooltip: 'Selección múltiple',
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: () {
+                      setState(() {
+                        _searchFilter = '';
+                        _searchController.clear();
+                      });
+                    },
+                    tooltip: 'Limpiar filtros',
                   ),
                 ],
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                setState(() {
-                  _searchFilter = '';
-                  _searchController.clear();
-                });
-              },
-              tooltip: 'Limpiar filtros',
+              ],
             ),
           ],
         ),
@@ -158,11 +196,21 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
 
   Widget _buildDataTable(List<DIOTRecord> records) {
     return DataTable(
-      sortColumnIndex: _sortColumnIndex,
+      sortColumnIndex:
+          _isSelectionMode && _sortColumnIndex == 0 ? 1 : _sortColumnIndex,
       sortAscending: _sortAscending,
       columnSpacing: 16,
       horizontalMargin: 16,
       columns: [
+        if (_isSelectionMode)
+          DataColumn(
+            label: Checkbox(
+              value: _selectedRecords.length == records.length &&
+                  records.isNotEmpty,
+              tristate: true,
+              onChanged: (_) => _selectAllRecords(records),
+            ),
+          ),
         DataColumn(
           label: const Text('RFC'),
           onSort: (columnIndex, ascending) =>
@@ -200,9 +248,10 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
           onSort: (columnIndex, ascending) =>
               _sort(columnIndex, ascending, 'status'),
         ),
-        const DataColumn(
-          label: Text('Acciones'),
-        ),
+        if (!_isSelectionMode)
+          const DataColumn(
+            label: Text('Acciones'),
+          ),
       ],
       rows: records.map((record) => _buildDataRow(record)).toList(),
     );
@@ -222,6 +271,13 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
     return DataRow(
       color: rowColor != null ? WidgetStateProperty.all(rowColor) : null,
       cells: [
+        if (_isSelectionMode)
+          DataCell(
+            Checkbox(
+              value: _selectedRecords.contains(record.rfc),
+              onChanged: (bool? value) => _toggleRecordSelection(record.rfc),
+            ),
+          ),
         DataCell(
           Text(
             record.rfc,
@@ -260,24 +316,25 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
         DataCell(
           _buildStatusChip(record),
         ),
-        DataCell(
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () => _showEditDialog(record),
-                tooltip: 'Editar registro',
-              ),
-              if (hasErrors)
+        if (!_isSelectionMode)
+          DataCell(
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 IconButton(
-                  icon: const Icon(Icons.warning, color: Colors.red),
-                  onPressed: () => _showErrorsDialog(record),
-                  tooltip: 'Ver errores de validación',
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _showEditDialog(record),
+                  tooltip: 'Editar registro',
                 ),
-            ],
+                if (hasErrors)
+                  IconButton(
+                    icon: const Icon(Icons.warning, color: Colors.red),
+                    onPressed: () => _showErrorsDialog(record),
+                    tooltip: 'Ver errores de validación',
+                  ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -292,8 +349,9 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
     }
 
     if (record.requiresUserInput) {
+      final String pendingReason = _getPendingReason(record);
       return Chip(
-        label: const Text('Pendiente'),
+        label: Text('Pendiente: $pendingReason'),
         backgroundColor: Colors.orange.withOpacity(0.2),
         avatar: const Icon(Icons.warning, size: 16, color: Colors.orange),
       );
@@ -403,6 +461,166 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
     if (state is DIOTRecordUpdated) return state.batch;
     if (state is DIOTValidated) return state.batch;
     return null;
+  }
+
+  // Métodos para selección múltiple
+  void _enterSelectionMode() {
+    setState(() {
+      _isSelectionMode = true;
+      _selectedRecords.clear();
+      // Reset sort when entering selection mode to avoid column index issues
+      _sortColumnIndex =
+          _isSelectionMode ? 1 : 0; // Account for checkbox column
+    });
+  }
+
+  void _exitSelectionMode() {
+    setState(() {
+      _isSelectionMode = false;
+      _selectedRecords.clear();
+      // Reset sort when exiting selection mode
+      _sortColumnIndex = 0;
+    });
+  }
+
+  void _toggleRecordSelection(String rfc) {
+    setState(() {
+      if (_selectedRecords.contains(rfc)) {
+        _selectedRecords.remove(rfc);
+      } else {
+        _selectedRecords.add(rfc);
+      }
+    });
+  }
+
+  void _selectAllRecords(List<DIOTRecord> records) {
+    setState(() {
+      if (_selectedRecords.length == records.length) {
+        _selectedRecords.clear();
+      } else {
+        _selectedRecords.clear();
+        _selectedRecords.addAll(records.map((r) => r.rfc));
+      }
+    });
+  }
+
+  Future<void> _showBulkEditDialog() async {
+    // Obtener el estado actual del BLoC para acceder a los records
+    final diotState = context.read<DIOTBloc>().state;
+
+    // Determinar el batch dependiendo del estado
+    DIOTBatch? batch;
+    if (diotState is DIOTBatchLoaded) {
+      batch = diotState.batch;
+    } else if (diotState is DIOTBatchCreated) {
+      batch = diotState.batch;
+    } else if (diotState is DIOTBatchGenerated) {
+      batch = diotState.batch;
+    } else if (diotState is DIOTRecordUpdated) {
+      batch = diotState.batch;
+    } else if (diotState is DIOTValidated) {
+      batch = diotState.batch;
+    }
+
+    if (batch == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error: No se pueden cargar los registros. Estado actual: ${diotState.runtimeType}',
+          ),
+        ),
+      );
+      return;
+    }
+
+    print('🔍 DEBUG: Estado del BLoC: ${diotState.runtimeType}');
+    print('🔍 DEBUG: Records seleccionados: ${_selectedRecords.length}');
+
+    // Determinar si alguno de los records seleccionados tiene valores de IVA
+    final selectedRecordObjects = batch.records
+        .where((record) => _selectedRecords.contains(record.rfc))
+        .toList();
+
+    final hasAnyIVAValues = selectedRecordObjects.any(
+      (record) =>
+          record.valorActos16Porciento > 0 ||
+          record.ivaNoAcreditableSinRequisitos16 > 0,
+    );
+
+    print('🔍 DEBUG: Records con valores de IVA: $hasAnyIVAValues');
+
+    // Crear un registro temporal que refleje si hay valores de IVA en la selección
+    final tempRecord = DIOTRecord(
+      rfc: '',
+      tipoTercero: TipoTercero.nacional,
+      tipoOperacion: TipoOperacion.prestacionServicios,
+      efectosFiscales: EfectosFiscales.si,
+      // Asignar valores de IVA si algún record seleccionado los tiene
+      valorActos16Porciento: hasAnyIVAValues ? 1000.0 : 0.0,
+      ivaNoAcreditableSinRequisitos16: 0.0,
+    );
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (dialogContext) => DIOTUserInputDialog(
+        record: tempRecord,
+        onSave: () {
+          // El diálogo manejará el Navigator.pop()
+        },
+        onCancel: () {
+          Navigator.of(dialogContext).pop();
+        },
+      ),
+    );
+
+    // Si se recibieron datos, aplicarlos a todos los registros seleccionados
+    if (result != null && mounted) {
+      for (final rfc in _selectedRecords) {
+        context.read<DIOTBloc>().add(
+              UpdateRecordUserInput(rfc, result),
+            );
+      }
+
+      // Salir del modo de selección
+      _exitSelectionMode();
+
+      // Mostrar mensaje de confirmación
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Se actualizaron ${_selectedRecords.length} registros exitosamente',
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  String _getPendingReason(DIOTRecord record) {
+    final List<String> missingItems = [];
+
+    // Si es extranjero y no tiene información completa
+    if (record.tipoTercero == TipoTercero.extranjero) {
+      if (record.nombreExtranjero == null || record.nombreExtranjero!.isEmpty) {
+        missingItems.add('Nombre');
+      }
+      if (record.paisResidenciaFiscal == null ||
+          record.paisResidenciaFiscal!.isEmpty) {
+        missingItems.add('País');
+      }
+    }
+
+    // Si no tiene tipo de operación definido
+    if (record.tipoOperacion == TipoOperacion.prestacionServicios &&
+        record.valorActos16Porciento == 0) {
+      missingItems.add('Tipo de operación');
+    }
+
+    if (missingItems.isEmpty) {
+      return 'Completar datos';
+    }
+
+    return missingItems.join(', ');
   }
 }
 
