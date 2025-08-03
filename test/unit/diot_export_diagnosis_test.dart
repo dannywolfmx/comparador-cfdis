@@ -31,7 +31,7 @@ void main() {
           'requiresUserInput': true, // Aún requiere input
           'validationErrors': [
             'Falta clasificación regional',
-            'Falta clasificación IVA'
+            'Falta clasificación IVA',
           ], // Con errores
         },
         {
@@ -46,7 +46,7 @@ void main() {
           'validationErrors': [
             'Falta nombre extranjero',
             'Falta clasificación regional',
-            'Falta clasificación IVA'
+            'Falta clasificación IVA',
           ], // Con errores
         },
       ];
@@ -63,13 +63,15 @@ void main() {
         print('  Nombre: ${record['nombreExtranjero'] ?? 'FALTA'}');
         print('  País: ${record['paisResidenciaFiscal'] ?? 'FALTA'}');
         print(
-            '  Clasif. Regional: ${record['clasificacionRegional'] ?? 'FALTA'}');
+          '  Clasif. Regional: ${record['clasificacionRegional'] ?? 'FALTA'}',
+        );
         print('  Clasif. IVA: ${record['clasificacionIVA'] ?? 'FALTA'}');
         print('  Valor IVA: ${record['valorActos16Porciento']}');
         print('  Requires Input: ${record['requiresUserInput']}');
         print('  Validation Errors: ${record['validationErrors']}');
         print(
-            '  Estado: ${record['requiresUserInput'] ? '❌ PENDIENTE' : '✅ COMPLETO'}');
+          '  Estado: ${record['requiresUserInput'] ? '❌ PENDIENTE' : '✅ COMPLETO'}',
+        );
         print('');
       }
 
@@ -111,11 +113,13 @@ void main() {
         print('🚨 BLOQUEOS PARA EXPORTAR:');
         if (recordsRequiringInput.isNotEmpty) {
           print(
-              '❌ Hay ${recordsRequiringInput.length} records que aún requieren input del usuario');
+            '❌ Hay ${recordsRequiringInput.length} records que aún requieren input del usuario',
+          );
         }
         if (recordsWithErrors.isNotEmpty) {
           print(
-              '❌ Hay ${recordsWithErrors.length} records con errores de validación');
+            '❌ Hay ${recordsWithErrors.length} records con errores de validación',
+          );
         }
         print('');
         print('💡 SOLUCIÓN:');
@@ -129,8 +133,11 @@ void main() {
       }
 
       // Test assertion
-      expect(isReadyForExport, false,
-          reason: 'Este test simula un lote problemático');
+      expect(
+        isReadyForExport,
+        false,
+        reason: 'Este test simula un lote problemático',
+      );
     });
 
     test('Show what a READY batch looks like', () {
@@ -194,8 +201,11 @@ void main() {
       print('');
       print('🎯 Este es el estado que necesitas lograr para poder exportar');
 
-      expect(isReadyForExport, true,
-          reason: 'Un lote completo debe estar listo para exportar');
+      expect(
+        isReadyForExport,
+        true,
+        reason: 'Un lote completo debe estar listo para exportar',
+      );
     });
   });
 }

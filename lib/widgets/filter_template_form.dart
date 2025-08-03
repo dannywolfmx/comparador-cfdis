@@ -474,13 +474,17 @@ class _FilterTemplateFormState extends State<FilterTemplateForm> {
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 6),
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 4, vertical: 1),
+                                      horizontal: 4,
+                                      vertical: 1,
+                                    ),
                                     decoration: BoxDecoration(
                                       color:
                                           _selectedColor.withValues(alpha: 0.3),
@@ -714,7 +718,9 @@ class _FilterTemplateFormState extends State<FilterTemplateForm> {
 
                       return Card(
                         margin: const EdgeInsets.symmetric(
-                            vertical: 1, horizontal: 4),
+                          vertical: 1,
+                          horizontal: 4,
+                        ),
                         color: isSelected
                             ? _selectedColor.withValues(alpha: 0.1)
                             : theme.colorScheme.surfaceContainerLow,
@@ -734,12 +740,16 @@ class _FilterTemplateFormState extends State<FilterTemplateForm> {
                         child: CheckboxListTile(
                           dense: true,
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 0),
+                            horizontal: 8,
+                            vertical: 0,
+                          ),
                           title: Row(
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? _selectedColor.withValues(alpha: 0.2)

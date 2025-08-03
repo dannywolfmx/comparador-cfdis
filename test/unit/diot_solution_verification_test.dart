@@ -85,8 +85,10 @@ void main() {
       print('3. Después de completar record 2:');
       pendingRecords =
           batch.where((r) => r['requiresUserInput'] == true).length;
-      final int totalErrors = batch.fold(0,
-          (sum, record) => sum + (record['validationErrors'] as List).length);
+      final int totalErrors = batch.fold(
+        0,
+        (sum, record) => sum + (record['validationErrors'] as List).length,
+      );
       print('   Records pending: $pendingRecords');
       print('   Total errors: $totalErrors');
       print('   Ready for export: ${pendingRecords == 0 && totalErrors == 0}');
@@ -97,14 +99,18 @@ void main() {
 
       expect(pendingRecords, 0, reason: 'No debe haber records pendientes');
       expect(totalErrors, 0, reason: 'No debe haber errores de validación');
-      expect(isReadyForExport, true,
-          reason: 'El lote debe estar listo para exportar');
+      expect(
+        isReadyForExport,
+        true,
+        reason: 'El lote debe estar listo para exportar',
+      );
 
       print('✅ ÉXITO: Lote completado y listo para exportar');
       print('   - Todos los records tienen información completa');
       print('   - No hay errores de validación');
       print(
-          '   - El mensaje "El lote no está listo para exportar" NO debería aparecer');
+        '   - El mensaje "El lote no está listo para exportar" NO debería aparecer',
+      );
     });
 
     test('Verify partial completion is properly detected', () {
@@ -156,8 +162,11 @@ void main() {
       print('   Razón: Faltan clasificaciones para valores de IVA');
       print('');
 
-      expect(stillRequires, true,
-          reason: 'Debe requerir input porque faltan clasificaciones');
+      expect(
+        stillRequires,
+        true,
+        reason: 'Debe requerir input porque faltan clasificaciones',
+      );
 
       print('✅ CORRECTO: El sistema detecta que falta información');
       print('   - El usuario completó extranjero pero no las clasificaciones');
@@ -167,7 +176,8 @@ void main() {
 
     test('Verify improved dialog prevents incomplete saves', () {
       print(
-          '=== TEST: Verificación de que el diálogo mejorado previene guardados incompletos ===');
+        '=== TEST: Verificación de que el diálogo mejorado previene guardados incompletos ===',
+      );
 
       // Simular validación del diálogo mejorado
       final Map<String, dynamic> recordData = {
@@ -214,8 +224,11 @@ void main() {
       print('   Should allow save: $shouldAllowSave');
       print('');
 
-      expect(shouldAllowSave, false,
-          reason: 'No debe permitir guardar con campos faltantes');
+      expect(
+        shouldAllowSave,
+        false,
+        reason: 'No debe permitir guardar con campos faltantes',
+      );
       expect(missingFields, contains('Clasificación Regional'));
       expect(missingFields, contains('Clasificación de IVA'));
 

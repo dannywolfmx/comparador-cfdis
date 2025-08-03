@@ -93,7 +93,9 @@ class _FilterTemplatePanelState extends State<FilterTemplatePanel> {
                                   final filterTemplateBloc =
                                       context.read<FilterTemplateBloc>();
                                   _clearAllTemplates(
-                                      context, filterTemplateBloc);
+                                    context,
+                                    filterTemplateBloc,
+                                  );
                                 },
                                 tooltip: 'Limpiar todas las plantillas',
                                 padding: EdgeInsets.zero,

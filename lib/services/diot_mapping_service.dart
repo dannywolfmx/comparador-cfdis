@@ -156,7 +156,9 @@ class DIOTMappingService {
 
   /// Infiere el tipo de operación basado en los CFDIs
   static TipoOperacion _inferTipoOperacion(
-      TipoTercero tipoTercero, List<CFDI> cfdis) {
+    TipoTercero tipoTercero,
+    List<CFDI> cfdis,
+  ) {
     // Para proveedor global, solo hay una opción
     if (tipoTercero == TipoTercero.global) {
       return TipoOperacion.operacionesGlobales;

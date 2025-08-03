@@ -95,10 +95,16 @@ void main() {
       // Verificaciones
       expect(updatedRecord['nombreExtranjero'], isNotNull);
       expect(updatedRecord['paisResidenciaFiscal'], isNotNull);
-      expect(updatedRecord['requiresUserInput'], false,
-          reason: 'Record completo no debería requerir más input');
-      expect(updatedRecord['validationErrors'], isEmpty,
-          reason: 'Record completo no debería tener errores');
+      expect(
+        updatedRecord['requiresUserInput'],
+        false,
+        reason: 'Record completo no debería requerir más input',
+      );
+      expect(
+        updatedRecord['validationErrors'],
+        isEmpty,
+        reason: 'Record completo no debería tener errores',
+      );
 
       print('✓ Proceso de actualización funciona correctamente');
     });
@@ -169,12 +175,16 @@ void main() {
         print('🔍 PROBLEMA ENCONTRADO:');
         print('   El record tiene información de extranjero completa,');
         print(
-            '   PERO le faltan clasificaciones de IVA porque tiene valores > 0');
+          '   PERO le faltan clasificaciones de IVA porque tiene valores > 0',
+        );
         print('   Esto explica por qué sigue marcado como "pending"');
       }
 
-      expect(missingFields.isNotEmpty, true,
-          reason: 'Este escenario debe revelar campos faltantes');
+      expect(
+        missingFields.isNotEmpty,
+        true,
+        reason: 'Este escenario debe revelar campos faltantes',
+      );
 
       print('✓ Test revela el problema real');
     });

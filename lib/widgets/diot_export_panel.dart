@@ -39,7 +39,8 @@ class DIOTExportPanel extends StatelessWidget {
 
           if (batch == null || validationSummary == null) {
             return const _ErrorWidget(
-                message: 'Error al obtener datos del lote');
+              message: 'Error al obtener datos del lote',
+            );
           }
 
           return _buildExportPanel(context, batch, validationSummary);
@@ -51,7 +52,10 @@ class DIOTExportPanel extends StatelessWidget {
   }
 
   Widget _buildExportPanel(
-      BuildContext context, dynamic batch, dynamic validationSummary) {
+    BuildContext context,
+    dynamic batch,
+    dynamic validationSummary,
+  ) {
     final isReadyForExport = validationSummary.isReadyForExport;
 
     return SingleChildScrollView(
@@ -74,7 +78,10 @@ class DIOTExportPanel extends StatelessWidget {
   }
 
   Widget _buildStatusCard(
-      BuildContext context, dynamic batch, dynamic validationSummary) {
+    BuildContext context,
+    dynamic batch,
+    dynamic validationSummary,
+  ) {
     final theme = Theme.of(context);
     final isReady = validationSummary.isReadyForExport;
 
@@ -169,7 +176,11 @@ class DIOTExportPanel extends StatelessWidget {
   }
 
   Widget _buildStatItem(
-      BuildContext context, String label, String value, Color color) {
+    BuildContext context,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Column(
       children: [
         Text(
@@ -261,7 +272,9 @@ class DIOTExportPanel extends StatelessWidget {
             _buildInfoRow('Extensión:', '.txt'),
             _buildInfoRow('Registros:', '${batch.records.length}'),
             _buildInfoRow(
-                'Tamaño estimado:', _calculateFileSize(batch.records.length)),
+              'Tamaño estimado:',
+              _calculateFileSize(batch.records.length),
+            ),
           ],
         ),
       ),
@@ -354,7 +367,11 @@ class DIOTExportPanel extends StatelessWidget {
   }
 
   Widget _buildIssueItem(
-      String title, String subtitle, IconData icon, Color color) {
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -365,8 +382,10 @@ class DIOTExportPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(fontWeight: FontWeight.w500)),
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
                 Text(subtitle, style: const TextStyle(fontSize: 12)),
               ],
             ),
@@ -434,7 +453,8 @@ class DIOTExportPanel extends StatelessWidget {
     for (int i = 0; i < batch.records.length && i < 5; i++) {
       final record = batch.records[i];
       preview.writeln(
-          '${record.rfc}|${record.tipoTercero.code}|${record.tipoOperacion.code}|...');
+        '${record.rfc}|${record.tipoTercero.code}|${record.tipoOperacion.code}|...',
+      );
     }
 
     if (batch.records.length > 5) {

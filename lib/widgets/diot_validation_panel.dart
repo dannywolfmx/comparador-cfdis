@@ -31,7 +31,8 @@ class DIOTValidationPanel extends StatelessWidget {
           final validationSummary = _getValidationSummaryFromState(state);
           if (validationSummary == null) {
             return const _ErrorWidget(
-                message: 'Error al obtener resumen de validación');
+              message: 'Error al obtener resumen de validación',
+            );
           }
 
           return _buildValidationPanel(context, validationSummary, state);
@@ -43,7 +44,10 @@ class DIOTValidationPanel extends StatelessWidget {
   }
 
   Widget _buildValidationPanel(
-      BuildContext context, DIOTValidationSummary summary, DIOTState state) {
+    BuildContext context,
+    DIOTValidationSummary summary,
+    DIOTState state,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -63,7 +67,9 @@ class DIOTValidationPanel extends StatelessWidget {
   }
 
   Widget _buildSummaryCard(
-      BuildContext context, DIOTValidationSummary summary) {
+    BuildContext context,
+    DIOTValidationSummary summary,
+  ) {
     final theme = Theme.of(context);
 
     return Card(
@@ -132,8 +138,13 @@ class DIOTValidationPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String title, String value,
-      IconData icon, Color color) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -163,7 +174,9 @@ class DIOTValidationPanel extends StatelessWidget {
   }
 
   Widget _buildReadinessIndicator(
-      BuildContext context, DIOTValidationSummary summary) {
+    BuildContext context,
+    DIOTValidationSummary summary,
+  ) {
     final isReady = summary.isReadyForExport;
     final color = isReady ? Colors.green : Colors.orange;
     final icon = isReady ? Icons.check_circle : Icons.warning;
@@ -235,7 +248,9 @@ class DIOTValidationPanel extends StatelessWidget {
   }
 
   Widget _buildInputRequiredCard(
-      BuildContext context, DIOTValidationSummary summary) {
+    BuildContext context,
+    DIOTValidationSummary summary,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),

@@ -563,7 +563,8 @@ class _DIOTConfigurationPanelState extends State<DIOTConfigurationPanel> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 Text(
-                    '${periodoInfo['month'].toString().padLeft(2, '0')}/${periodoInfo['year']}'),
+                  '${periodoInfo['month'].toString().padLeft(2, '0')}/${periodoInfo['year']}',
+                ),
                 Text(
                   'Rango: ${_formatDate(periodoInfo['startDate'])} - ${_formatDate(periodoInfo['endDate'])}',
                   style: Theme.of(context).textTheme.bodySmall,

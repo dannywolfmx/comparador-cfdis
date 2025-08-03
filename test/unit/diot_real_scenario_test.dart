@@ -29,7 +29,8 @@ void main() {
       print('   Nombre: ${initialRecord['nombreExtranjero']}');
       print('   País: ${initialRecord['paisResidenciaFiscal']}');
       print(
-          '   Clasificación Regional: ${initialRecord['clasificacionRegional']}');
+        '   Clasificación Regional: ${initialRecord['clasificacionRegional']}',
+      );
       print('   Clasificación IVA: ${initialRecord['clasificacionIVA']}');
       print('   Valor IVA 16%: ${initialRecord['valorActos16Porciento']}');
       print('   Requires Input: ${initialRecord['requiresUserInput']}');
@@ -73,7 +74,8 @@ void main() {
       print('   Nombre: ${updatedRecord['nombreExtranjero']}');
       print('   País: ${updatedRecord['paisResidenciaFiscal']}');
       print(
-          '   Clasificación Regional: ${updatedRecord['clasificacionRegional']}');
+        '   Clasificación Regional: ${updatedRecord['clasificacionRegional']}',
+      );
       print('   Clasificación IVA: ${updatedRecord['clasificacionIVA']}');
       print('');
 
@@ -140,7 +142,8 @@ void main() {
       print('   Nombre: ${updatedRecord['nombreExtranjero']}');
       print('   País: ${updatedRecord['paisResidenciaFiscal']}');
       print(
-          '   Clasificación Regional: ${updatedRecord['clasificacionRegional']}');
+        '   Clasificación Regional: ${updatedRecord['clasificacionRegional']}',
+      );
       print('   Clasificación IVA: ${updatedRecord['clasificacionIVA']}');
       print('   Requires Input: ${updatedRecord['requiresUserInput']}');
       print('   Validation Errors: ${updatedRecord['validationErrors']}');
@@ -159,13 +162,15 @@ void main() {
         print('✅ SUCCESS: Record está completo y listo para exportar');
       } else {
         print(
-            '❌ FAILURE: Record sigue incompleto después de llenar el diálogo');
+          '❌ FAILURE: Record sigue incompleto después de llenar el diálogo',
+        );
       }
     });
 
     test('What happens if user PARTIALLY fills dialog?', () {
       print(
-          '=== TEST: ¿Qué pasa si el usuario llena PARCIALMENTE el diálogo? ===');
+        '=== TEST: ¿Qué pasa si el usuario llena PARCIALMENTE el diálogo? ===',
+      );
 
       // Record inicial
       final Map<String, dynamic> initialRecord = {
@@ -225,20 +230,25 @@ void main() {
       print('Result after partial completion:');
       print('   Nombre completo: ${updatedRecord['nombreExtranjero'] != null}');
       print(
-          '   País completo: ${updatedRecord['paisResidenciaFiscal'] != null}');
+        '   País completo: ${updatedRecord['paisResidenciaFiscal'] != null}',
+      );
       print(
-          '   Clasificación Regional: ${updatedRecord['clasificacionRegional']}');
+        '   Clasificación Regional: ${updatedRecord['clasificacionRegional']}',
+      );
       print('   Clasificación IVA: ${updatedRecord['clasificacionIVA']}');
       print('   Still requires input: $stillRequires');
       print('');
 
-      expect(stillRequires, true,
-          reason:
-              'Debe seguir requiriendo input porque faltan clasificaciones');
+      expect(
+        stillRequires,
+        true,
+        reason: 'Debe seguir requiriendo input porque faltan clasificaciones',
+      );
 
       if (stillRequires) {
         print(
-            '✅ CORRECTO: Record aún requiere input porque faltan clasificaciones');
+          '✅ CORRECTO: Record aún requiere input porque faltan clasificaciones',
+        );
         print('   Esto explica por qué algunos records siguen "pending"');
       }
     });
