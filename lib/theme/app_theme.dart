@@ -367,7 +367,7 @@ class AppTheme {
       // Scroll behavior
       scrollbarTheme: ScrollbarThemeData(
         thumbColor: WidgetStateProperty.all(
-          AppColorSchemes.lightScheme.onSurfaceVariant.withOpacity(0.5),
+          AppColorSchemes.lightScheme.onSurfaceVariant.withAlpha((255 * 0.5).round()),
         ),
         trackColor: WidgetStateProperty.all(
           AppColorSchemes.lightScheme.surfaceContainerHighest,

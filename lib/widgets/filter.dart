@@ -38,7 +38,7 @@ class _FilterColumnState extends State<FilterColumn> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withAlpha((255 * 0.1).round()),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -172,7 +172,7 @@ class _FilterColumnState extends State<FilterColumn> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withAlpha((255 * 0.1).round()),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(

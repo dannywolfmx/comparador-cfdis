@@ -42,7 +42,7 @@ class AccessibilityService {
   void updateFromMediaQuery(MediaQueryData mediaQuery) {
     _isHighContrastEnabled = mediaQuery.highContrast;
     _textScaleFactor = mediaQuery.textScaleFactor;
-    _isLargeTextEnabled = mediaQuery.textScaleFactor > 1.2;
+    _isLargeTextEnabled = mediaQuery.textScaler.scale(1) > 1.2;
     _isReduceMotionEnabled = mediaQuery.disableAnimations;
 
     // TalkBack/VoiceOver detection (aproximado)

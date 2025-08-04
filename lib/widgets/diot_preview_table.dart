@@ -263,7 +263,7 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
 
     Color? rowColor;
     if (hasErrors) {
-      rowColor = Colors.red.withOpacity(0.1);
+      rowColor = Colors.red.withAlpha((255 * 0.1).round());
     } else if (requiresInput) {
       rowColor = Colors.orange.withOpacity(0.1);
     }
@@ -359,7 +359,7 @@ class _DIOTPreviewTableState extends State<DIOTPreviewTable> {
 
     return Chip(
       label: const Text('Válido'),
-      backgroundColor: Colors.green.withOpacity(0.2),
+      backgroundColor: Colors.green.withAlpha((255 * 0.2).round()),
       avatar: const Icon(Icons.check, size: 16, color: Colors.green),
     );
   }

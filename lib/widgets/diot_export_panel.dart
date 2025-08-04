@@ -555,7 +555,7 @@ class _ErrorWidget extends StatelessWidget {
           Icon(
             Icons.error,
             size: 64,
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withAlpha((255 * 0.5).round()),
           ),
           const SizedBox(height: 16),
           Text(

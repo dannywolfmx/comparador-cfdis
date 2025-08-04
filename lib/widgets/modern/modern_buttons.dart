@@ -281,7 +281,7 @@ class ModernChip extends StatelessWidget {
       selected: selected,
       onSelected: onTap != null ? (_) => onTap!() : null,
       backgroundColor: effectiveColor.withOpacity(0.1),
-      selectedColor: effectiveColor.withOpacity(0.2),
+      selectedColor: effectiveColor.withAlpha((255 * 0.2).round()),
       avatar: icon != null ? Icon(icon, size: 16) : null,
     );
   }
