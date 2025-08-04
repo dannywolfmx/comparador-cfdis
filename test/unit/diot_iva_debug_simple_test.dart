@@ -39,9 +39,11 @@ void main() {
           DIOTMappingService.mapCFDIsToRecords([cfdiSinIva], configuration);
 
       print(
-          'Con TotalImpuestosTrasladados: \$${recordsConIva.first.ivaAcreditableExclusivo16}');
+        'Con TotalImpuestosTrasladados: \$${recordsConIva.first.ivaAcreditableExclusivo16}',
+      );
       print(
-          'Sin TotalImpuestosTrasladados (fallback): \$${recordsSinIva.first.ivaAcreditableExclusivo16}');
+        'Sin TotalImpuestosTrasladados (fallback): \$${recordsSinIva.first.ivaAcreditableExclusivo16}',
+      );
 
       expect(recordsConIva.first.ivaAcreditableExclusivo16, 160.0);
       expect(recordsSinIva.first.ivaAcreditableExclusivo16, 0.0);

@@ -146,7 +146,8 @@ void main() {
       expect(updatedRecord.tipoTercero, equals(TipoTercero.extranjero));
 
       print(
-          '✅ CORRECTO: Preserva descuentos del CFDI incluso con input entero');
+        '✅ CORRECTO: Preserva descuentos del CFDI incluso con input entero',
+      );
     });
   });
 }

@@ -37,7 +37,8 @@ void main() {
       final record = records.first;
 
       print(
-          'Valor directo de TotalImpuestosTrasladados: \$${cfdi.impuestos!.totalImpuestosTrasladados}');
+        'Valor directo de TotalImpuestosTrasladados: \$${cfdi.impuestos!.totalImpuestosTrasladados}',
+      );
       print('IVA mapeado en DIOT: \$${record.ivaAcreditableExclusivo16}');
 
       expect(record.ivaAcreditableExclusivo16, 160.0);
