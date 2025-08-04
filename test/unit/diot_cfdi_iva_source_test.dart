@@ -5,7 +5,8 @@ void main() {
   group('DIOT CFDI IVA Value Source Tests', () {
     test('Should verify CFDI correctly parses TotalImpuestosTrasladados', () {
       print(
-          '=== TEST: Verificar que CFDI parsea TotalImpuestosTrasladados ===');
+        '=== TEST: Verificar que CFDI parsea TotalImpuestosTrasladados ===',
+      );
 
       // Crear CFDI con TotalImpuestosTrasladados específico
       final cfdiData = {
@@ -29,7 +30,8 @@ void main() {
       print('Datos del CFDI parseado:');
       print('  Subtotal: \$${cfdi.subTotal}');
       print(
-          '  TotalImpuestosTrasladados: \$${cfdi.impuestos?.totalImpuestosTrasladados}');
+        '  TotalImpuestosTrasladados: \$${cfdi.impuestos?.totalImpuestosTrasladados}',
+      );
       print('  Descuento: \$${cfdi.descuento}');
 
       // Verificar que el CFDI tiene el valor correcto
@@ -54,7 +56,8 @@ void main() {
       print('COMPARACIÓN:');
       print('  Subtotal: \$${subtotal.toStringAsFixed(2)}');
       print(
-          '  IVA calculado (16%): \$${ivaCalculado.toStringAsFixed(2)} ← INCORRECTO');
+        '  IVA calculado (16%): \$${ivaCalculado.toStringAsFixed(2)} ← INCORRECTO',
+      );
       print('  IVA real del CFDI: \$${ivaReal.toStringAsFixed(2)} ← CORRECTO');
       print('  Diferencia: \$${(ivaCalculado - ivaReal).toStringAsFixed(2)}');
 
@@ -99,13 +102,15 @@ void main() {
       print('CFDI con TotalImpuestosTrasladados:');
       print('  Valor: \$${cfdi1.impuestos?.totalImpuestosTrasladados}');
       print(
-          '  ¿Disponible?: ${cfdi1.impuestos?.totalImpuestosTrasladados != null && cfdi1.impuestos!.totalImpuestosTrasladados > 0}');
+        '  ¿Disponible?: ${cfdi1.impuestos?.totalImpuestosTrasladados != null && cfdi1.impuestos!.totalImpuestosTrasladados > 0}',
+      );
 
       print('');
       print('CFDI sin TotalImpuestosTrasladados:');
       print('  Valor: \$${cfdi2.impuestos?.totalImpuestosTrasladados}');
       print(
-          '  ¿Disponible?: ${cfdi2.impuestos?.totalImpuestosTrasladados != null && cfdi2.impuestos!.totalImpuestosTrasladados > 0}');
+        '  ¿Disponible?: ${cfdi2.impuestos?.totalImpuestosTrasladados != null && cfdi2.impuestos!.totalImpuestosTrasladados > 0}',
+      );
 
       // Verificar lógica de prioridad
       expect(

@@ -15,7 +15,8 @@ void main() {
 
       print('ENFOQUE INCORRECTO:');
       print(
-          '  Valor de actos: \$${baseGravable.toStringAsFixed(2)} (base gravable)');
+        '  Valor de actos: \$${baseGravable.toStringAsFixed(2)} (base gravable)',
+      );
       print('  IVA: \$${ivaEsperado.toStringAsFixed(2)}');
 
       const record = DIOTRecord(
@@ -36,9 +37,11 @@ void main() {
       expect(ivaErrors.isEmpty, true);
 
       print(
-          '❌ PROBLEMA: Este enfoque "funciona" pero es conceptualmente incorrecto');
+        '❌ PROBLEMA: Este enfoque "funciona" pero es conceptualmente incorrecto',
+      );
       print(
-          '   Los descuentos deberían ir en devoluciones, no reducir el valor de actos');
+        '   Los descuentos deberían ir en devoluciones, no reducir el valor de actos',
+      );
     });
 
     test('Should show CORRECT approach with subtotal and devoluciones', () {
@@ -50,7 +53,8 @@ void main() {
 
       print('ENFOQUE CORRECTO:');
       print(
-          '  Valor de actos: \$${subtotalOriginal.toStringAsFixed(2)} (subtotal completo)');
+        '  Valor de actos: \$${subtotalOriginal.toStringAsFixed(2)} (subtotal completo)',
+      );
       print('  Devoluciones: \$${descuento.toStringAsFixed(2)}');
       print('  IVA: \$${ivaEsperado.toStringAsFixed(2)}');
 

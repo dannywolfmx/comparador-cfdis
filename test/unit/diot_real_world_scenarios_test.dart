@@ -7,7 +7,8 @@ void main() {
     test('Should not validate CFDIs with 0.01 subtotal (validation disabled)',
         () {
       print(
-          '=== TEST: No validar CFDI con subtotal 0.01 (validación deshabilitada) ===');
+        '=== TEST: No validar CFDI con subtotal 0.01 (validación deshabilitada) ===',
+      );
 
       // Escenario reportado por el usuario:
       // Factura con subtotal 0.01, total 0.01 (sin IVA)
@@ -43,12 +44,14 @@ void main() {
       );
 
       print(
-          '✓ CORRECTO: No se valida consistencia para CFDI con subtotal \$0.01');
+        '✓ CORRECTO: No se valida consistencia para CFDI con subtotal \$0.01',
+      );
     });
 
     test('Should not validate tolerance thresholds (validation disabled)', () {
       print(
-          '=== TEST: No validar umbrales de tolerancia (validación deshabilitada) ===');
+        '=== TEST: No validar umbrales de tolerancia (validación deshabilitada) ===',
+      );
 
       // Casos de prueba que anteriormente se basaban en umbrales
       // AHORA: Confiamos en los valores del CFDI ya validados por el SAT

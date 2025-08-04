@@ -7,8 +7,7 @@ import 'package:comparador_cfdis/constants/diot_constants.dart';
 
 void main() {
   group('DIOT Currency Conversion Tests', () {
-    
-    final testConfig = DIOTConfiguration(
+    const testConfig = DIOTConfiguration(
       year: 2025,
       month: 6,
       ejercicio: 2025,
@@ -29,8 +28,8 @@ void main() {
         moneda: 'USD',
         tipoCambio: '20.5', // 1 USD = 20.5 MXN
         subTotal: '1000.00', // $1,000 USD
-        descuento: '100.00',  // $100 USD descuento
-        total: '1060.00',     // $1,060 USD total
+        descuento: '100.00', // $100 USD descuento
+        total: '1060.00', // $1,060 USD total
         tipoDeComprobante: 'I',
         emisor: Emisor(rfc: 'XEXX010101001', nombre: 'Proveedor Internacional'),
         impuestos: Impuesto(
@@ -42,7 +41,8 @@ void main() {
       );
 
       // Mapear a DIOT (debería convertir a pesos)
-      final records = DIOTMappingService.mapCFDIsToRecords([cfdiUSD], testConfig);
+      final records =
+          DIOTMappingService.mapCFDIsToRecords([cfdiUSD], testConfig);
       expect(records.length, 1);
 
       final record = records.first;
@@ -57,7 +57,9 @@ void main() {
       print('📊 VALORES CONVERTIDOS (MXN):');
       print('  valorActos16Porciento: \$${record.valorActos16Porciento}');
       print('  devoluciones16Porciento: \$${record.devoluciones16Porciento}');
-      print('  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}');
+      print(
+        '  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}',
+      );
 
       print('');
       print('🔍 VERIFICACIÓN:');
@@ -66,12 +68,21 @@ void main() {
       print('  IVA esperado: \$3,280.00 MXN (160 * 20.5)');
 
       // Verificar conversiones
-      expect(record.valorActos16Porciento, 20500.0,
-          reason: 'Subtotal debe convertirse: 1000 USD * 20.5 = 20,500 MXN');
-      expect(record.devoluciones16Porciento, 2050.0,
-          reason: 'Descuento debe convertirse: 100 USD * 20.5 = 2,050 MXN');
-      expect(record.ivaAcreditableExclusivo16, 3280.0,
-          reason: 'IVA debe convertirse: 160 USD * 20.5 = 3,280 MXN');
+      expect(
+        record.valorActos16Porciento,
+        20500.0,
+        reason: 'Subtotal debe convertirse: 1000 USD * 20.5 = 20,500 MXN',
+      );
+      expect(
+        record.devoluciones16Porciento,
+        2050.0,
+        reason: 'Descuento debe convertirse: 100 USD * 20.5 = 2,050 MXN',
+      );
+      expect(
+        record.ivaAcreditableExclusivo16,
+        3280.0,
+        reason: 'IVA debe convertirse: 160 USD * 20.5 = 3,280 MXN',
+      );
 
       print('');
       print('✅ ÉXITO: Conversión USD a MXN funciona correctamente');
@@ -87,8 +98,8 @@ void main() {
         moneda: 'MXN',
         tipoCambio: '1', // Sin conversión
         subTotal: '1000.00', // $1,000 MXN
-        descuento: '100.00',  // $100 MXN descuento
-        total: '1060.00',     // $1,060 MXN total
+        descuento: '100.00', // $100 MXN descuento
+        total: '1060.00', // $1,060 MXN total
         tipoDeComprobante: 'I',
         emisor: Emisor(rfc: 'XAXX010101000', nombre: 'Proveedor Nacional'),
         impuestos: Impuesto(
@@ -99,13 +110,16 @@ void main() {
         ),
       );
 
-      final records = DIOTMappingService.mapCFDIsToRecords([cfdiMXN], testConfig);
+      final records =
+          DIOTMappingService.mapCFDIsToRecords([cfdiMXN], testConfig);
       final record = records.first;
 
       print('📊 VALORES MXN (sin conversión):');
       print('  valorActos16Porciento: \$${record.valorActos16Porciento}');
       print('  devoluciones16Porciento: \$${record.devoluciones16Porciento}');
-      print('  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}');
+      print(
+        '  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}',
+      );
 
       // Los valores deben mantenerse igual (sin conversión)
       expect(record.valorActos16Porciento, 1000.0);
@@ -148,7 +162,8 @@ void main() {
         ),
       );
 
-      final records = DIOTMappingService.mapCFDIsToRecords([cfdiMXN, cfdiUSD], testConfig);
+      final records =
+          DIOTMappingService.mapCFDIsToRecords([cfdiMXN, cfdiUSD], testConfig);
       final record = records.first; // Agrupados por mismo RFC
 
       print('📊 CFDI 1 (MXN): Subtotal \$1,000, IVA \$160');
@@ -157,7 +172,9 @@ void main() {
       print('📊 TOTAL AGREGADO (todo en MXN):');
       print('  valorActos16Porciento: \$${record.valorActos16Porciento}');
       print('  devoluciones16Porciento: \$${record.devoluciones16Porciento}');
-      print('  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}');
+      print(
+        '  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}',
+      );
 
       // Verificar agregación correcta:
       // Subtotal: 1000 MXN + (500 USD * 20) = 1000 + 10000 = 11000 MXN
@@ -188,7 +205,8 @@ void main() {
         ),
       );
 
-      final records = DIOTMappingService.mapCFDIsToRecords([cfdiEUR], testConfig);
+      final records =
+          DIOTMappingService.mapCFDIsToRecords([cfdiEUR], testConfig);
       final record = records.first;
 
       print('📊 VALORES ORIGINALES (EUR):');
@@ -201,7 +219,9 @@ void main() {
       print('📊 VALORES CONVERTIDOS (MXN):');
       print('  valorActos16Porciento: \$${record.valorActos16Porciento}');
       print('  devoluciones16Porciento: \$${record.devoluciones16Porciento}');
-      print('  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}');
+      print(
+        '  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}',
+      );
 
       // Verificar conversiones EUR a MXN
       expect(record.valorActos16Porciento, 22800.0); // 1000 * 22.8

@@ -26,7 +26,8 @@ class DIOTValidationService {
 
   /// Validaciones específicas del lote que complementan DIOT 2025
   static List<DIOTValidationError> _validateBatchSpecificRules(
-      DIOTBatch batch) {
+    DIOTBatch batch,
+  ) {
     final List<DIOTValidationError> errors = [];
 
     // Validar que hay registros

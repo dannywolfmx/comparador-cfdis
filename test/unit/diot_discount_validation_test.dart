@@ -38,9 +38,11 @@ void main() {
       );
 
       print(
-          '✅ Cálculo correcto: Base gravable = \$${baseGravableCalculada.toStringAsFixed(2)}');
+        '✅ Cálculo correcto: Base gravable = \$${baseGravableCalculada.toStringAsFixed(2)}',
+      );
       print(
-          '✅ La lógica actualizada en diot_mapping_service.dart debería usar este valor');
+        '✅ La lógica actualizada en diot_mapping_service.dart debería usar este valor',
+      );
 
       // Verificar que es diferente del subtotal completo (problema original)
       expect(
@@ -74,7 +76,8 @@ void main() {
       );
 
       print(
-          '✅ Sin descuento: Base gravable = \$${baseGravableCalculada.toStringAsFixed(2)}');
+        '✅ Sin descuento: Base gravable = \$${baseGravableCalculada.toStringAsFixed(2)}',
+      );
     });
 
     test('Should demonstrate the fix resolves validation issue', () {

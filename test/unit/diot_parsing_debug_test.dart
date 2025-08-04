@@ -10,7 +10,7 @@ void main() {
         {
           'input': '219.31',
           'expected': 219.31,
-          'description': 'Decimal normal'
+          'description': 'Decimal normal',
         },
         {'input': '0.00', 'expected': 0.0, 'description': 'Cero explícito'},
         {'input': '377.52', 'expected': 377.52, 'description': 'Otro decimal'},
@@ -58,22 +58,22 @@ void main() {
         {
           'input': '219,31',
           'expected': 0.0,
-          'description': 'Coma en lugar de punto'
+          'description': 'Coma en lugar de punto',
         },
         {
           'input': '  219.31  ',
           'expected': 219.31,
-          'description': 'Con espacios'
+          'description': 'Con espacios',
         },
         {
           'input': '+219.31',
           'expected': 219.31,
-          'description': 'Con signo positivo'
+          'description': 'Con signo positivo',
         },
         {
           'input': '-219.31',
           'expected': -219.31,
-          'description': 'Con signo negativo'
+          'description': 'Con signo negativo',
         },
       ];
 
@@ -121,9 +121,11 @@ void main() {
       final cfdi = CFDI.fromJson(cfdiData);
 
       print(
-          'XML simulado: <cfdi:Impuestos TotalImpuestosTrasladados="219.31">');
+        'XML simulado: <cfdi:Impuestos TotalImpuestosTrasladados="219.31">',
+      );
       print(
-          'Resultado del parsing: ${cfdi.impuestos?.totalImpuestosTrasladados}');
+        'Resultado del parsing: ${cfdi.impuestos?.totalImpuestosTrasladados}',
+      );
 
       if (cfdi.impuestos?.totalImpuestosTrasladados == 219.31) {
         print('✅ PARSING CORRECTO: Se parseó como 219.31');
@@ -132,7 +134,8 @@ void main() {
         print('   Esto explica por qué usa el fallback de cálculo');
       } else {
         print(
-            '⚠️  PARSING INESPERADO: ${cfdi.impuestos?.totalImpuestosTrasladados}');
+          '⚠️  PARSING INESPERADO: ${cfdi.impuestos?.totalImpuestosTrasladados}',
+        );
       }
 
       expect(

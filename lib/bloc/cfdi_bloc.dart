@@ -143,7 +143,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
         );
       } else {
         final cfdiInformation = calculateTotals(cfdis);
-        emit(CFDILoaded(cfdis, cfdiInformation, {}));
+        emit(CFDILoaded(cfdis, cfdiInformation, const {}));
       }
     } catch (e) {
       emit(CFDIError('Error al cargar los CFDIs: $e'));
@@ -159,7 +159,7 @@ class CFDIBloc extends Bloc<CFDIEvent, CFDIState> {
       final cfdis = await _repository.loadCFDIFromFile();
       if (cfdis.isNotEmpty) {
         final cfdiInformation = calculateTotals(cfdis);
-        emit(CFDILoaded(cfdis, cfdiInformation, {}));
+        emit(CFDILoaded(cfdis, cfdiInformation, const {}));
       } else {
         emit(CFDIError('No se pudo cargar el CFDI'));
       }

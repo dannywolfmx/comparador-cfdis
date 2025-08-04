@@ -2,13 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:comparador_cfdis/models/cfdi.dart';
 import 'package:comparador_cfdis/models/diot_batch.dart';
 import 'package:comparador_cfdis/services/diot_mapping_service.dart';
+import 'package:comparador_cfdis/constants/diot_constants.dart';
 
 void main() {
   group('DIOT CFDI IVA Debug Tests', () {
     test('Debug exact scenario from user problem', () {
       print('=== DEBUG: Escenario exacto del problema del usuario ===');
 
-      // Simular XML parsing que resulta en el CFDI problemático
+      // Simular CFDI con TotalImpuestosTrasladados específico
       final cfdiData = {
         'SubTotal': '2359.53',
         'Descuento': '717.68',
@@ -22,65 +23,7 @@ void main() {
           'Nombre': 'Mi Empresa',
         },
         'Impuestos': {
-          'TotalImpuestosTrasladados': '219.31', // ❗ VALOR REAL DEL PROBLEMA
-          'Traslados': {
-            'Traslado': [
-              {
-                'Impuesto': '002',
-                'TipoFactor': 'Tasa',
-                'TasaOCuota': '0.160000',
-                'Importe': '160.00',
-              },
-              {
-                'Impuesto': '002',
-                'TipoFactor': 'Tasa',
-                'TasaOCuota': '0.000000',
-                'Importe': '0.00',
-              }
-            ],
-          },
-        },
-        'Conceptos': {
-          'Concepto': [
-            {
-              'Cantidad': '1',
-              'ClaveUnidad': 'H87',
-              'ClaveProdServ': '50202306',
-              'Descripcion': 'Producto con IVA 16%',
-              'ValorUnitario': '1000.00',
-              'Importe': '1000.00',
-              'Impuestos': {
-                'Traslados': {
-                  'Traslado': {
-                    'Base': '1000.00',
-                    'Impuesto': '002',
-                    'TipoFactor': 'Tasa',
-                    'TasaOCuota': '0.160000',
-                    'Importe': '160.00',
-                  },
-                },
-              },
-            },
-            {
-              'Cantidad': '1',
-              'ClaveUnidad': 'H87',
-              'ClaveProdServ': '50202306',
-              'Descripcion': 'Producto exento 0%',
-              'ValorUnitario': '1359.53',
-              'Importe': '1359.53',
-              'Impuestos': {
-                'Traslados': {
-                  'Traslado': {
-                    'Base': '1359.53',
-                    'Impuesto': '002',
-                    'TipoFactor': 'Tasa',
-                    'TasaOCuota': '0.000000',
-                    'Importe': '0.00',
-                  },
-                },
-              },
-            }
-          ],
+          'TotalImpuestosTrasladados': '219.31', // VALOR REAL DEL PROBLEMA
         },
       };
 
@@ -95,27 +38,23 @@ void main() {
       print('  cfdi.impuestos != null: ${cfdi.impuestos != null}');
       if (cfdi.impuestos != null) {
         print(
-            '  TotalImpuestosTrasladados: \$${cfdi.impuestos!.totalImpuestosTrasladados}');
+          '  TotalImpuestosTrasladados: \$${cfdi.impuestos!.totalImpuestosTrasladados}',
+        );
         print(
-            '  TotalImpuestosTrasladados > 0: ${cfdi.impuestos!.totalImpuestosTrasladados > 0}');
+          '  TotalImpuestosTrasladados > 0: ${cfdi.impuestos!.totalImpuestosTrasladados > 0}',
+        );
       }
 
       // Simular configuración mínima
-      final configuration = DIOTConfiguration(
+      const configuration = DIOTConfiguration(
         year: 2025,
         month: 1,
-        ejercicio: '2025',
-        periodo: '01',
+        ejercicio: 2025,
+        periodo: 1,
         rfcContribuyente: 'XAXX010101000',
-        tipoComplemento: '0',
-        userPreferences: UserPreferences(
-          rfcToTipoTercero: {},
-          rfcToTipoOperacion: {},
-          rfcToClasificacionRegional: {},
-          rfcToClasificacionIVA: {},
-          rfcToEfectosFiscales: {},
-          rfcToExtranjeroInfo: {},
-        ),
+        tipoComplemento: TipoComplemento.normal,
+        filterCriteria: DIOTFilterCriteria(),
+        userPreferences: DIOTUserPreferences(),
       );
 
       // Mapear a DIOT
@@ -129,7 +68,8 @@ void main() {
       print('📋 RESULTADO DEL MAPEO DIOT:');
       print('  valorActos16Porciento: \$${record.valorActos16Porciento}');
       print(
-          '  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}');
+        '  ivaAcreditableExclusivo16: \$${record.ivaAcreditableExclusivo16}',
+      );
       print('  devoluciones16Porciento: \$${record.devoluciones16Porciento}');
 
       print('');
@@ -189,12 +129,13 @@ void main() {
         print('');
         print('🧪 Caso: ${testCase['name']}');
 
-        final cfdi = CFDI.fromJson(testCase['data']);
+        final cfdi = CFDI.fromJson(testCase['data'] as Map<String, dynamic>);
 
         print('  cfdi.impuestos != null: ${cfdi.impuestos != null}');
         if (cfdi.impuestos != null) {
           print(
-              '  TotalImpuestosTrasladados: \$${cfdi.impuestos!.totalImpuestosTrasladados}');
+            '  TotalImpuestosTrasladados: \$${cfdi.impuestos!.totalImpuestosTrasladados}',
+          );
         }
 
         // Simular la lógica del mapping

@@ -18,89 +18,129 @@ class DIOT2025MappingService {
 
     // Campos 8-17: Valores de actos y devoluciones
     fields[8] = _formatNumericValue(
-        record.valorActosFronteraNorte); // valor_actos_frontera_norte
+      record.valorActosFronteraNorte,
+    ); // valor_actos_frontera_norte
     fields[9] = _formatNumericValue(
-        record.devolucionesFronteraNorte); // devoluciones_frontera_norte
+      record.devolucionesFronteraNorte,
+    ); // devoluciones_frontera_norte
     fields[10] = _formatNumericValue(
-        record.valorActosFronteraSur); // valor_actos_frontera_sur
+      record.valorActosFronteraSur,
+    ); // valor_actos_frontera_sur
     fields[11] = _formatNumericValue(
-        record.devolucionesFronteraSur); // devoluciones_frontera_sur
+      record.devolucionesFronteraSur,
+    ); // devoluciones_frontera_sur
     fields[12] = _formatNumericValue(
-        record.valorActos16Porciento); // valor_actos_16_porciento
+      record.valorActos16Porciento,
+    ); // valor_actos_16_porciento
     fields[13] = _formatNumericValue(
-        record.devoluciones16Porciento); // devoluciones_16_porciento
+      record.devoluciones16Porciento,
+    ); // devoluciones_16_porciento
     fields[14] = _formatNumericValue(
-        record.valorImportacionTangibles16); // valor_importacion_tangibles_16
-    fields[15] = _formatNumericValue(record
-        .devolucionesImportacionTangibles16); // devoluciones_importacion_tangibles_16
-    fields[16] = _formatNumericValue(record
-        .valorImportacionIntangibles16); // valor_importacion_intangibles_16
-    fields[17] = _formatNumericValue(record
-        .devolucionesImportacionIntangibles16); // devoluciones_importacion_intangibles_16
+      record.valorImportacionTangibles16,
+    ); // valor_importacion_tangibles_16
+    fields[15] = _formatNumericValue(
+      record.devolucionesImportacionTangibles16,
+    ); // devoluciones_importacion_tangibles_16
+    fields[16] = _formatNumericValue(
+      record.valorImportacionIntangibles16,
+    ); // valor_importacion_intangibles_16
+    fields[17] = _formatNumericValue(
+      record.devolucionesImportacionIntangibles16,
+    ); // devoluciones_importacion_intangibles_16
 
     // Campos 18-27: IVA acreditable
-    fields[18] = _formatNumericValue(record
-        .ivaAcreditableExclusivoFronteraNorte); // iva_acreditable_exclusivo_frontera_norte
-    fields[19] = _formatNumericValue(record
-        .ivaAcreditableProporcionFronteraNorte); // iva_acreditable_proporcion_frontera_norte
-    fields[20] = _formatNumericValue(record
-        .ivaAcreditableExclusivoFronteraSur); // iva_acreditable_exclusivo_frontera_sur
-    fields[21] = _formatNumericValue(record
-        .ivaAcreditableProporcionFronteraSur); // iva_acreditable_proporcion_frontera_sur
+    fields[18] = _formatNumericValue(
+      record.ivaAcreditableExclusivoFronteraNorte,
+    ); // iva_acreditable_exclusivo_frontera_norte
+    fields[19] = _formatNumericValue(
+      record.ivaAcreditableProporcionFronteraNorte,
+    ); // iva_acreditable_proporcion_frontera_norte
+    fields[20] = _formatNumericValue(
+      record.ivaAcreditableExclusivoFronteraSur,
+    ); // iva_acreditable_exclusivo_frontera_sur
+    fields[21] = _formatNumericValue(
+      record.ivaAcreditableProporcionFronteraSur,
+    ); // iva_acreditable_proporcion_frontera_sur
     fields[22] = _formatNumericValue(
-        record.ivaAcreditableExclusivo16); // iva_acreditable_exclusivo_16
+      record.ivaAcreditableExclusivo16,
+    ); // iva_acreditable_exclusivo_16
     fields[23] = _formatNumericValue(
-        record.ivaAcreditableProporcion16); // iva_acreditable_proporcion_16
-    fields[24] = _formatNumericValue(record
-        .ivaAcreditableExclusivoImportacionTangibles16); // iva_acreditable_exclusivo_importacion_tangibles_16
-    fields[25] = _formatNumericValue(record
-        .ivaAcreditableProporcionImportacionTangibles16); // iva_acreditable_proporcion_importacion_tangibles_16
-    fields[26] = _formatNumericValue(record
-        .ivaAcreditableExclusivoImportacionIntangibles16); // iva_acreditable_exclusivo_importacion_intangibles_16
-    fields[27] = _formatNumericValue(record
-        .ivaAcreditableProporcionImportacionIntangibles16); // iva_acreditable_proporcion_importacion_intangibles_16
+      record.ivaAcreditableProporcion16,
+    ); // iva_acreditable_proporcion_16
+    fields[24] = _formatNumericValue(
+      record.ivaAcreditableExclusivoImportacionTangibles16,
+    ); // iva_acreditable_exclusivo_importacion_tangibles_16
+    fields[25] = _formatNumericValue(
+      record.ivaAcreditableProporcionImportacionTangibles16,
+    ); // iva_acreditable_proporcion_importacion_tangibles_16
+    fields[26] = _formatNumericValue(
+      record.ivaAcreditableExclusivoImportacionIntangibles16,
+    ); // iva_acreditable_exclusivo_importacion_intangibles_16
+    fields[27] = _formatNumericValue(
+      record.ivaAcreditableProporcionImportacionIntangibles16,
+    ); // iva_acreditable_proporcion_importacion_intangibles_16
 
     // Campos 28-47: IVA no acreditable
-    fields[28] = _formatNumericValue(record
-        .ivaNoAcreditableProporcionFronteraNorte); // iva_no_acreditable_proporcion_frontera_norte
-    fields[29] = _formatNumericValue(record
-        .ivaNoAcreditableSinRequisitosFronteraNorte); // iva_no_acreditable_sin_requisitos_frontera_norte
-    fields[30] = _formatNumericValue(record
-        .ivaNoAcreditableExentasFronteraNorte); // iva_no_acreditable_exentas_frontera_norte
-    fields[31] = _formatNumericValue(record
-        .ivaNoAcreditableNoObjetoFronteraNorte); // iva_no_acreditable_no_objeto_frontera_norte
-    fields[32] = _formatNumericValue(record
-        .ivaNoAcreditableProporcionFronteraSur); // iva_no_acreditable_proporcion_frontera_sur
-    fields[33] = _formatNumericValue(record
-        .ivaNoAcreditableSinRequisitosFronteraSur); // iva_no_acreditable_sin_requisitos_frontera_sur
-    fields[34] = _formatNumericValue(record
-        .ivaNoAcreditableExentasFronteraSur); // iva_no_acreditable_exentas_frontera_sur
-    fields[35] = _formatNumericValue(record
-        .ivaNoAcreditableNoObjetoFronteraSur); // iva_no_acreditable_no_objeto_frontera_sur
-    fields[36] = _formatNumericValue(record
-        .ivaNoAcreditableProporcion16); // iva_no_acreditable_proporcion_16
-    fields[37] = _formatNumericValue(record
-        .ivaNoAcreditableSinRequisitos16); // iva_no_acreditable_sin_requisitos_16
+    fields[28] = _formatNumericValue(
+      record.ivaNoAcreditableProporcionFronteraNorte,
+    ); // iva_no_acreditable_proporcion_frontera_norte
+    fields[29] = _formatNumericValue(
+      record.ivaNoAcreditableSinRequisitosFronteraNorte,
+    ); // iva_no_acreditable_sin_requisitos_frontera_norte
+    fields[30] = _formatNumericValue(
+      record.ivaNoAcreditableExentasFronteraNorte,
+    ); // iva_no_acreditable_exentas_frontera_norte
+    fields[31] = _formatNumericValue(
+      record.ivaNoAcreditableNoObjetoFronteraNorte,
+    ); // iva_no_acreditable_no_objeto_frontera_norte
+    fields[32] = _formatNumericValue(
+      record.ivaNoAcreditableProporcionFronteraSur,
+    ); // iva_no_acreditable_proporcion_frontera_sur
+    fields[33] = _formatNumericValue(
+      record.ivaNoAcreditableSinRequisitosFronteraSur,
+    ); // iva_no_acreditable_sin_requisitos_frontera_sur
+    fields[34] = _formatNumericValue(
+      record.ivaNoAcreditableExentasFronteraSur,
+    ); // iva_no_acreditable_exentas_frontera_sur
+    fields[35] = _formatNumericValue(
+      record.ivaNoAcreditableNoObjetoFronteraSur,
+    ); // iva_no_acreditable_no_objeto_frontera_sur
+    fields[36] = _formatNumericValue(
+      record.ivaNoAcreditableProporcion16,
+    ); // iva_no_acreditable_proporcion_16
+    fields[37] = _formatNumericValue(
+      record.ivaNoAcreditableSinRequisitos16,
+    ); // iva_no_acreditable_sin_requisitos_16
     fields[38] = _formatNumericValue(
-        record.ivaNoAcreditableExentas16); // iva_no_acreditable_exentas_16
+      record.ivaNoAcreditableExentas16,
+    ); // iva_no_acreditable_exentas_16
     fields[39] = _formatNumericValue(
-        record.ivaNoAcreditableNoObjeto16); // iva_no_acreditable_no_objeto_16
-    fields[40] = _formatNumericValue(record
-        .ivaNoAcreditableProporcionImportacionTangibles16); // iva_no_acreditable_proporcion_importacion_tangibles_16
-    fields[41] = _formatNumericValue(record
-        .ivaNoAcreditableSinRequisitosImportacionTangibles16); // iva_no_acreditable_sin_requisitos_importacion_tangibles_16
-    fields[42] = _formatNumericValue(record
-        .ivaNoAcreditableExentasImportacionTangibles16); // iva_no_acreditable_exentas_importacion_tangibles_16
-    fields[43] = _formatNumericValue(record
-        .ivaNoAcreditableNoObjetoImportacionTangibles16); // iva_no_acreditable_no_objeto_importacion_tangibles_16
-    fields[44] = _formatNumericValue(record
-        .ivaNoAcreditableProporcionImportacionIntangibles16); // iva_no_acreditable_proporcion_importacion_intangibles_16
-    fields[45] = _formatNumericValue(record
-        .ivaNoAcreditableSinRequisitosImportacionIntangibles16); // iva_no_acreditable_sin_requisitos_importacion_intangibles_16
-    fields[46] = _formatNumericValue(record
-        .ivaNoAcreditableExentasImportacionIntangibles16); // iva_no_acreditable_exentas_importacion_intangibles_16
-    fields[47] = _formatNumericValue(record
-        .ivaNoAcreditableNoObjetoImportacionIntangibles16); // iva_no_acreditable_no_objeto_importacion_intangibles_16
+      record.ivaNoAcreditableNoObjeto16,
+    ); // iva_no_acreditable_no_objeto_16
+    fields[40] = _formatNumericValue(
+      record.ivaNoAcreditableProporcionImportacionTangibles16,
+    ); // iva_no_acreditable_proporcion_importacion_tangibles_16
+    fields[41] = _formatNumericValue(
+      record.ivaNoAcreditableSinRequisitosImportacionTangibles16,
+    ); // iva_no_acreditable_sin_requisitos_importacion_tangibles_16
+    fields[42] = _formatNumericValue(
+      record.ivaNoAcreditableExentasImportacionTangibles16,
+    ); // iva_no_acreditable_exentas_importacion_tangibles_16
+    fields[43] = _formatNumericValue(
+      record.ivaNoAcreditableNoObjetoImportacionTangibles16,
+    ); // iva_no_acreditable_no_objeto_importacion_tangibles_16
+    fields[44] = _formatNumericValue(
+      record.ivaNoAcreditableProporcionImportacionIntangibles16,
+    ); // iva_no_acreditable_proporcion_importacion_intangibles_16
+    fields[45] = _formatNumericValue(
+      record.ivaNoAcreditableSinRequisitosImportacionIntangibles16,
+    ); // iva_no_acreditable_sin_requisitos_importacion_intangibles_16
+    fields[46] = _formatNumericValue(
+      record.ivaNoAcreditableExentasImportacionIntangibles16,
+    ); // iva_no_acreditable_exentas_importacion_intangibles_16
+    fields[47] = _formatNumericValue(
+      record.ivaNoAcreditableNoObjetoImportacionIntangibles16,
+    ); // iva_no_acreditable_no_objeto_importacion_intangibles_16
 
     // Campos 48-53: Otros valores
     fields[48] = _formatNumericValue(record.ivaRetenido); // iva_retenido
@@ -109,9 +149,11 @@ class DIOT2025MappingService {
     fields[50] = _formatNumericValue(record.actosExentos); // actos_exentos
     fields[51] = _formatNumericValue(record.actosTasaCero); // actos_tasa_cero
     fields[52] = _formatNumericValue(
-        record.actosNoObjetoNacional); // actos_no_objeto_nacional
-    fields[53] = _formatNumericValue(record
-        .actosNoObjetoSinEstablecimiento); // actos_no_objeto_sin_establecimiento
+      record.actosNoObjetoNacional,
+    ); // actos_no_objeto_nacional
+    fields[53] = _formatNumericValue(
+      record.actosNoObjetoSinEstablecimiento,
+    ); // actos_no_objeto_sin_establecimiento
 
     // Campo 54: Efectos fiscales
     fields[54] = record.efectosFiscales.code; // efectos_fiscales

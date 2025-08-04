@@ -139,7 +139,8 @@ void main() {
 
     test('Should confirm IVA tolerance validation is disabled', () {
       print(
-          '=== TEST: Confirmar que validación de tolerancia IVA está deshabilitada ===');
+        '=== TEST: Confirmar que validación de tolerancia IVA está deshabilitada ===',
+      );
 
       // Las constantes de tolerancia ya no se usan porque
       // las validaciones de consistencia de IVA han sido deshabilitadas

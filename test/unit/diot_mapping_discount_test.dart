@@ -50,9 +50,11 @@ void main() {
       print('');
       print('DIOT Mapping Result:');
       print(
-          '  valorActos16Porciento: \$${record.valorActos16Porciento?.toStringAsFixed(2)}');
+        '  valorActos16Porciento: \$${record.valorActos16Porciento?.toStringAsFixed(2)}',
+      );
       print(
-          '  devoluciones16Porciento: \$${record.devoluciones16Porciento?.toStringAsFixed(2)}');
+        '  devoluciones16Porciento: \$${record.devoluciones16Porciento?.toStringAsFixed(2)}',
+      );
 
       // Verificar que el mapeo es correcto
       expect(
@@ -177,9 +179,11 @@ void main() {
       );
 
       print(
-          '✅ CORRECTO: Total de subtotales = \$${subtotalTotal.toStringAsFixed(2)}');
+        '✅ CORRECTO: Total de subtotales = \$${subtotalTotal.toStringAsFixed(2)}',
+      );
       print(
-          '✅ CORRECTO: Total de descuentos = \$${descuentoTotal.toStringAsFixed(2)}');
+        '✅ CORRECTO: Total de descuentos = \$${descuentoTotal.toStringAsFixed(2)}',
+      );
     });
   });
 }

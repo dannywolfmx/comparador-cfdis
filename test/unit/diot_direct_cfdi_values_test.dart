@@ -114,7 +114,9 @@ void main() {
         descuento: '25.00',
         total: '555.00',
         emisor: Emisor(
-            rfc: 'GHI789012345', nombre: 'Proveedor Test 4'), // Mismo RFC
+          rfc: 'GHI789012345',
+          nombre: 'Proveedor Test 4',
+        ), // Mismo RFC
         impuestos: Impuesto(
           totalImpuestosRetenidos: 0.0,
           totalImpuestosTrasladados: 80.0,

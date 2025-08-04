@@ -107,7 +107,7 @@ class DIOTMappingService {
       // 💱 CONVERSIÓN DE TIPO DE CAMBIO A PESOS MEXICANOS
       final tipoCambio = double.tryParse(cfdi.tipoCambio ?? '1') ?? 1.0;
       final isMonedaExtranjera = tipoCambio != 1.0;
-      
+
       if (isMonedaExtranjera) {
         print('💱 CFDI en moneda extranjera detectado:');
         print('   RFC: ${cfdi.emisor?.rfc}');
@@ -118,15 +118,22 @@ class DIOTMappingService {
       // Tomar valores directamente del CFDI y convertir a pesos si es necesario
       final subtotalOriginal = double.tryParse(cfdi.subTotal ?? '0') ?? 0;
       final descuentoOriginal = double.tryParse(cfdi.descuento ?? '0') ?? 0;
-      
+
       // Aplicar conversión a pesos mexicanos
-      final subtotal = isMonedaExtranjera ? subtotalOriginal * tipoCambio : subtotalOriginal;
-      final descuento = isMonedaExtranjera ? descuentoOriginal * tipoCambio : descuentoOriginal;
-      
+      final subtotal =
+          isMonedaExtranjera ? subtotalOriginal * tipoCambio : subtotalOriginal;
+      final descuento = isMonedaExtranjera
+          ? descuentoOriginal * tipoCambio
+          : descuentoOriginal;
+
       if (isMonedaExtranjera) {
-        print('   Subtotal original: \$${subtotalOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}');
+        print(
+          '   Subtotal original: \$${subtotalOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}',
+        );
         print('   Subtotal en MXN: \$${subtotal.toStringAsFixed(2)}');
-        print('   Descuento original: \$${descuentoOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}');
+        print(
+          '   Descuento original: \$${descuentoOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}',
+        );
         print('   Descuento en MXN: \$${descuento.toStringAsFixed(2)}');
       }
 
@@ -140,7 +147,8 @@ class DIOTMappingService {
         print('   cfdi.impuestos != null: ${cfdi.impuestos != null}');
         if (cfdi.impuestos != null) {
           print(
-              '   TotalImpuestosTrasladados: ${cfdi.impuestos!.totalImpuestosTrasladados}');
+            '   TotalImpuestosTrasladados: ${cfdi.impuestos!.totalImpuestosTrasladados}',
+          );
           print('   > 0: ${cfdi.impuestos!.totalImpuestosTrasladados > 0}');
         }
       }
@@ -149,10 +157,12 @@ class DIOTMappingService {
           cfdi.impuestos!.totalImpuestosTrasladados > 0) {
         final ivaOriginal = cfdi.impuestos!.totalImpuestosTrasladados;
         iva = isMonedaExtranjera ? ivaOriginal * tipoCambio : ivaOriginal;
-        
+
         if (rfcEmisor.isNotEmpty) print('   ✅ USANDO: $iva');
         if (isMonedaExtranjera) {
-          print('   IVA original: \$${ivaOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}');
+          print(
+            '   IVA original: \$${ivaOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}',
+          );
           print('   IVA en MXN: \$${iva.toStringAsFixed(2)}');
         }
       } else {
@@ -186,7 +196,7 @@ class DIOTMappingService {
   /// - Productos con tasa 0% que no aparecen en traslados
   /// - Redondeos en el cálculo individual vs total
   /// - Otros casos especiales del SAT
-  /// 
+  ///
   /// [tipoCambio] - Tipo de cambio para convertir a pesos mexicanos
   static double _calculateIVAFromCFDI(CFDI cfdi, double tipoCambio) {
     double totalIVA = 0;
