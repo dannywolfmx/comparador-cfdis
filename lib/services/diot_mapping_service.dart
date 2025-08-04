@@ -104,9 +104,31 @@ class DIOTMappingService {
     double devoluciones16Porciento = 0;
 
     for (final cfdi in cfdis) {
-      // Tomar valores directamente del CFDI en lugar de calcularlos
-      final subtotal = double.tryParse(cfdi.subTotal ?? '0') ?? 0;
-      final descuento = double.tryParse(cfdi.descuento ?? '0') ?? 0;
+      // 💱 CONVERSIÓN DE TIPO DE CAMBIO A PESOS MEXICANOS
+      final tipoCambio = double.tryParse(cfdi.tipoCambio ?? '1') ?? 1.0;
+      final isMonedaExtranjera = tipoCambio != 1.0;
+      
+      if (isMonedaExtranjera) {
+        print('💱 CFDI en moneda extranjera detectado:');
+        print('   RFC: ${cfdi.emisor?.rfc}');
+        print('   Moneda: ${cfdi.moneda ?? 'USD'}');
+        print('   Tipo de cambio: $tipoCambio');
+      }
+
+      // Tomar valores directamente del CFDI y convertir a pesos si es necesario
+      final subtotalOriginal = double.tryParse(cfdi.subTotal ?? '0') ?? 0;
+      final descuentoOriginal = double.tryParse(cfdi.descuento ?? '0') ?? 0;
+      
+      // Aplicar conversión a pesos mexicanos
+      final subtotal = isMonedaExtranjera ? subtotalOriginal * tipoCambio : subtotalOriginal;
+      final descuento = isMonedaExtranjera ? descuentoOriginal * tipoCambio : descuentoOriginal;
+      
+      if (isMonedaExtranjera) {
+        print('   Subtotal original: \$${subtotalOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}');
+        print('   Subtotal en MXN: \$${subtotal.toStringAsFixed(2)}');
+        print('   Descuento original: \$${descuentoOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}');
+        print('   Descuento en MXN: \$${descuento.toStringAsFixed(2)}');
+      }
 
       // Usar TotalImpuestosTrasladados directamente del CFDI si está disponible
       double iva = 0;
@@ -125,15 +147,26 @@ class DIOTMappingService {
 
       if (cfdi.impuestos?.totalImpuestosTrasladados != null &&
           cfdi.impuestos!.totalImpuestosTrasladados > 0) {
-        iva = cfdi.impuestos!.totalImpuestosTrasladados;
+        final ivaOriginal = cfdi.impuestos!.totalImpuestosTrasladados;
+        iva = isMonedaExtranjera ? ivaOriginal * tipoCambio : ivaOriginal;
+        
         if (rfcEmisor.isNotEmpty) print('   ✅ USANDO: $iva');
+        if (isMonedaExtranjera) {
+          print('   IVA original: \$${ivaOriginal.toStringAsFixed(2)} ${cfdi.moneda ?? 'USD'}');
+          print('   IVA en MXN: \$${iva.toStringAsFixed(2)}');
+        }
       } else {
         // Fallback: calcular desde conceptos solo si no está disponible el total
-        iva = _calculateIVAFromCFDI(cfdi);
-        if (rfcEmisor.isNotEmpty) print('   ⚠️  FALLBACK: $iva');
+        iva = _calculateIVAFromCFDI(cfdi, tipoCambio);
+        if (isMonedaExtranjera) {
+          print('   ⚠️  FALLBACK convertido a MXN: $iva');
+        } else {
+          if (rfcEmisor.isNotEmpty) print('   ⚠️  FALLBACK: $iva');
+        }
       }
 
       // Para DIOT: valor de actos es el subtotal, descuentos van en devoluciones
+      // TODOS LOS VALORES YA ESTÁN EN PESOS MEXICANOS
       valorActos16Porciento += subtotal;
       devoluciones16Porciento += descuento;
       ivaTotal16 += iva;
@@ -153,10 +186,12 @@ class DIOTMappingService {
   /// - Productos con tasa 0% que no aparecen en traslados
   /// - Redondeos en el cálculo individual vs total
   /// - Otros casos especiales del SAT
-  static double _calculateIVAFromCFDI(CFDI cfdi) {
+  /// 
+  /// [tipoCambio] - Tipo de cambio para convertir a pesos mexicanos
+  static double _calculateIVAFromCFDI(CFDI cfdi, double tipoCambio) {
     double totalIVA = 0;
 
-    // Sumar IVA de conceptos
+    // Sumar IVA de conceptos (en moneda original)
     if (cfdi.conceptos?.concepto != null) {
       for (final concepto in cfdi.conceptos!.concepto!) {
         for (final traslado in concepto.traslados) {
@@ -168,7 +203,9 @@ class DIOTMappingService {
       }
     }
 
-    return totalIVA;
+    // Convertir a pesos mexicanos si es necesario
+    final isMonedaExtranjera = tipoCambio != 1.0;
+    return isMonedaExtranjera ? totalIVA * tipoCambio : totalIVA;
   }
 
   /// Infiere el tipo de tercero basado en el RFC
