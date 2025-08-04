@@ -89,6 +89,7 @@ class DIOTMappingService {
       valorActos16Porciento: values.valorActos16Porciento,
       valorActosFronteraNorte: values.valorActosFronteraNorte,
       valorActosFronteraSur: values.valorActosFronteraSur,
+      devoluciones16Porciento: values.devoluciones16Porciento,
       ivaAcreditableExclusivo16: values.ivaTotal16,
       requiresUserInput: requiresUserInput,
     );
@@ -100,14 +101,41 @@ class DIOTMappingService {
     const double valorActosFronteraNorte = 0;
     const double valorActosFronteraSur = 0;
     double ivaTotal16 = 0;
+    double devoluciones16Porciento = 0;
 
     for (final cfdi in cfdis) {
+      // Tomar valores directamente del CFDI en lugar de calcularlos
       final subtotal = double.tryParse(cfdi.subTotal ?? '0') ?? 0;
-      final iva = _calculateIVAFromCFDI(cfdi);
+      final descuento = double.tryParse(cfdi.descuento ?? '0') ?? 0;
 
-      // Por defecto asumimos tasa general del 16%
-      // El usuario puede reclasificar posteriormente
+      // Usar TotalImpuestosTrasladados directamente del CFDI si está disponible
+      double iva = 0;
+
+      // DEBUG: Para el RFC problemático específico
+      final rfcEmisor = cfdi.emisor?.rfc ?? '';
+      if (rfcEmisor.isNotEmpty) {
+        print('🔍 DEBUG RFC $rfcEmisor:');
+        print('   cfdi.impuestos != null: ${cfdi.impuestos != null}');
+        if (cfdi.impuestos != null) {
+          print(
+              '   TotalImpuestosTrasladados: ${cfdi.impuestos!.totalImpuestosTrasladados}');
+          print('   > 0: ${cfdi.impuestos!.totalImpuestosTrasladados > 0}');
+        }
+      }
+
+      if (cfdi.impuestos?.totalImpuestosTrasladados != null &&
+          cfdi.impuestos!.totalImpuestosTrasladados > 0) {
+        iva = cfdi.impuestos!.totalImpuestosTrasladados;
+        if (rfcEmisor.isNotEmpty) print('   ✅ USANDO: $iva');
+      } else {
+        // Fallback: calcular desde conceptos solo si no está disponible el total
+        iva = _calculateIVAFromCFDI(cfdi);
+        if (rfcEmisor.isNotEmpty) print('   ⚠️  FALLBACK: $iva');
+      }
+
+      // Para DIOT: valor de actos es el subtotal, descuentos van en devoluciones
       valorActos16Porciento += subtotal;
+      devoluciones16Porciento += descuento;
       ivaTotal16 += iva;
     }
 
@@ -116,10 +144,15 @@ class DIOTMappingService {
       valorActosFronteraNorte: valorActosFronteraNorte,
       valorActosFronteraSur: valorActosFronteraSur,
       ivaTotal16: ivaTotal16,
+      devoluciones16Porciento: devoluciones16Porciento,
     );
   }
 
-  /// Calcula el IVA total de un CFDI
+  /// Calcula el IVA total de un CFDI (fallback cuando no está disponible TotalImpuestosTrasladados)
+  /// NOTA: Este método puede tener discrepancias con el total real del CFDI debido a:
+  /// - Productos con tasa 0% que no aparecen en traslados
+  /// - Redondeos en el cálculo individual vs total
+  /// - Otros casos especiales del SAT
   static double _calculateIVAFromCFDI(CFDI cfdi) {
     double totalIVA = 0;
 
@@ -262,6 +295,11 @@ class DIOTMappingService {
           userInput['paisResidenciaFiscal'] ?? record.paisResidenciaFiscal,
       especificarJurisdiccion: userInput['especificarJurisdiccion'] ??
           record.especificarJurisdiccion,
+      // 🚫 ELIMINADO: Ya no permitir sobrescribir devoluciones
+      // El descuento SIEMPRE debe venir del CFDI automáticamente
+      // devoluciones16Porciento: userInput['devoluciones'] != null
+      //     ? (userInput['devoluciones'] as num).toDouble()
+      //     : record.devoluciones16Porciento,
       requiresUserInput: false,
     );
   }
@@ -300,11 +338,13 @@ class _CFDIValues {
   final double valorActosFronteraNorte;
   final double valorActosFronteraSur;
   final double ivaTotal16;
+  final double devoluciones16Porciento;
 
   const _CFDIValues({
     required this.valorActos16Porciento,
     required this.valorActosFronteraNorte,
     required this.valorActosFronteraSur,
     required this.ivaTotal16,
+    required this.devoluciones16Porciento,
   });
 }

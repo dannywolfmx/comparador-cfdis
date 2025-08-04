@@ -59,6 +59,13 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
     _nombreExtranjeroController.text = widget.record.nombreExtranjero ?? '';
     _selectedPais = widget.record.paisResidenciaFiscal;
     _jurisdiccionController.text = widget.record.especificarJurisdiccion ?? '';
+
+    // Inicializar campo de devoluciones con el valor existente
+    if (widget.record.devoluciones16Porciento != null &&
+        widget.record.devoluciones16Porciento! > 0) {
+      _devolucionesController.text =
+          widget.record.devoluciones16Porciento!.toInt().toString();
+    }
   }
 
   @override
@@ -506,6 +513,10 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
   }
 
   Widget _buildDevolucionesSection() {
+    final double? valorDevoluciones = widget.record.devoluciones16Porciento;
+    final bool hasAutomaticDevoluciones =
+        valorDevoluciones != null && valorDevoluciones > 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -516,36 +527,118 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
               ),
         ),
         const SizedBox(height: 8),
-        Text(
-          'Si aplica, especifique el monto de devoluciones, descuentos y bonificaciones',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _devolucionesController,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Monto de Devoluciones',
-            helperText: 'Opcional - Solo números enteros',
-            prefixText: '\$ ',
+        if (hasAutomaticDevoluciones) ...[
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              border: Border.all(color: Colors.blue.shade200),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.blue.shade600),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Descuento detectado automáticamente',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                      Text(
+                        'Se encontró un descuento de \$${valorDevoluciones.toStringAsFixed(2)} en los CFDIs de este RFC.',
+                        style: TextStyle(color: Colors.blue.shade700),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-          validator: (value) {
-            if (value != null && value.isNotEmpty) {
-              final numero = int.tryParse(value);
-              if (numero == null) {
-                return 'Debe ser un número válido';
-              }
-              if (numero > DIOTConstants.maxNumericValue) {
-                return 'El valor no puede exceder ${DIOTConstants.maxNumericValue}';
-              }
-            }
-            return null;
-          },
+          const SizedBox(height: 12),
+        ],
+        // 🚫 ELIMINADO: Ya no permitir editar devoluciones manualmente
+        // Las devoluciones siempre se extraen automáticamente del CFDI
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.green.shade50,
+            border: Border.all(color: Colors.green.shade200),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.green.shade600),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Descuentos cargados automáticamente',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green.shade800,
+                      ),
+                    ),
+                    Text(
+                      'Los descuentos se extraen directamente de los CFDIs y ya no se pueden modificar manualmente.',
+                      style: TextStyle(color: Colors.green.shade700),
+                    ),
+                    if (hasAutomaticDevoluciones)
+                      Text(
+                        'Descuento detectado: \$${valorDevoluciones.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: Colors.green.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+        // Text(
+        //   'Especifique el monto de devoluciones, descuentos y bonificaciones otorgadas en el período',
+        //   style: Theme.of(context).textTheme.bodyMedium,
+        // ),
+        // const SizedBox(height: 16),
+        // TextFormField(
+        //   controller: _devolucionesController,
+        //   decoration: InputDecoration(
+        //     border: const OutlineInputBorder(),
+        //     labelText: 'Monto de Devoluciones 16%',
+        //     helperText: hasAutomaticDevoluciones
+        //         ? 'Valor auto-completado desde CFDIs con descuentos'
+        //         : 'Opcional - Solo números enteros',
+        //     prefixText: '\$ ',
+        //     suffixIcon: hasAutomaticDevoluciones
+        //         ? Icon(Icons.auto_awesome, color: Colors.blue.shade600)
+        //         : null,
+        //   ),
+        //   keyboardType: TextInputType.number,
+        //   inputFormatters: [
+        //     FilteringTextInputFormatter.digitsOnly,
+        //   ],
+        //   validator: (value) {
+        //     if (value != null && value.isNotEmpty) {
+        //       final numero = int.tryParse(value);
+        //       if (numero == null) {
+        //         return 'Debe ser un número válido';
+        //       }
+        //       if (numero > DIOTConstants.maxNumericValue) {
+        //         return 'El valor no puede exceder ${DIOTConstants.maxNumericValue}';
+        //       }
+        //     }
+        //     return null;
+        //   },
+        // ),
       ],
     );
   }
@@ -623,9 +716,11 @@ class _DIOTUserInputDialogState extends State<DIOTUserInputDialog> {
         'nombreExtranjero': _nombreExtranjeroController.text.trim(),
         'paisResidenciaFiscal': _selectedPais,
         'especificarJurisdiccion': _jurisdiccionController.text.trim(),
-        'devoluciones': _devolucionesController.text.isNotEmpty
-            ? double.tryParse(_devolucionesController.text) ?? 0
-            : 0,
+        // 🚫 ELIMINADO: Ya no enviar devoluciones desde el diálogo
+        // Las devoluciones se manejan automáticamente desde el CFDI
+        // 'devoluciones': _devolucionesController.text.isNotEmpty
+        //     ? double.tryParse(_devolucionesController.text) ?? 0
+        //     : 0,
       };
 
       // Este callback se implementaría en el widget padre para manejar los datos

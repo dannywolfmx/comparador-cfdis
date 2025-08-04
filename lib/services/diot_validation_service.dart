@@ -1,46 +1,37 @@
 import 'package:comparador_cfdis/models/diot_record.dart';
 import 'package:comparador_cfdis/models/diot_batch.dart';
-import 'package:comparador_cfdis/constants/diot_constants.dart';
+import 'package:comparador_cfdis/services/diot_2025_validation_service.dart';
 
 /// Servicio para validar registros DIOT según las reglas del SAT
+/// Actualizado para cumplir con especificación DIOT 2025
 class DIOTValidationService {
-  /// Valida un registro DIOT individual
+  /// Valida un registro DIOT individual usando validaciones DIOT 2025
   static List<DIOTValidationError> validateRecord(DIOTRecord record) {
-    final List<DIOTValidationError> errors = [];
-
-    // Validaciones de tipo de tercero y RFC
-    errors.addAll(_validateTipoTerceroAndRFC(record));
-
-    // Validaciones para proveedor extranjero
-    if (record.tipoTercero == TipoTercero.extranjero) {
-      errors.addAll(_validateProveedorExtranjero(record));
-    }
-
-    // Validaciones de tipo de operación
-    errors.addAll(_validateTipoOperacion(record));
-
-    // Validaciones de valores numéricos
-    errors.addAll(_validateNumericValues(record));
-
-    // Validaciones de consistencia de IVA
-    errors.addAll(_validateIVAConsistency(record));
-
-    // Validaciones de efectos fiscales
-    errors.addAll(_validateEfectosFiscales(record));
-
-    return errors;
+    // Usar directamente las validaciones DIOT 2025 que son más completas
+    return DIOT2025ValidationService.validateRecord2025(record);
   }
 
-  /// Valida un lote completo de DIOT
+  /// Valida un lote completo de DIOT usando validaciones DIOT 2025
   static List<DIOTValidationError> validateBatch(DIOTBatch batch) {
     final List<DIOTValidationError> globalErrors = [];
 
-    // Validar configuración del lote
-    globalErrors.addAll(_validateConfiguration(batch.configuration));
+    // Usar validaciones DIOT 2025 para el lote completo
+    globalErrors.addAll(DIOT2025ValidationService.validateBatch2025(batch));
+
+    // Validaciones adicionales específicas del lote
+    globalErrors.addAll(_validateBatchSpecificRules(batch));
+
+    return globalErrors;
+  }
+
+  /// Validaciones específicas del lote que complementan DIOT 2025
+  static List<DIOTValidationError> _validateBatchSpecificRules(
+      DIOTBatch batch) {
+    final List<DIOTValidationError> errors = [];
 
     // Validar que hay registros
     if (batch.records.isEmpty) {
-      globalErrors.add(
+      errors.add(
         const DIOTValidationError(
           field: 'records',
           message: 'El lote DIOT debe contener al menos un registro',
@@ -50,353 +41,10 @@ class DIOTValidationService {
     }
 
     // Validar duplicados por RFC
-    globalErrors.addAll(_validateDuplicateRFCs(batch.records));
+    errors.addAll(_validateDuplicateRFCs(batch.records));
 
     // Validar totales del lote
-    globalErrors.addAll(_validateBatchTotals(batch));
-
-    return globalErrors;
-  }
-
-  /// Valida tipo de tercero y RFC
-  static List<DIOTValidationError> _validateTipoTerceroAndRFC(
-    DIOTRecord record,
-  ) {
-    final List<DIOTValidationError> errors = [];
-
-    switch (record.tipoTercero) {
-      case TipoTercero.nacional:
-      case TipoTercero.global:
-        // RFC es requerido
-        if (record.rfc.isEmpty) {
-          errors.add(
-            const DIOTValidationError(
-              field: 'rfc',
-              message:
-                  'RFC es requerido para proveedores nacionales y globales',
-              severity: DIOTValidationSeverity.error,
-            ),
-          );
-        } else {
-          // Validar formato del RFC
-          if (record.tipoTercero == TipoTercero.global) {
-            if (record.rfc != DIOTConstants.rfcProveedorGlobal) {
-              errors.add(
-                const DIOTValidationError(
-                  field: 'rfc',
-                  message:
-                      'Para proveedor global debe usar ${DIOTConstants.rfcProveedorGlobal}',
-                  severity: DIOTValidationSeverity.error,
-                ),
-              );
-            }
-          } else {
-            if (!RegExp(DIOTConstants.rfcPattern).hasMatch(record.rfc)) {
-              errors.add(
-                const DIOTValidationError(
-                  field: 'rfc',
-                  message:
-                      'RFC debe tener formato válido (12-13 caracteres alfanuméricos)',
-                  severity: DIOTValidationSeverity.error,
-                ),
-              );
-            }
-          }
-        }
-        break;
-
-      case TipoTercero.extranjero:
-        // RFC no debe estar presente para extranjeros
-        if (record.rfc.isNotEmpty) {
-          errors.add(
-            const DIOTValidationError(
-              field: 'rfc',
-              message: 'RFC no debe especificarse para proveedores extranjeros',
-              severity: DIOTValidationSeverity.warning,
-            ),
-          );
-        }
-        break;
-    }
-
-    return errors;
-  }
-
-  /// Valida campos específicos de proveedor extranjero
-  static List<DIOTValidationError> _validateProveedorExtranjero(
-    DIOTRecord record,
-  ) {
-    final List<DIOTValidationError> errors = [];
-
-    // Número de identificación fiscal requerido
-    if (record.numeroIdentificacionFiscal == null ||
-        record.numeroIdentificacionFiscal!.isEmpty) {
-      errors.add(
-        const DIOTValidationError(
-          field: 'numeroIdentificacionFiscal',
-          message:
-              'Número de identificación fiscal es requerido para proveedores extranjeros',
-          severity: DIOTValidationSeverity.error,
-        ),
-      );
-    } else if (record.numeroIdentificacionFiscal!.length >
-        DIOTConstants.maxIdentificacionFiscalLength) {
-      errors.add(
-        const DIOTValidationError(
-          field: 'numeroIdentificacionFiscal',
-          message:
-              'Número de identificación fiscal no puede exceder ${DIOTConstants.maxIdentificacionFiscalLength} caracteres',
-          severity: DIOTValidationSeverity.error,
-        ),
-      );
-    }
-
-    // Nombre del extranjero requerido
-    if (record.nombreExtranjero == null || record.nombreExtranjero!.isEmpty) {
-      errors.add(
-        const DIOTValidationError(
-          field: 'nombreExtranjero',
-          message:
-              'Nombre del extranjero es requerido para proveedores extranjeros',
-          severity: DIOTValidationSeverity.error,
-        ),
-      );
-    } else if (record.nombreExtranjero!.length >
-        DIOTConstants.maxNombreExtranjeroLength) {
-      errors.add(
-        const DIOTValidationError(
-          field: 'nombreExtranjero',
-          message:
-              'Nombre del extranjero no puede exceder ${DIOTConstants.maxNombreExtranjeroLength} caracteres',
-          severity: DIOTValidationSeverity.error,
-        ),
-      );
-    }
-
-    // País de residencia fiscal requerido
-    if (record.paisResidenciaFiscal == null ||
-        record.paisResidenciaFiscal!.isEmpty) {
-      errors.add(
-        const DIOTValidationError(
-          field: 'paisResidenciaFiscal',
-          message:
-              'País de residencia fiscal es requerido para proveedores extranjeros',
-          severity: DIOTValidationSeverity.error,
-        ),
-      );
-    } else {
-      // Validar que el país existe en el catálogo
-      if (!DIOTConstants.paisesResidenciaFiscal
-          .containsKey(record.paisResidenciaFiscal!)) {
-        errors.add(
-          const DIOTValidationError(
-            field: 'paisResidenciaFiscal',
-            message: 'Código de país no válido según catálogo SAT',
-            severity: DIOTValidationSeverity.error,
-          ),
-        );
-      }
-
-      // Validar formato (2 caracteres alfabéticos)
-      if (!RegExp(DIOTConstants.paisPattern)
-          .hasMatch(record.paisResidenciaFiscal!)) {
-        errors.add(
-          const DIOTValidationError(
-            field: 'paisResidenciaFiscal',
-            message: 'País debe ser código de 2 caracteres alfabéticos',
-            severity: DIOTValidationSeverity.error,
-          ),
-        );
-      }
-
-      // Validar jurisdicción especial
-      if (record.paisResidenciaFiscal == 'ZZZ') {
-        if (record.especificarJurisdiccion == null ||
-            record.especificarJurisdiccion!.isEmpty) {
-          errors.add(
-            const DIOTValidationError(
-              field: 'especificarJurisdiccion',
-              message:
-                  'Especificar jurisdicción es requerido cuando país es "ZZZ"',
-              severity: DIOTValidationSeverity.error,
-            ),
-          );
-        } else if (record.especificarJurisdiccion!.length >
-            DIOTConstants.maxJurisdiccionLength) {
-          errors.add(
-            const DIOTValidationError(
-              field: 'especificarJurisdiccion',
-              message:
-                  'Jurisdicción no puede exceder ${DIOTConstants.maxJurisdiccionLength} caracteres',
-              severity: DIOTValidationSeverity.error,
-            ),
-          );
-        }
-      } else {
-        // Si no es ZZZ, no debe especificar jurisdicción
-        if (record.especificarJurisdiccion != null &&
-            record.especificarJurisdiccion!.isNotEmpty) {
-          errors.add(
-            const DIOTValidationError(
-              field: 'especificarJurisdiccion',
-              message: 'Solo especificar jurisdicción cuando país sea "ZZZ"',
-              severity: DIOTValidationSeverity.warning,
-            ),
-          );
-        }
-      }
-    }
-
-    return errors;
-  }
-
-  /// Valida tipo de operación según tipo de tercero
-  static List<DIOTValidationError> _validateTipoOperacion(DIOTRecord record) {
-    final List<DIOTValidationError> errors = [];
-
-    final validOperations =
-        TipoOperacion.getValidForTipoTercero(record.tipoTercero);
-
-    if (!validOperations.contains(record.tipoOperacion)) {
-      errors.add(
-        DIOTValidationError(
-          field: 'tipoOperacion',
-          message:
-              'Tipo de operación ${record.tipoOperacion.description} no es válido para ${record.tipoTercero.description}',
-          severity: DIOTValidationSeverity.error,
-        ),
-      );
-    }
-
-    return errors;
-  }
-
-  /// Valida valores numéricos
-  static List<DIOTValidationError> _validateNumericValues(DIOTRecord record) {
-    final List<DIOTValidationError> errors = [];
-
-    final numericFields = [
-      ('valorActosFronteraNorte', record.valorActosFronteraNorte),
-      ('devolucionesFronteraNorte', record.devolucionesFronteraNorte),
-      ('valorActosFronteraSur', record.valorActosFronteraSur),
-      ('devolucionesFronteraSur', record.devolucionesFronteraSur),
-      ('valorActos16Porciento', record.valorActos16Porciento),
-      ('devoluciones16Porciento', record.devoluciones16Porciento),
-      ('ivaRetenido', record.ivaRetenido),
-    ];
-
-    for (final field in numericFields) {
-      final fieldName = field.$1;
-      final value = field.$2;
-
-      // Validar que es positivo
-      if ((value ?? 0) < 0) {
-        errors.add(
-          DIOTValidationError(
-            field: fieldName,
-            message: 'El valor debe ser positivo',
-            severity: DIOTValidationSeverity.error,
-          ),
-        );
-      }
-
-      // Validar que no excede el máximo
-      if ((value ?? 0) > DIOTConstants.maxNumericValue) {
-        errors.add(
-          DIOTValidationError(
-            field: fieldName,
-            message:
-                'El valor no puede exceder ${DIOTConstants.maxNumericValue} (14 dígitos)',
-            severity: DIOTValidationSeverity.error,
-          ),
-        );
-      }
-    }
-
-    return errors;
-  }
-
-  /// Valida consistencia de valores de IVA
-  static List<DIOTValidationError> _validateIVAConsistency(DIOTRecord record) {
-    final List<DIOTValidationError> errors = [];
-
-    // Si hay valor de actos, debe haber IVA correspondiente (y viceversa)
-    if ((record.valorActosFronteraNorte ?? 0) > 0) {
-      final totalIVANorte = (record.ivaAcreditableExclusivoFronteraNorte ?? 0) +
-          (record.ivaAcreditableProporcionFronteraNorte ?? 0) +
-          (record.ivaNoAcreditableProporcionFronteraNorte ?? 0) +
-          (record.ivaNoAcreditableSinRequisitosFronteraNorte ?? 0) +
-          (record.ivaNoAcreditableExentasFronteraNorte ?? 0) +
-          (record.ivaNoAcreditableNoObjetoFronteraNorte ?? 0);
-
-      if (totalIVANorte == 0) {
-        errors.add(
-          const DIOTValidationError(
-            field: 'ivaFronteraNorte',
-            message:
-                'Si hay valor de actos en frontera norte, debe especificar IVA correspondiente',
-            severity: DIOTValidationSeverity.warning,
-          ),
-        );
-      }
-    }
-
-    // Validación similar para otras regiones...
-
-    return errors;
-  }
-
-  /// Valida efectos fiscales
-  static List<DIOTValidationError> _validateEfectosFiscales(DIOTRecord record) {
-    final List<DIOTValidationError> errors = [];
-
-    // Los efectos fiscales son siempre requeridos
-    // (ya se maneja en el enum, pero validación adicional si es necesario)
-
-    return errors;
-  }
-
-  /// Valida configuración del lote
-  static List<DIOTValidationError> _validateConfiguration(
-    DIOTConfiguration config,
-  ) {
-    final List<DIOTValidationError> errors = [];
-
-    // Validar año
-    final currentYear = DateTime.now().year;
-    if (config.year < 2020 || config.year > currentYear + 1) {
-      errors.add(
-        DIOTValidationError(
-          field: 'year',
-          message: 'Año debe estar entre 2020 y ${currentYear + 1}',
-          severity: DIOTValidationSeverity.error,
-        ),
-      );
-    }
-
-    // Validar mes
-    if (config.month < 1 || config.month > 12) {
-      errors.add(
-        const DIOTValidationError(
-          field: 'month',
-          message: 'Mes debe estar entre 1 y 12',
-          severity: DIOTValidationSeverity.error,
-        ),
-      );
-    }
-
-    // Validar RFC del declarante si está presente
-    if (config.rfcDeclarante != null && config.rfcDeclarante!.isNotEmpty) {
-      if (!RegExp(DIOTConstants.rfcPattern).hasMatch(config.rfcDeclarante!)) {
-        errors.add(
-          const DIOTValidationError(
-            field: 'rfcDeclarante',
-            message: 'RFC del declarante debe tener formato válido',
-            severity: DIOTValidationSeverity.error,
-          ),
-        );
-      }
-    }
+    errors.addAll(_validateBatchTotals(batch));
 
     return errors;
   }
@@ -453,12 +101,9 @@ class DIOTValidationService {
     return errors;
   }
 
-  /// Valida un registro antes de permitir su exportación
+  /// Valida un registro antes de permitir su exportación (usando DIOT 2025)
   static bool isRecordReadyForExport(DIOTRecord record) {
-    final errors = validateRecord(record);
-    final hasErrors =
-        errors.any((error) => error.severity == DIOTValidationSeverity.error);
-    return !hasErrors && !record.requiresUserInput;
+    return DIOT2025ValidationService.isRecord2025ReadyForExport(record);
   }
 
   /// Obtiene un resumen de validación para mostrar al usuario
@@ -477,10 +122,12 @@ class DIOTValidationService {
       }
     }
 
-    // Contar errores de registros
+    // Contar errores de registros usando validaciones DIOT 2025
     for (final record in batch.records) {
       bool hasErrors = false;
-      for (final error in record.validationErrors) {
+      final recordErrors = validateRecord(record); // Usa DIOT 2025
+
+      for (final error in recordErrors) {
         if (error.severity == DIOTValidationSeverity.error) {
           totalErrors++;
           hasErrors = true;

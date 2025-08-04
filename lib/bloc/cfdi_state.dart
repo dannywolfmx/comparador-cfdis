@@ -1,10 +1,14 @@
 import 'package:comparador_cfdis/models/cfdi_information.dart';
 import 'package:comparador_cfdis/models/filter.dart';
+import 'package:equatable/equatable.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../models/cfdi.dart';
 
-abstract class CFDIState {}
+abstract class CFDIState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
 class CFDIInitial extends CFDIState {}
 
@@ -29,6 +33,9 @@ class CFDILoaded extends CFDIState {
     }
   }
 
+  @override
+  List<Object?> get props => [cfdis, cfdiInformation, activeFilters];
+
   PlutoRow _row(CFDI cfdi) {
     return PlutoRow(
       cells: {
@@ -47,4 +54,7 @@ class CFDIError extends CFDIState {
   final String message;
 
   CFDIError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

@@ -1,5 +1,6 @@
 import 'concepto.dart';
 import 'package:comparador_cfdis/models/complemento_pago.dart';
+import 'package:comparador_cfdis/models/impuesto.dart';
 
 class CFDI {
   String? version;
@@ -22,6 +23,7 @@ class CFDI {
   Emisor? emisor;
   Receptor? receptor;
   Conceptos? conceptos;
+  Impuesto? impuestos; // Campo agregado para impuestos totales
   TimbreFiscalDigital? timbreFiscalDigital;
   ComplementoPago? complementoPago;
   String? filePath;
@@ -47,6 +49,7 @@ class CFDI {
     this.emisor,
     this.receptor,
     this.conceptos,
+    this.impuestos,
     this.timbreFiscalDigital,
     this.complementoPago,
     this.filePath,
@@ -95,6 +98,9 @@ class CFDI {
           json['Receptor'] != null ? Receptor.fromJson(json['Receptor']) : null,
       conceptos: json['Conceptos'] != null
           ? Conceptos.fromJson(json['Conceptos'])
+          : null,
+      impuestos: json['Impuestos'] != null
+          ? Impuesto.fromJson(json['Impuestos'])
           : null,
       timbreFiscalDigital: json['TimbreFiscalDigital'] != null
           ? TimbreFiscalDigital.fromJson(json['TimbreFiscalDigital'])

@@ -324,104 +324,104 @@ class DIOTRecord extends Equatable {
     );
   }
 
-  /// Convierte el registro a formato pipe-delimited para DIOT
+  /// Convierte el registro a formato pipe-delimited para DIOT 2025 (54 campos)
   String toPipeDelimitedString() {
     return [
       tipoTercero.code,
       tipoOperacion.code,
       tipoTercero == TipoTercero.global
           ? 'XAXX010101000'
-          : (rfc.isEmpty ? '' : rfc),
+          : (tipoTercero == TipoTercero.extranjero ? '' : rfc),
       tipoTercero == TipoTercero.extranjero
           ? (numeroIdentificacionFiscal ?? '')
           : '',
       tipoTercero == TipoTercero.extranjero ? (nombreExtranjero ?? '') : '',
       tipoTercero == TipoTercero.extranjero ? (paisResidenciaFiscal ?? '') : '',
       paisResidenciaFiscal == 'ZZZ' ? (especificarJurisdiccion ?? '') : '',
-      _formatNullableNumericValue(valorActosFronteraNorte),
-      _formatNullableNumericValue(devolucionesFronteraNorte),
-      _formatNullableNumericValue(valorActosFronteraSur),
-      _formatNullableNumericValue(devolucionesFronteraSur),
-      _formatNullableNumericValue(valorActos16Porciento),
-      _formatNullableNumericValue(devoluciones16Porciento),
-      _formatNullableNumericValue(valorImportacionTangibles16),
-      _formatNullableNumericValue(devolucionesImportacionTangibles16),
-      _formatNullableNumericValue(valorImportacionIntangibles16),
-      _formatNullableNumericValue(devolucionesImportacionIntangibles16),
-      _formatNullableNumericValue(ivaAcreditableExclusivoFronteraNorte),
-      _formatNullableNumericValue(ivaAcreditableProporcionFronteraNorte),
-      _formatNullableNumericValue(ivaAcreditableExclusivoFronteraSur),
-      _formatNullableNumericValue(ivaAcreditableProporcionFronteraSur),
-      _formatNullableNumericValue(ivaAcreditableExclusivo16),
-      _formatNullableNumericValue(ivaAcreditableProporcion16),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(valorActosFronteraNorte),
+      _formatNumericValueForDIOT(devolucionesFronteraNorte),
+      _formatNumericValueForDIOT(valorActosFronteraSur),
+      _formatNumericValueForDIOT(devolucionesFronteraSur),
+      _formatNumericValueForDIOT(valorActos16Porciento),
+      _formatNumericValueForDIOT(devoluciones16Porciento),
+      _formatNumericValueForDIOT(valorImportacionTangibles16),
+      _formatNumericValueForDIOT(devolucionesImportacionTangibles16),
+      _formatNumericValueForDIOT(valorImportacionIntangibles16),
+      _formatNumericValueForDIOT(devolucionesImportacionIntangibles16),
+      _formatNumericValueForDIOT(ivaAcreditableExclusivoFronteraNorte),
+      _formatNumericValueForDIOT(ivaAcreditableProporcionFronteraNorte),
+      _formatNumericValueForDIOT(ivaAcreditableExclusivoFronteraSur),
+      _formatNumericValueForDIOT(ivaAcreditableProporcionFronteraSur),
+      _formatNumericValueForDIOT(ivaAcreditableExclusivo16),
+      _formatNumericValueForDIOT(ivaAcreditableProporcion16),
+      _formatNumericValueForDIOT(
         ivaAcreditableExclusivoImportacionTangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaAcreditableProporcionImportacionTangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaAcreditableExclusivoImportacionIntangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaAcreditableProporcionImportacionIntangibles16,
       ),
-      _formatNullableNumericValue(ivaNoAcreditableProporcionFronteraNorte),
-      _formatNullableNumericValue(ivaNoAcreditableSinRequisitosFronteraNorte),
-      _formatNullableNumericValue(ivaNoAcreditableExentasFronteraNorte),
-      _formatNullableNumericValue(ivaNoAcreditableNoObjetoFronteraNorte),
-      _formatNullableNumericValue(ivaNoAcreditableProporcionFronteraSur),
-      _formatNullableNumericValue(ivaNoAcreditableSinRequisitosFronteraSur),
-      _formatNullableNumericValue(ivaNoAcreditableExentasFronteraSur),
-      _formatNullableNumericValue(ivaNoAcreditableNoObjetoFronteraSur),
-      _formatNullableNumericValue(ivaNoAcreditableProporcion16),
-      _formatNullableNumericValue(ivaNoAcreditableSinRequisitos16),
-      _formatNullableNumericValue(ivaNoAcreditableExentas16),
-      _formatNullableNumericValue(ivaNoAcreditableNoObjeto16),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(ivaNoAcreditableProporcionFronteraNorte),
+      _formatNumericValueForDIOT(ivaNoAcreditableSinRequisitosFronteraNorte),
+      _formatNumericValueForDIOT(ivaNoAcreditableExentasFronteraNorte),
+      _formatNumericValueForDIOT(ivaNoAcreditableNoObjetoFronteraNorte),
+      _formatNumericValueForDIOT(ivaNoAcreditableProporcionFronteraSur),
+      _formatNumericValueForDIOT(ivaNoAcreditableSinRequisitosFronteraSur),
+      _formatNumericValueForDIOT(ivaNoAcreditableExentasFronteraSur),
+      _formatNumericValueForDIOT(ivaNoAcreditableNoObjetoFronteraSur),
+      _formatNumericValueForDIOT(ivaNoAcreditableProporcion16),
+      _formatNumericValueForDIOT(ivaNoAcreditableSinRequisitos16),
+      _formatNumericValueForDIOT(ivaNoAcreditableExentas16),
+      _formatNumericValueForDIOT(ivaNoAcreditableNoObjeto16),
+      _formatNumericValueForDIOT(
         ivaNoAcreditableProporcionImportacionTangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaNoAcreditableSinRequisitosImportacionTangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaNoAcreditableExentasImportacionTangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaNoAcreditableNoObjetoImportacionTangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaNoAcreditableProporcionImportacionIntangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaNoAcreditableSinRequisitosImportacionIntangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaNoAcreditableExentasImportacionIntangibles16,
       ),
-      _formatNullableNumericValue(
+      _formatNumericValueForDIOT(
         ivaNoAcreditableNoObjetoImportacionIntangibles16,
       ),
-      _formatNullableNumericValue(ivaRetenido),
-      _formatNullableNumericValue(importacionExentos),
-      _formatNullableNumericValue(actosExentos),
-      _formatNullableNumericValue(actosTasaCero),
-      _formatNullableNumericValue(actosNoObjetoNacional),
-      _formatNullableNumericValue(actosNoObjetoSinEstablecimiento),
+      _formatNumericValueForDIOT(ivaRetenido),
+      _formatNumericValueForDIOT(importacionExentos),
+      _formatNumericValueForDIOT(actosExentos),
+      _formatNumericValueForDIOT(actosTasaCero),
+      _formatNumericValueForDIOT(actosNoObjetoNacional),
+      _formatNumericValueForDIOT(actosNoObjetoSinEstablecimiento),
       efectosFiscales.code,
     ].join('|');
   }
 
-  /// Formatea valores numéricos nullable para DIOT:
+  /// Formatea valores numéricos para DIOT 2025:
   /// - null = campo vacío (no aplica)
-  /// - 0.0 = "0" (valor cero legítimo)
-  /// - >0 = valor como entero
-  String _formatNullableNumericValue(double? value) {
-    if (value == null) {
-      return ''; // Campo vacío cuando no aplica
+  /// - 0.0 = campo vacío (según especificación DIOT 2025)
+  /// - >0 = valor como entero (sin decimales según especificación SAT)
+  String _formatNumericValueForDIOT(double? value) {
+    if (value == null || value == 0) {
+      return ''; // Campo vacío para null o cero según especificación
     }
-    return value
-        .toStringAsFixed(2); // Formato con 2 decimales para valores legítimos
+    // DIOT 2025 requiere enteros sin decimales según SAT
+    return value.toInt().toString();
   }
 
   /// Helper para obtener valor numérico tratando null como 0

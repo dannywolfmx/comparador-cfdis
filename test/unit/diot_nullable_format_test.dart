@@ -12,7 +12,7 @@ void main() {
         // Campos con null - deben exportarse como campos vacíos
         valorActosFronteraNorte: null,
         valorActos16Porciento:
-            1500.00, // Campo con valor - debe exportarse como "1500.00"
+            1500.00, // Campo con valor - debe exportarse como "1500" (entero)
         valorActosFronteraSur: null,
         // Los demás campos quedarán null por defecto
       );
@@ -21,11 +21,11 @@ void main() {
 
       print('Export line: $exportLine');
 
-      // Verificar que contiene el valor y no contiene "0" innecesarios
+      // Verificar que contiene el valor como entero según DIOT 2025
       expect(
-        exportLine.contains('1500.00'),
+        exportLine.contains('1500'),
         isTrue,
-        reason: 'Debe contener el valor 1500.00',
+        reason: 'Debe contener el valor 1500 como entero',
       );
 
       // Contar campos vacíos consecutivos (||)
@@ -44,28 +44,30 @@ void main() {
         tipoOperacion: TipoOperacion.prestacionServicios,
         efectosFiscales: EfectosFiscales.si,
         valorActosFronteraNorte:
-            0.0, // Cero explícito - debe mostrarse como "0.00"
+            0.0, // Cero explícito - según DIOT 2025 se exporta como campo vacío
         valorActos16Porciento: null, // Null - debe ser campo vacío
         valorActosFronteraSur:
-            0.0, // Cero explícito - debe mostrarse como "0.00"
+            0.0, // Cero explícito - según DIOT 2025 se exporta como campo vacío
       );
 
       final exportLine = record.toPipeDelimitedString();
 
       print('Export line with zeros: $exportLine');
 
-      // Verificar que contiene "0.00" para ceros explícitos
-      expect(
-        exportLine.contains('0.00'),
-        isTrue,
-        reason: 'Debe contener "0.00" para valores de cero explícitos',
-      );
-
-      // Verificar que hay campos vacíos para null
+      // Verificar que hay campos vacíos para null y para ceros según DIOT 2025
       expect(
         exportLine.contains('||'),
         isTrue,
-        reason: 'Debe haber campos vacíos para valores null',
+        reason: 'Debe haber campos vacíos para valores null y cero',
+      );
+
+      // Verificar que NO contiene "0" explícitos (según especificación DIOT 2025)
+      final fields = exportLine.split('|');
+      // Los campos de valores deberían estar vacíos
+      expect(
+        fields[7], // valorActosFronteraNorte
+        isEmpty,
+        reason: 'Cero debe formatearse como campo vacío según DIOT 2025',
       );
     });
 
@@ -112,24 +114,31 @@ void main() {
 
       final exportLine = recordWithValues.toPipeDelimitedString();
 
-      // Verificar que:
+      // Verificar que según DIOT 2025:
       // - null se convierte en campo vacío
-      // - 0.0 se convierte en "0.00"
-      // - 123.45 se convierte en "123.45"
+      // - 0.0 se convierte en campo vacío (no "0")
+      // - 123.45 se convierte en "123" (entero)
       expect(
-        exportLine.contains('0.00'),
+        exportLine.contains('123'),
         isTrue,
-        reason: 'Cero debe formatearse como "0.00"',
-      );
-      expect(
-        exportLine.contains('123.45'),
-        isTrue,
-        reason: 'Valor decimal debe formatearse correctamente',
+        reason: 'Valor decimal debe formatearse como entero',
       );
       expect(
         exportLine.contains('||'),
         isTrue,
-        reason: 'Null debe crear campo vacío (||)',
+        reason: 'Null y cero deben crear campos vacíos (||)',
+      );
+
+      // Verificar que NO contiene decimales o ceros explícitos
+      expect(
+        exportLine.contains('0.00'),
+        isFalse,
+        reason: 'No debe contener decimales según DIOT 2025',
+      );
+      expect(
+        exportLine.contains('123.45'),
+        isFalse,
+        reason: 'No debe contener decimales según DIOT 2025',
       );
     });
   });

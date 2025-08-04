@@ -1,13 +1,69 @@
 /// Constantes y catálogos para DIOT 2025
 class DIOTConstants {
-  // Especificaciones del archivo
+  // Especificaciones del archivo según DIOT 2025
   static const String fileDelimiter = '|';
   static const String fileEncoding = 'UTF-8';
   static const String fileExtension = '.txt';
   static const int maxNumericLength = 14;
+  static const bool numericAcceptsDecimals = false;
 
   // RFC especial para proveedor global
   static const String rfcProveedorGlobal = 'XAXX010101000';
+
+  // Tolerancias para validación de montos muy pequeños
+  static const double minAmountForIVAValidation =
+      1.0; // Monto mínimo para validar IVA
+  static const double ivaToleranceThreshold =
+      0.10; // Umbral de tolerancia para IVA (10 centavos)
+  static const double roundingTolerance =
+      0.01; // Tolerancia de redondeo (1 centavo)
+
+  // Estructura DIOT 2025 - 54 campos obligatorios
+  static const Map<int, Map<String, dynamic>> diot2025Structure = {
+    1: {
+      'name': 'tipo_tercero',
+      'description': 'Tipo de tercero',
+      'data_type': 'numeric',
+      'length': 2,
+      'required': true,
+      'values': {
+        '04': 'Proveedor Nacional',
+        '05': 'Proveedor Extranjero',
+        '15': 'Proveedor Global',
+      },
+    },
+    2: {
+      'name': 'tipo_operacion',
+      'description': 'Tipo de operación',
+      'data_type': 'numeric',
+      'length': 2,
+      'required': true,
+      'values_by_tercero': {
+        '04': {
+          '02': 'Enajenación de bienes',
+          '03': 'Prestación de Servicios Profesionales',
+          '06': 'Uso o goce temporal de bienes',
+          '08': 'Importación por transferencia virtual',
+          '85': 'Otros',
+        },
+        '05': {
+          '02': 'Enajenación de bienes',
+          '03': 'Prestación de Servicios Profesionales',
+          '07': 'Importación de bienes o servicios',
+        },
+        '15': {'87': 'Operaciones globales'},
+      },
+    },
+    54: {
+      'name': 'efectos_fiscales',
+      'description':
+          'Manifiesto que se dio efectos fiscales a los comprobantes',
+      'data_type': 'numeric',
+      'length': 2,
+      'required': true,
+      'values': {'01': 'Sí', '02': 'No'},
+    },
+  };
 
   // Catálogo de países (ISO 3166-1 alpha-3)
   static const Map<String, String> paisesResidenciaFiscal = {
@@ -307,7 +363,57 @@ class DIOTConstants {
   static const double tasaIVAGeneral = 0.16;
   static const double tasaIVAFronteriza = 0.08;
 
-  // Mensajes de validación
+  // Validación DIOT 2025 - Reglas específicas
+  static const Map<String, dynamic> diot2025ValidationRules = {
+    'general': {
+      'delimiter_required': '|',
+      'encoding_required': 'UTF-8',
+      'file_extension': '.txt',
+      'numeric_no_decimals': true,
+      'numeric_accepts_zero': true,
+    },
+    'conditional_requirements': {
+      'extranjero_fields': {
+        'required_when': 'tipo_tercero == "05"',
+        'fields': [
+          'numero_identificacion_fiscal',
+          'nombre_extranjero',
+          'pais_residencia_fiscal',
+        ],
+      },
+      'jurisdiccion_especial': {
+        'required_when': 'pais_residencia_fiscal == "ZZZ"',
+        'fields': ['especificar_jurisdiccion'],
+      },
+      'iva_acreditable_conditions': {
+        'frontera_norte': 'valor_actos_frontera_norte > 0',
+        'frontera_sur': 'valor_actos_frontera_sur > 0',
+        'tasa_16': 'valor_actos_16_porciento > 0',
+        'importacion_tangibles': 'valor_importacion_tangibles_16 > 0',
+        'importacion_intangibles': 'valor_importacion_intangibles_16 > 0',
+      },
+    },
+    'data_consistency': {
+      'rfc_validation': {
+        'length': [12, 13],
+        'format': 'alphanumeric_uppercase',
+        'special_case_global': 'XAXX010101000',
+      },
+      'country_code_validation': {
+        'length': 3, // ISO 3166-1 alpha-3
+        'format': 'alphabetic_uppercase',
+        'must_exist_in_catalog': true,
+      },
+      'numeric_validation': {
+        'max_length': 14,
+        'no_decimals': true,
+        'accepts_zero': true,
+        'positive_only': true,
+      },
+    },
+  };
+
+  // Mensajes de validación actualizados para DIOT 2025
   static const Map<String, String> validationMessages = {
     'rfc_required':
         'El RFC es requerido para proveedores nacionales y globales',
@@ -316,14 +422,19 @@ class DIOTConstants {
     'extranjero_fields_required':
         'Los campos de proveedor extranjero son requeridos',
     'pais_required': 'El país de residencia fiscal es requerido',
-    'pais_invalid': 'El código de país no es válido',
+    'pais_invalid': 'El código de país no es válido según catálogo DIOT 2025',
     'jurisdiccion_required':
         'Especificar jurisdicción es requerido cuando país es "ZZZ"',
     'tipo_operacion_invalid':
-        'Tipo de operación no válido para el tipo de tercero',
+        'Tipo de operación no válido para el tipo de tercero según DIOT 2025',
     'numeric_invalid':
-        'El valor numérico debe ser positivo y menor a 14 dígitos',
-    'efectos_fiscales_required': 'Los efectos fiscales son requeridos',
+        'El valor numérico debe ser positivo y menor a 14 dígitos sin decimales',
+    'efectos_fiscales_required':
+        'Los efectos fiscales son requeridos (01 o 02)',
+    'structure_invalid':
+        'El registro no cumple con la estructura de 54 campos DIOT 2025',
+    'iva_consistency':
+        'Si hay valores de actos, debe especificar IVA correspondiente',
   };
 
   // Configuraciones por defecto
@@ -345,7 +456,8 @@ class DIOTConstants {
 
   // Expresiones regulares para validación
   static const String rfcPattern = r'^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$';
-  static const String paisPattern = r'^[A-Z]{2}$';
+  static const String paisPattern =
+      r'^[A-Z]{3}$'; // ISO 3166-1 alpha-3 (3 caracteres)
   static const String numericPattern = r'^[0-9]{1,14}$';
 }
 
